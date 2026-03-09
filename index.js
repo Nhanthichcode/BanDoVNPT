@@ -115,6 +115,7 @@ const capnhatTaikhoanRouter = require('./routes/capnhat_taikhoan');
 const capnhatTaikhoanXulyRouter = require('./routes/capnhat_taikhoan_xuly');
 const matkhauDoiRouter = require('./routes/matkhau_doi');
 const matkhauDoiXulyRouter = require('./routes/matkhau_doi_xuly');
+const quanlyNguoiDungRouter = require('./routes/quanly_nguoidung');
 
 // Khai báo tiền tố cho các đường dẫn
 app.use('/', indexRouter);                  //Các trang chung
@@ -129,6 +130,7 @@ app.use('/taikhoan', capnhatTaikhoanRouter);     //Giao diện cập nhật hồ
 app.use('/taikhoan', capnhatTaikhoanXulyRouter);    //Xử lý cập nhật hồ sơ cá nhân
 app.use('/taikhoan', matkhauDoiRouter);     //Giao diện đổi mật khẩu
 app.use('/taikhoan', matkhauDoiXulyRouter);    //Xử lý đổi mật khẩu
+app.use('/quanly/taikhoan', quanlyNguoiDungRouter);  //Phân hệ quản lý người dùng
 
 //KHỞI CHẠY SERVER
 app.listen(port, () => {
