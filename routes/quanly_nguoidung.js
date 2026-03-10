@@ -18,7 +18,7 @@ const kiemTraQuyenQuanTri = (req, res, next) => {
     const vaiTro = req.session.user.vai_tro_id;
     // Nếu là Admin hoặc Quản lý thì cho đi tiếp
     if (vaiTro === 1 || vaiTro === 2) {
-        next(); 
+        next();
     } else {
         hienThiLoiHeThong(req, res, "TRUY CẬP BỊ TỪ CHỐI!");
     }
@@ -28,7 +28,7 @@ const kiemTraQuyenQuanTri = (req, res, next) => {
 router.get('/', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, res) => {
     try {
         let pool = await sql.connect(sqlConfig);
-        
+
         // Truy vấn lấy toàn bộ tài khoản, ưu tiên xếp Admin/Quản lý lên đầu bảng
         let result = await pool.request().query(`
             SELECT tk.*, vt.ten_vai_tro 
@@ -37,11 +37,11 @@ router.get('/', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, res) => {
             ORDER BY tk.vai_tro_id ASC, tk.ho_ten ASC
         `);
 
-       res.render('quanly_nguoidung', {
-    title: 'Quản lý người dùng',
-    user: req.session.user,
-    danhSachTaiKhoan: result.recordset
-});
+        res.render('quanly_nguoidung', {
+            title: 'Quản lý người dùng',
+            user: req.session.user,
+            danhSachTaiKhoan: result.recordset
+        });
     } catch (error) {
         console.error("Lỗi tải danh sách tài khoản:", error);
         hienThiLoiHeThong(req, res);

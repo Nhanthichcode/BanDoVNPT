@@ -23,9 +23,13 @@ CREATE TABLE TaiKhoan (
     trang_thai TINYINT DEFAULT 1, -- 1: Hoạt động, 0: Bị khóa
     FOREIGN KEY (vai_tro_id) REFERENCES VaiTro(id)
 );
--- Thêm tài khoản Admin
+-- Thêm tài khoản
 INSERT INTO TaiKhoan (ten_dang_nhap, mat_khau, ho_ten, so_dien_thoai, dia_chi, vai_tro_id) 
 VALUES ('admin_phong', '123456', N'Đàm Thanh Phong', '0748119333', N'14AB Đặng Dung, Phường Long Xuyên', 1);
+INSERT INTO TaiKhoan (ten_dang_nhap, mat_khau, ho_ten, so_dien_thoai, dia_chi, vai_tro_id) 
+VALUES ('mane_phong', '123456', N'Đàm Thanh Phong', '0748119212', N'1 Đặng Dung, Phường Mỹ Thới', 2);
+INSERT INTO TaiKhoan (ten_dang_nhap, mat_khau, ho_ten, so_dien_thoai, dia_chi, vai_tro_id) 
+VALUES ('staff_phong', '123456', N'Đàm Thanh Phong', '0748119223', N'14AB Đặng Dung, Phường Bình Đức', 3);
 -- 3. Gói cước
 CREATE TABLE GoiCuoc (
     id INT IDENTITY(1,1) PRIMARY KEY,
