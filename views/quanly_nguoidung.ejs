@@ -82,26 +82,46 @@
                                         </td>
                                         
                                         <td>
-                                            <% if (tk.trang_thai === 1) { %>
-                                                <button class="btn btn-sm btn-outline-success shadow-sm px-2 py-1 btn-trangthai-khoa"
-                                                    title="Đang hoạt động - Nhấn để Khóa" data-bs-toggle="modal" data-bs-target="#modalKhoaTaiKhoan"
-                                                    onclick="chuanBiKhoa('<%= tk.ten_dang_nhap %>', '<%= tk.ho_ten %>')">
-                                                    <i class="bi bi-unlock fs-6 icon-mo"></i>
-                                                    <i class="bi bi-lock-fill fs-6 icon-dong"></i>
+                                            <% if (tk.ten_dang_nhap === user.ten_dang_nhap) { %>
+                                                <button class="btn btn-sm btn-outline-secondary shadow-sm px-2 py-1" title="Bạn không thể tự khóa tài khoản của mình" disabled>
+                                                    <i class="bi bi-unlock fs-6 text-muted"></i>
                                                 </button>
                                             <% } else { %>
-                                                <button class="btn btn-sm btn-outline-danger shadow-sm px-2 py-1 btn-trangthai-mokhoa"
-                                                    title="Đã khóa - Nhấn để Mở khóa" data-bs-toggle="modal" data-bs-target="#modalMoKhoaTaiKhoan"
-                                                    onclick="chuanBiMoKhoa('<%= tk.ten_dang_nhap %>', '<%= tk.ho_ten %>', '<%= tk.ly_do_khoa || ',' %>')">
-                                                    <i class="bi bi-lock-fill fs-6 icon-dong-mac-dinh"></i>
-                                                    <i class="bi bi-unlock fs-6 icon-mo-hover"></i>
-                                                </button>
+                                                <% if (tk.trang_thai === 1) { %>
+                                                    <button class="btn btn-sm btn-outline-success shadow-sm px-2 py-1 btn-trangthai-khoa"
+                                                        title="Đang hoạt động - Nhấn để Khóa" data-bs-toggle="modal" data-bs-target="#modalKhoaTaiKhoan"
+                                                        onclick="chuanBiKhoa('<%= tk.ten_dang_nhap %>', '<%= tk.ho_ten %>')">
+                                                        <i class="bi bi-unlock fs-6 icon-mo"></i>
+                                                        <i class="bi bi-lock-fill fs-6 icon-dong"></i>
+                                                    </button>
+                                                <% } else { %>
+                                                    <button class="btn btn-sm btn-outline-danger shadow-sm px-2 py-1 btn-trangthai-mokhoa"
+                                                        title="Đã khóa - Nhấn để Mở khóa" data-bs-toggle="modal" data-bs-target="#modalMoKhoaTaiKhoan"
+                                                        onclick="chuanBiMoKhoa('<%= tk.ten_dang_nhap %>', '<%= tk.ho_ten %>', '<%= tk.ly_do_khoa || ',' %>')">
+                                                        <i class="bi bi-lock-fill fs-6 icon-dong-mac-dinh"></i>
+                                                        <i class="bi bi-unlock fs-6 icon-mo-hover"></i>
+                                                    </button>
+                                                <% } %>
                                             <% } %>
                                         </td>
 
                                         <td>
-                                            <button class="btn btn-sm btn-outline-primary shadow-sm me-1" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i></button>
-                                            <button class="btn btn-sm btn-outline-warning shadow-sm me-1" title="Đặt lại mật khẩu"><i class="bi bi-key"></i></button>
+                                            <% if (tk.ten_dang_nhap === user.ten_dang_nhap) { %>
+                                                <button class="btn btn-sm btn-outline-secondary shadow-sm me-1" title="Vui lòng vào 'Hồ sơ cá nhân' để tự chỉnh sửa" disabled>
+                                                    <i class="bi bi-pencil-square text-muted"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-secondary shadow-sm me-1" title="Vui lòng vào 'Hồ sơ cá nhân' để đổi mật khẩu" disabled>
+                                                    <i class="bi bi-key text-muted"></i>
+                                                </button>
+                                            <% } else { %>
+                                                <button class="btn btn-sm btn-outline-primary shadow-sm me-1" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i></button>
+                                                
+                                                <button class="btn btn-sm btn-outline-warning shadow-sm me-1" title="Đặt lại mật khẩu"
+                                                    data-bs-toggle="modal" data-bs-target="#modalDatLaiMatKhau"
+                                                    onclick="chuanBiDatLaiMatKhau('<%= tk.ten_dang_nhap %>', '<%= tk.ho_ten %>')">
+                                                    <i class="bi bi-arrow-clockwise"></i>
+                                                </button>
+                                            <% } %>
                                         </td>
                                     </tr>
                                 <% }); %>
@@ -184,7 +204,48 @@
             </div>
         </div>
     </div>
+<div class="modal fade" id="modalDatLaiMatKhau" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <form action="/quanly/taikhoan/datlai_matkhau_xuly" method="POST">
+                    
+                    <div class="modal-header bg-warning text-dark py-3">
+                        <h5 class="modal-title fw-bold"><i class="bi bi-arrow-clockwise"></i> ĐẶT LẠI MẬT KHẨU</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                    </div>
+                    
+                    <div class="modal-body p-4">
+                        <div class="alert alert-warning border-0 shadow-sm">
+                            Bạn đang yêu cầu đặt lại mật khẩu cho tài khoản: <strong id="ten_hien_thi_datlai" class="text-danger"></strong>
+                        </div>
+                        
+                        <p class="text-muted small mb-3">
+                            <i class="bi bi-info-circle-fill text-primary"></i> 
+                            Hệ thống sẽ tự động đặt lại mật khẩu của tài khoản này trở về giá trị mặc định là: <strong class="text-danger fs-6 px-1">abc123</strong>
+                        </p>
+                        
+                        <input type="hidden" id="input_ten_dang_nhap_datlai" name="ten_dang_nhap_datlai">
 
+                        <hr class="text-muted opacity-25">
+
+                        <div class="mb-2">
+                            <label class="form-label fw-bold text-primary"><i class="bi bi-shield-lock-fill"></i> Xác thực bảo mật</label>
+                            <p class="small text-muted mb-2">Vui lòng nhập mật khẩu của bạn để xác nhận thao tác này.</p>
+                            <input type="password" class="form-control border-primary" name="mat_khau_xac_nhan" placeholder="Mật khẩu của bạn" required>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer bg-light mt-2">
+                        <button type="button" class="btn btn-outline-secondary fw-bold rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-warning text-dark fw-bold rounded-pill px-4 shadow-sm">
+                            <i class="bi bi-check-circle-fill"></i> Xác nhận đặt lại
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
     <script>
         function chuanBiKhoa(tenDangNhap, hoTen) {
             document.getElementById('ten_hien_thi_khoa').innerText = hoTen + ' (' + tenDangNhap + ')';
@@ -195,6 +256,10 @@
             document.getElementById('ten_hien_thi_mokhoa').innerText = hoTen + ' (' + tenDangNhap + ')';
             document.getElementById('input_ten_dang_nhap_duoc_mo').value = tenDangNhap;
             document.getElementById('hien_thi_ly_do_khoa_cu').value = lyDoKhoa || 'Không có ghi chú lý do.';
+        }
+        function chuanBiDatLaiMatKhau(tenDangNhap, hoTen) {
+            document.getElementById('ten_hien_thi_datlai').innerText = hoTen + ' (' + tenDangNhap + ')';
+            document.getElementById('input_ten_dang_nhap_datlai').value = tenDangNhap;
         }
     </script>
 
