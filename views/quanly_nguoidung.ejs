@@ -116,11 +116,15 @@
                                             <% } else { %>
                                                 <button class="btn btn-sm btn-outline-primary shadow-sm me-1" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i></button>
                                                 
-                                                <button class="btn btn-sm btn-outline-warning shadow-sm me-1" title="Đặt lại mật khẩu"
+                                                <button class="btn btn-sm btn-outline-warning shadow-sm me-1" title="Đặt lại mật khẩu mặc định"
                                                     data-bs-toggle="modal" data-bs-target="#modalDatLaiMatKhau"
                                                     onclick="chuanBiDatLaiMatKhau('<%= tk.ten_dang_nhap %>', '<%= tk.ho_ten %>')">
                                                     <i class="bi bi-arrow-clockwise"></i>
                                                 </button>
+
+                                                <a href="/quanly/taikhoan/chitiet/<%= tk.ten_dang_nhap %>" class="btn btn-sm btn-outline-info shadow-sm" title="Xem thông tin chi tiết">
+                                                    <i class="bi bi-info-circle-fill"></i>
+                                                </a>
                                             <% } %>
                                         </td>
                                     </tr>

@@ -121,6 +121,8 @@ const quanlyThemNguoiDungXulyRouter = require('./routes/quanly_them_nguoidung_xu
 const quanlyKhoaTaiKhoanXulyRouter = require('./routes/quanly_khoa_taikhoan_xuly');
 const quanlyMoKhoaTaiKhoanXulyRouter = require('./routes/quanly_mokhoa_taikhoan_xuly');
 const quanlyDatLaiMatKhauXulyRouter = require('./routes/quanly_datlai_matkhau_xuly');
+const quanlyChiTietNguoiDungRouter = require('./routes/quanly_chitiet_nguoidung');
+const quanlyChiTietNguoiDungXulyRouter = require('./routes/quanly_chitiet_nguoidung_xuly');
 
 // Khai báo tiền tố cho các đường dẫn
 app.use('/', indexRouter);                  //Các trang chung
@@ -141,6 +143,8 @@ app.use('/quanly/taikhoan', quanlyThemNguoiDungXulyRouter); //Xử lý thêm ng�
 app.use('/quanly/taikhoan', quanlyKhoaTaiKhoanXulyRouter); //Xử lý khóa tài khoản
 app.use('/quanly/taikhoan', quanlyMoKhoaTaiKhoanXulyRouter); //Xử lý mở khóa tài khoản
 app.use('/quanly/taikhoan', quanlyDatLaiMatKhauXulyRouter); //Xử lý đặt lại mật khẩu
+app.use('/quanly/taikhoan', quanlyChiTietNguoiDungRouter); //Giao diện chi tiết người dùng (có xác thực bảo mật)
+app.use('/quanly/taikhoan', quanlyChiTietNguoiDungXulyRouter); //Xử lý xác thực bảo mật để xem thông tin nhạy cảm trong chi tiết người dùng
 
 //KHỞI CHẠY SERVER
 app.listen(port, () => {
