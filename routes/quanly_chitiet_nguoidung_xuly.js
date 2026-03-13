@@ -22,13 +22,13 @@ router.post('/chitiet_xuly', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, r
 
         let pool = await sql.connect(sqlConfig);
 
-        //KIỂM TRA MẬT KHẨU ADMIN
+        //Kiểm tra mật khẩu Admin
         let checkPass = await pool.request()
             .input('admin', sql.VarChar, adminUser)
             .input('pass', sql.VarChar, mat_khau_admin)
             .query('SELECT ten_dang_nhap FROM TaiKhoan WHERE ten_dang_nhap = @admin AND mat_khau = @pass');
 
-        //Nếu sai thì sẽ trả quản trị về trang Quản lý tài khoản mà không báo lý do cụ thể (vừa tránh lộ thông tin người dùng, vừa tránh lộ mật khẩu)
+        //Nếu sai thì sẽ trả Admin về trang Quản lý tài khoản mà không báo lý do cụ thể (tránh lộ thông tin người dùng và mật khẩu)
         if (checkPass.recordset.length === 0) {
             return res.redirect('/quanly/taikhoan');
         }

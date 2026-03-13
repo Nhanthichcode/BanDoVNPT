@@ -6,7 +6,7 @@ const session = require('express-session');
 const app = express();
 const port = 3000;
 
-//CẤU HÌNH HỆ THỐNG VÀ SESSION
+//Cấu hình hệ thống và Session
 app.use('/js', express.static('js'));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -22,27 +22,27 @@ app.use(session({
     cookie: { maxAge: 1000 * 60 * 60 * 8 }
 }));
 
-//KẾT NỐI DATABASE VÀ KHAI BÁO MODEL
+//Kết nối database MongoDB và khai báo Schema/Model
 const uri = 'mongodb+srv://sa:admin123@vnpt-mapping.ep8txj8.mongodb.net/VNPT_Mapping?appName=VNPT-Mapping';
 mongoose.connect(uri)
     .then(() => console.log('Đã kết nối MongoDB!'))
     .catch(err => console.log('Lỗi kết nối MongoDB:', err));
 
-//MODEL: SPLITTER (TỦ CHIA QUANG / HỘP CÁP)
+//Model splitter (Tủ chia/Hộp cáp)
 const splitterSchema = new mongoose.Schema({
-    ten_splitter: { type: String, required: true }, // VD:Tủ cáp Long Xuyên 01
+    ten_splitter: { type: String, required: true },
     loai_splitter: { type: String, enum: ['1:4', '1:16'], required: true },
 
-    //SysID định danh trạm OLT mà nhánh này đang cắm vào (VD: AGG-LX-01)
+    //SysID định danh trạm OLT mà nhánh này đang cắm vào
     sys_id: { type: String, required: true },
 
     //Tọa độ của tủ cáp trên đường phố
     vi_tri: {
         type: { type: String, enum: ['Point'], default: 'Point' },
-        coordinates: { type: [Number], required: true } // [Kinh độ, Vĩ độ]
+        coordinates: { type: [Number], required: true } //[Kinh độ, Vĩ độ]
     },
 
-    //THIẾT KẾ PHÂN CẤP (HIERARCHY):
+    //Thiết kế phân cấp:
     //Nếu là 1:16, trường này sẽ lưu ID của Splitter 1:4 mà nó cắm vào.
     //Nếu là 1:4, trường này để null.
     splitter_cha_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Splitter', default: null },
@@ -50,13 +50,13 @@ const splitterSchema = new mongoose.Schema({
     trang_thai: { type: String, default: 'Hoạt động' }
 }, { collection: 'Splitter' });
 
-//MODEL: ĐIỂM KẾT NỐI
+//Model: Điểm kết nối
 const diemKetNoiSchema = new mongoose.Schema({
     ten_khach_hang: String,
     loai_khach_hang: String,
     dia_chi: String,
 
-    //Tọa độ nhà khách hàng
+    //Tọa độ khách hàng
     vi_tri: {
         type: { type: String, enum: ['Point'], default: 'Point' },
         coordinates: { type: [Number] }
@@ -69,8 +69,7 @@ const diemKetNoiSchema = new mongoose.Schema({
         ngay_het_han: Date
     },
 
-    //HẠ TẦNG VIỄN THÔNG (PON & PPPoE)
-
+    //Hạ tầng viễn thông (PON & PPPoE)
     //Khách hàng đang cắm dây mạng vào Splitter 1:16 nào?
     splitter_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Splitter' },
 
@@ -85,7 +84,7 @@ const diemKetNoiSchema = new mongoose.Schema({
             slot: { type: String, required: true },
             port: { type: String, required: true },
             vpi: { type: String, default: '0' },
-            vci: { type: String, default: '33' } // VNPT thường dùng VPI/VCI là 0/33
+            vci: { type: String, default: '33' } //VNPT thường dùng VPI/VCI là 0/33
         }
     },
 
@@ -150,7 +149,7 @@ app.use('/quanly/taikhoan', quanlyChiTietNguoiDungXulyRouter); //Xử lý xác t
 app.use('/quanly/taikhoan', quanlyCapNhatNguoiDungRouter); //Giao diện cập nhật người dùng
 app.use('/quanly/taikhoan', quanlyCapNhatNguoiDungXulyRouter); //Xử lý cập nhật người dùng
 
-//KHỞI CHẠY SERVER
+//Khởi chạy Server
 app.listen(port, () => {
     console.log(`Server đang chạy tại: http://localhost:${port}`);
 });

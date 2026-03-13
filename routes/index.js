@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 
 const DiemKetNoi = mongoose.model('DiemKetNoi');
 
-// Route: Giao diện chính bản đồ
+//Route: Giao diện chính bản đồ
 router.get('/', (req, res) => {
     res.render('views', { title: 'Bản đồ giám sát mạng lưới', user: req.session.user || null });
 });

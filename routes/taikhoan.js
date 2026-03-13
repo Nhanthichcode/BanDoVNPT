@@ -11,7 +11,7 @@ const kiemTraDangNhap = (req, res, next) => {
     if (req.session.user) next(); else res.redirect('/dangnhap');
 };
 
-// Route: Trang hồ sơ cá nhân
+//Route: Trang hồ sơ cá nhân
 router.get('/hoso', kiemTraDangNhap, async (req, res) => {
     try {
         let pool = await sql.connect(sqlConfig);

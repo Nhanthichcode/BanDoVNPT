@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    //KHỞI TẠO BẢN ĐỒ
+    //Khởi tạo bản đồ
     document.getElementById('map-container').innerHTML = '';
     
     let toaDoTrungTam = [10.368422344066985, 105.43320325646403]; 
@@ -10,10 +10,10 @@ document.addEventListener('DOMContentLoaded', function () {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    //LẤY DỮ LIỆU TỪ API VÀ VẼ LÊN BẢN ĐỒ
+    //Lấy dữ liệu API và vẽ lên bản đồ
     let danhSachGoc = [];
     
-    //TẠO 3 LỚP LAYER RIÊNG BIỆT ĐỂ DỄ QUẢN LÝ
+    //TẠO 3 LỚP LAYER RIÊNG BIỆT CHO ĐIỂM KHÁCH HÀNG, TỦ SPLITTER VÀ SỢI CÁP QUANG
     let markerLayer = L.layerGroup().addTo(map);
     let splitterLayer = L.layerGroup().addTo(map);
     let capQuangLayer = L.layerGroup().addTo(map);
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
             else if (mau_trang_thai === "Đỏ") ma_mau = "#dc3545";
             else if (mau_trang_thai === "Vàng") ma_mau = "#ffc107";
 
-            //VẼ ĐIỂM KHÁCH HÀNG
+            //Vẽ điểm khách hàng
             let marker = L.circleMarker([vi_do, kinh_do], {
                 radius: 8, fillColor: ma_mau, color: "#ffffff",
                 weight: 2, opacity: 1, fillOpacity: 0.9
@@ -74,12 +74,12 @@ document.addEventListener('DOMContentLoaded', function () {
             marker.bindPopup(noi_dung_popup);
             markerLayer.addLayer(marker);
 
-            //VẼ TỦ SPLITTER VÀ TIA CÁP QUANG
+            //Vẽ tủ splitter và sợi cáp quang
             if (diem.splitter_id && diem.splitter_id.vi_tri) {
                 let spKinhDo = diem.splitter_id.vi_tri.coordinates[0];
                 let spViDo = diem.splitter_id.vi_tri.coordinates[1];
                 
-                //Vẽ Tủ Splitter (Chỉ vẽ nếu chưa có trên bản đồ)
+                //Vẽ tủ splitter
                 if (!drawnSplitters.has(diem.splitter_id._id)) {
                     let spMarker = L.marker([spViDo, spKinhDo], { icon: splitterIcon });
                     spMarker.bindPopup(`
@@ -90,9 +90,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     drawnSplitters.add(diem.splitter_id._id); //Đánh dấu là đã vẽ tủ này
                 }
 
-                //Vẽ Sợi cáp quang
+                //Vẽ sợi cáp quang
                 let capQuang = L.polyline([[vi_do, kinh_do], [spViDo, spKinhDo]], {
-                    color: ma_mau, //Màu sợi cáp đồng bộ với màu Ping của khách
+                    color: ma_mau, //Màu sợi cáp đồng bộ với tình trạng kết nối của khách
                     weight: 2,
                     opacity: 0.6,
                     dashArray: '5, 5' //Hiệu ứng nét đứt
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    //CÁC HÀM XỬ LÝ LỌC DỮ LIỆU
+    //Các hàm lọc dữ liệu
     window.xoaBoLoc = function () {
         document.getElementById('input-tukhoa').value = '';
         document.getElementById('loai_tatca').checked = true;

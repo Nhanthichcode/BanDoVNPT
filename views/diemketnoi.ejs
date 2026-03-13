@@ -58,7 +58,7 @@
                                         <th class="py-3 text-start ps-4">Khách hàng/Địa chỉ</th>
                                         <th class="py-3">Tủ cáp</th>
                                         <th class="py-3 text-start">Tài khoản PPPoE & Circuit ID</th>
-                                        <th class="py-3">Trạng thái (Ping)</th>
+                                        <th class="py-3">Trạng thái kết nối</th>
                                         <th class="py-3">Thao tác</th>
                                     </tr>
                                 </thead>
@@ -196,7 +196,7 @@
                                     </div>
 
                                     <div class="col-md-4">
-                                        <label class="form-label fw-bold">Mô phỏng Ping (ms)</label>
+                                        <label class="form-label fw-bold">Mô phỏng trạng thái</label>
                                         <input type="number" name="ping" class="form-control" value="15" required>
                                     </div>
                                     <div class="col-md-6">
@@ -272,23 +272,23 @@
                 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
                 <script>
-                    // Lấy toàn bộ mảng gói cước do Node.js truyền từ SQL sang, ép thành mảng JSON để JS đọc được
+                    //Lấy toàn bộ mảng gói cước do Node.js truyền từ SQL sang, ép thành mảng JSON để JS đọc được
                     const mangGoiCuoc = JSON.parse("<%- JSON.stringify(typeof danhSachGoiCuoc !== 'undefined' ? danhSachGoiCuoc : []) %>");
 
                     function capNhatGoiCuoc() {
                         const loaiHinh = document.getElementById('chon_loai_hinh').value;
                         const selectGoiCuoc = document.getElementById('chon_goi_cuoc');
 
-                        // Xóa dữ liệu cũ, đưa về trạng thái mặc định
+                        //Xóa dữ liệu cũ, đưa về trạng thái mặc định
                         selectGoiCuoc.innerHTML = '<option value="">-- Chọn gói cước --</option>';
 
-                        // Nếu người dùng chọn lại option rỗng thì dừng
+                        //Nếu người dùng chọn lại option rỗng thì dừng
                         if (!loaiHinh) return;
 
-                        // Lọc ra các gói cước có loại hình chứa chuỗi khớp với lựa chọn (Hộ gia đình / Doanh nghiệp / Điểm công cộng)
+                        //Lọc ra các gói cước có loại hình chứa chuỗi khớp với lựa chọn (Hộ gia đình/Doanh nghiệp/Điểm công cộng)
                         const danhSachLoc = mangGoiCuoc.filter(gc => gc.loai_hinh_thue_bao && gc.loai_hinh_thue_bao.includes(loaiHinh));
 
-                        // Đổ các gói cước đã lọc vào cái Select Box thứ 2
+                        //Đổ các gói cước đã lọc vào Select Box thứ 2
                         danhSachLoc.forEach(gc => {
                             const option = document.createElement('option');
                             option.value = gc.id;

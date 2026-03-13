@@ -12,7 +12,7 @@ const kiemTraQuyenQuanTri = (req, res, next) => {
     else hienThiLoiHeThong(req, res, "TRUY CẬP BỊ TỪ CHỐI! Chức năng này chỉ dành cho Quản trị viên và Quản lý.");
 };
 
-// Route: Hiển thị trang Thêm người dùng
+//Route: Hiển thị trang thêm người dùng
 router.get('/them', kiemTraDangNhap, kiemTraQuyenQuanTri, (req, res) => {
     res.render('quanly_them_nguoidung', {
         title: 'Thêm người dùng mới',

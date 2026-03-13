@@ -14,7 +14,7 @@ const kiemTraQuyenQuanTri = (req, res, next) => {
     else hienThiLoiHeThong(req, res, "TRUY CẬP BỊ TỪ CHỐI!");
 };
 
-//Route: lấy dữ liệu và hiển thị form sửa
+//Route: Lấy dữ liệu và hiển thị form sửa
 router.get('/sua/:username', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, res) => {
     try {
         let pool = await sql.connect(sqlConfig);

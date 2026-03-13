@@ -9,7 +9,7 @@ const kiemTraDangNhap = (req, res, next) => {
     if (req.session.user) next(); else res.redirect('/dangnhap');
 };
 
-//TRANG QUẢN LÝ DANH SÁCH TỦ SPLITTER
+//Trang quản lý danh sách tủ cáp
 router.get('/', kiemTraDangNhap, async (req, res) => {
     try {
         const danhSachSplitter = await Splitter.find({})
@@ -30,7 +30,7 @@ router.get('/', kiemTraDangNhap, async (req, res) => {
     }
 });
 
-//XỬ LÝ THÊM TỦ CÁP MỚI
+//Xử lý thêm tủ cáp mới
 
 router.post('/them', kiemTraDangNhap, async (req, res) => {
     try {

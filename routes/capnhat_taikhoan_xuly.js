@@ -12,7 +12,7 @@ const kiemTraDangNhap = (req, res, next) => {
     if (req.session.user) next(); else res.redirect('/dangnhap');
 };
 
-// Route: Xử lý lưu thông tin hồ sơ vào SQL Server
+//Route: Xử lý lưu thông tin hồ sơ vào SQL Server
 router.post('/capnhat_xuly', kiemTraDangNhap, async (req, res) => {
     try {
         const { ho_ten, so_dien_thoai, email_lien_he, dia_chi } = req.body;
@@ -34,13 +34,12 @@ router.post('/capnhat_xuly', kiemTraDangNhap, async (req, res) => {
                 WHERE ten_dang_nhap = @ten_dang_nhap
             `);
 
-        // Cập nhật lại session
+        //Cập nhật lại session
         req.session.user.ho_ten = ho_ten;
         req.session.user.so_dien_thoai = so_dien_thoai;
         req.session.user.email_lien_he = email_lien_he;
         req.session.user.dia_chi = dia_chi;
 
-        // Xong việc thì trả về trang xem hồ sơ
         res.redirect('/taikhoan/hoso');
 
     } catch (error) {

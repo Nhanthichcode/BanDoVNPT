@@ -17,7 +17,7 @@ const kiemTraDangNhap = (req, res, next) => {
     if (req.session.user) next(); else res.redirect('/dangnhap');
 };
 
-//TRANG QUẢN LÝ ĐIỂM KẾT NỐI
+//Trang quản lý điểm kết nối
 router.get('/', kiemTraDangNhap, async (req, res) => {
     try {
         //Lấy danh sách Điểm kết nối từ MongoDB, có populate thông tin Tủ cấp 2 và sắp xếp theo lần kiểm tra cuối
@@ -49,13 +49,12 @@ router.get('/', kiemTraDangNhap, async (req, res) => {
     }
 });
 
-//XỬ LÝ THÊM KHÁCH HÀNG MỚI
+//Xử lý thêm điểm kết nối mới
 router.post('/them', kiemTraDangNhap, async (req, res) => {
     try {
         const {
             ten_khach_hang, dia_chi, kinh_do, vi_do, ping,
             goi_cuoc_id, ngay_dang_ky, thoi_gian_su_dung_thang,
-            //CÁC THÔNG SỐ MỚI THÊM
             splitter_id, username, password, rack, shelf, slot, port
         } = req.body;
 
@@ -71,20 +70,20 @@ router.post('/them', kiemTraDangNhap, async (req, res) => {
         const ngayHetHanDate = new Date(ngayDangKyDate);
         ngayHetHanDate.setMonth(ngayHetHanDate.getMonth() + parseInt(thoi_gian_su_dung_thang));
 
-        //Xử lý trạng thái Ping
+        //Xử lý trạng thái kết nối
         const soPing = parseInt(ping);
         let mau_sac = "Xám", cuong_do = 0;
         if (soPing > 0 && soPing <= 90) { mau_sac = "Xanh"; cuong_do = Math.floor(Math.random() * 21) + 80; }
         else if (soPing > 90 && soPing <= 250) { mau_sac = "Vàng"; cuong_do = Math.floor(Math.random() * 31) + 50; }
         else if (soPing > 250) { mau_sac = "Đỏ"; cuong_do = Math.floor(Math.random() * 49) + 1; }
 
-        //Tạo Document Mới chuẩn kiến trúc PON
+        //Tạo Document mới và lưu vào MongoDB
         const diemMoi = new DiemKetNoi({
             ten_khach_hang, loai_khach_hang, dia_chi,
             vi_tri: { type: 'Point', coordinates: [parseFloat(kinh_do), parseFloat(vi_do)] },
             thong_tin_hop_dong: { goi_cuoc_id: parseInt(goi_cuoc_id), ngay_dang_ky: ngayDangKyDate, thoi_gian_su_dung_thang: parseInt(thoi_gian_su_dung_thang), ngay_het_han: ngayHetHanDate },
 
-            //LƯU TRỮ HẠ TẦNG VÀ PPPoE
+            //Lưu trữ hạ tầng và PPPoE
             splitter_id: splitter_id,
             thong_tin_pppoe: {
                 username: username,

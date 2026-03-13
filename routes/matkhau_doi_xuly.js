@@ -12,7 +12,7 @@ const kiemTraDangNhap = (req, res, next) => {
     if (req.session.user) next(); else res.redirect('/dangnhap');
 };
 
-//XÁC THỰC MẬT KHẨU CŨ
+//Xác thực mật khẩu cũ
 router.post('/matkhau_doi_xacthuc', kiemTraDangNhap, async (req, res) => {
     try {
         const { ten_dang_nhap, mat_khau_cu } = req.body;
@@ -46,7 +46,7 @@ router.post('/matkhau_doi_xacthuc', kiemTraDangNhap, async (req, res) => {
     }
 });
 
-//LƯU MẬT KHẨU MỚI VÀ ĐĂNG XUẤT
+//Lưu mật khẩu mới và đăng xuất
 router.post('/matkhau_doi_xuly', kiemTraDangNhap, async (req, res) => {
     try {
         const { mat_khau_moi, nhap_lai_mat_khau_moi } = req.body;
@@ -67,7 +67,7 @@ router.post('/matkhau_doi_xuly', kiemTraDangNhap, async (req, res) => {
             .input('user', sql.VarChar, tenDangNhap)
             .query('UPDATE TaiKhoan SET mat_khau = @newPass WHERE ten_dang_nhap = @user');
 
-        //Thành công - Đăng xuất người dùng
+        //Thành công thì đăng xuất tài khoản để người dùng đăng nhập lại
         req.session.destroy();
         res.redirect('/dangnhap');
 

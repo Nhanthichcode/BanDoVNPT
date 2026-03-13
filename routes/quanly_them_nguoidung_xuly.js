@@ -18,14 +18,14 @@ const kiemTraQuyenQuanTri = (req, res, next) => {
     else hienThiLoiHeThong(req, res, "TRUY CẬP BỊ TỪ CHỐI!");
 };
 
-// Route: Xử lý Thêm tài khoản vào SQL Server
+//Route: Xử lý thêm tài khoản vào SQL Server
 router.post('/them_xuly', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, res) => {
     try {
         const { ten_dang_nhap, mat_khau, ho_ten, so_dien_thoai, email_lien_he, dia_chi, vai_tro_id, trang_thai } = req.body;
 
         let pool = await sql.connect(sqlConfig);
 
-        // Kiểm tra xem tên đăng nhập có bị trùng chưa
+        //Kiểm tra xem tên đăng nhập có bị trùng chưa
         let checkExist = await pool.request()
             .input('user', sql.VarChar, ten_dang_nhap)
             .query('SELECT ten_dang_nhap FROM TaiKhoan WHERE ten_dang_nhap = @user');
@@ -34,7 +34,7 @@ router.post('/them_xuly', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, res)
             return hienThiLoiHeThong(req, res, `Tên đăng nhập "${ten_dang_nhap}" đã được sử dụng. Vui lòng chọn tên khác!`);
         }
 
-        // Lưu vào cơ sở dữ liệu
+        //Lưu vào cơ sở dữ liệu
         await pool.request()
             .input('ten_dang_nhap', sql.VarChar, ten_dang_nhap)
             .input('mat_khau', sql.VarChar, mat_khau)
@@ -49,7 +49,7 @@ router.post('/them_xuly', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, res)
                 VALUES (@ten_dang_nhap, @mat_khau, @ho_ten, @so_dien_thoai, @email_lien_he, @dia_chi, @vai_tro_id, @trang_thai)
             `);
 
-        // Lưu thành công, đẩy về trang danh sách
+        //Lưu và trở về trang danh sách
         res.redirect('/quanly/taikhoan');
 
     } catch (error) {

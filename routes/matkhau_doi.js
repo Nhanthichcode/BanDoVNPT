@@ -5,7 +5,7 @@ const kiemTraDangNhap = (req, res, next) => {
     if (req.session.user) next(); else res.redirect('/dangnhap');
 };
 
-// Route: Hiển thị form kiểm tra danh tính
+//Route: Hiển thị form kiểm tra danh tính
 router.get('/matkhau_doi', kiemTraDangNhap, (req, res) => {
     res.render('matkhau_doi', { 
         title: 'Cập nhật mật khẩu', 

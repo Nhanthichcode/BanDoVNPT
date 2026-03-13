@@ -26,7 +26,7 @@ router.post('/mokhoa_xuly', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, re
 
         let pool = await sql.connect(sqlConfig);
 
-        //KIỂM TRA MẬT KHẨU CỦA NGƯỜI THỰC HIỆN
+        //Kiểm tra mật khẩu của Admin
         let checkPass = await pool.request()
             .input('userThucHien', sql.VarChar, nguoiThucHien)
             .input('passXacNhan', sql.VarChar, mat_khau_xac_nhan)
@@ -36,7 +36,7 @@ router.post('/mokhoa_xuly', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, re
             return hienThiLoiHeThong(req, res, "Thao tác thất bại: Mật khẩu xác nhận của bạn không chính xác!");
         }
 
-        //MẬT KHẨU ĐÚNG THÌ MỞ KHÓA TÀI KHOẢN VÀ XÓA LÝ DO
+        //Mật khẩu đúng thì mở khóa và xóa lý do khóa
         await pool.request()
             .input('userDuocMo', sql.VarChar, ten_dang_nhap_duoc_mo)
             .query(`

@@ -1,4 +1,4 @@
-// Hàm dùng chung để hiển thị trang lỗi 500
+//Hàm dùng chung để hiển thị trang lỗi 500
 function hienThiLoiHeThong(req, res, thongBaoTuyChinh) {
 
     const loiMacDinh = 'Không thể kết nối với cơ sở dữ liệu. Xin vui lòng kiểm tra lại đường truyền hoặc cấu hình MongoDB/SQL Server.';

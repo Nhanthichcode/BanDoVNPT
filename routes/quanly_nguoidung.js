@@ -13,10 +13,10 @@ const kiemTraDangNhap = (req, res, next) => {
     if (req.session.user) next(); else res.redirect('/dangnhap');
 };
 
-//KIỂM TRA QUYỀN TRUY CẬP
+//Kiểm tra xem có phải Admin hoặc Quản lý không
 const kiemTraQuyenQuanTri = (req, res, next) => {
     const vaiTro = req.session.user.vai_tro_id;
-    // Nếu là Admin hoặc Quản lý thì cho đi tiếp
+    //Nếu là Admin hoặc Quản lý thì tiếp tục
     if (vaiTro === 1 || vaiTro === 2) {
         next();
     } else {
@@ -24,12 +24,12 @@ const kiemTraQuyenQuanTri = (req, res, next) => {
     }
 };
 
-// Route: Hiển thị danh sách Người dùng
+//Route: Hiển thị danh sách người dùng
 router.get('/', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, res) => {
     try {
         let pool = await sql.connect(sqlConfig);
 
-        // Truy vấn lấy toàn bộ tài khoản, ưu tiên xếp Admin/Quản lý lên đầu bảng
+        //Truy vấn lấy toàn bộ tài khoản cùng tên vai trò, sắp xếp theo vai trò và tên
         let result = await pool.request().query(`
             SELECT tk.*, vt.ten_vai_tro 
             FROM TaiKhoan tk 

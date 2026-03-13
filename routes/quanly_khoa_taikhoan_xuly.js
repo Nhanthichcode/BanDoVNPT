@@ -31,7 +31,7 @@ router.post('/khoa_xuly', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, res)
 
         let pool = await sql.connect(sqlConfig);
 
-        //KIỂM TRA MẬT KHẨU CỦA NGƯỜI THỰC HIỆN
+        //Kiểm tra mật khẩu của Admin
         let checkPass = await pool.request()
             .input('userThucHien', sql.VarChar, nguoiThucHien)
             .input('passXacNhan', sql.VarChar, mat_khau_xac_nhan)
@@ -42,8 +42,7 @@ router.post('/khoa_xuly', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, res)
             return hienThiLoiHeThong(req, res, "Thao tác thất bại: Mật khẩu xác nhận của bạn không chính xác!");
         }
 
-        //NẾU MẬT KHẨU ĐÚNG THÌ TIẾN HÀNH KHÓA TÀI KHOẢN MỤC TIÊU
-        //Ghi thêm tag tên người khóa vào đầu lý do để sau này dễ tra cứu
+        //Mật khẩu xác nhận đúng + Ghi thêm tag tên người khóa vào đầu lý do để dễ tra cứu về sau
         const lyDoDayDu = `[Bị khóa bởi ${nguoiThucHien}]: ${ly_do_khoa}`;
 
         await pool.request()
@@ -54,8 +53,6 @@ router.post('/khoa_xuly', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, res)
                 SET trang_thai = 0, ly_do_khoa = @lyDo 
                 WHERE ten_dang_nhap = @userBiKhoa
             `);
-
-        //Quay lại trang danh sách sau khi khóa
         res.redirect('/quanly/taikhoan');
 
     } catch (error) {
