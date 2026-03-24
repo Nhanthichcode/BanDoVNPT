@@ -8,7 +8,7 @@ const sqlConfig = {
     options: { encrypt: false, trustServerCertificate: true }
 };
 
-//Route: Xử lý dữ liệu đăng nhập
+//Route: Xử lý đăng nhập
 router.post('/dangnhap', async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) return res.render('dangnhap', { error: 'Vui lòng nhập đầy đủ!', oldUsername: username || '' });

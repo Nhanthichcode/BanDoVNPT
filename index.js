@@ -101,7 +101,7 @@ const diemKetNoiSchema = new mongoose.Schema({
 mongoose.model('DiemKetNoi', diemKetNoiSchema);
 mongoose.model('Splitter', splitterSchema);
 
-//KẾT NỐI ROUTER
+//Kết nối Router
 const indexRouter = require('./routes/index');
 const vitriRouter = require('./routes/vitri');
 const goicuocRouter = require('./routes/goicuoc');
@@ -125,6 +125,7 @@ const quanlyChiTietNguoiDungXulyRouter = require('./routes/quanly_chitiet_nguoid
 const quanlyCapNhatNguoiDungRouter = require('./routes/quanly_capnhat_nguoidung');
 const quanlyCapNhatNguoiDungXulyRouter = require('./routes/quanly_capnhat_nguoidung_xuly');
 const goicuocXoaXulyRouter = require('./routes/goicuoc_xoa_xuly');
+const goicuocThemXulyRouter = require('./routes/goicuoc_them_xuly');
 
 // Khai báo tiền tố cho các đường dẫn
 app.use('/', indexRouter);                  //Các trang chung
@@ -150,6 +151,7 @@ app.use('/quanly/taikhoan', quanlyChiTietNguoiDungXulyRouter); //Xử lý xác t
 app.use('/quanly/taikhoan', quanlyCapNhatNguoiDungRouter); //Giao diện cập nhật người dùng
 app.use('/quanly/taikhoan', quanlyCapNhatNguoiDungXulyRouter); //Xử lý cập nhật người dùng
 app.use('/quanly/goicuoc', goicuocXoaXulyRouter); //Xử lý xóa gói cước
+app.use('/quanly/goicuoc', goicuocThemXulyRouter); //Xử lý thêm gói cước
 
 //Khởi chạy Server
 app.listen(port, () => {

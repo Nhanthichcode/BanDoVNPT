@@ -26,15 +26,35 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     fetch('/api/diem-ket-noi')
-        .then(response => response.json())
+        .then(response => {
+            //Nếu API báo lỗi
+            if (!response.ok) {
+                throw new Error('Lỗi máy chủ hoặc mất kết nối Database');
+            }
+            return response.json();
+        })
         .then(data => {
             danhSachGoc = data;
             veCacDiemLenBanDo(danhSachGoc);
-            
+
             let labelSoLuong = document.getElementById('so-luong-diem-bando');
             if(labelSoLuong) labelSoLuong.innerText = danhSachGoc.length;
         })
-        .catch(err => console.error("Lỗi khi tải dữ liệu API:", err));
+        .catch(err => {
+            console.error("Lỗi khi tải dữ liệu API:", err);
+            
+            //Hiển thị Popup báo lỗi
+            let modalLoi = new bootstrap.Modal(document.getElementById('modalLoiMongoDB'));
+            modalLoi.show();
+            
+            document.getElementById('map-container').innerHTML = `
+                <div class="d-flex flex-column justify-content-center align-items-center h-100 text-danger w-100" style="z-index: 999; position: relative;">
+                    <i class="bi bi-wifi-off fs-1 mb-2"></i>
+                    <h5 class="fw-bold">Bản đồ tạm thời không khả dụng</h5>
+                    <p class="small text-muted">Mất kết nối với cơ sở dữ liệu không gian.</p>
+                </div>
+            `;
+        });
 
     function veCacDiemLenBanDo(danhSachDiem) {
         markerLayer.clearLayers();

@@ -46,19 +46,4 @@ router.get('/', kiemTraDangNhap, async (req, res) => {
     }
 });
 
-//Route: Thêm gói cước mới
-router.post('/them', kiemTraDangNhap, async (req, res) => {
-    try {
-        const { ten_goi_cuoc, loai_hinh_thue_bao } = req.body;
-        let pool = await sql.connect(sqlConfig);
-        await pool.request()
-            .input('ten', sql.NVarChar, ten_goi_cuoc)
-            .input('loai', sql.NVarChar, loai_hinh_thue_bao)
-            .query(`INSERT INTO GoiCuoc (ten_goi_cuoc, loai_hinh_thue_bao) VALUES (@ten, @loai)`);
-        res.redirect('/quanly/goicuoc');
-    } catch (err) {
-        res.status(500).send("Đã xảy ra lỗi khi lưu dữ liệu gói cước.");
-    }
-});
-
 module.exports = router;
