@@ -3,7 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const sql = require('mssql');
 
-const DiemKetNoi = mongoose.model('DiemKetNoi');
+const DiemKetNoi = require('../models/DiemKetNoi');
 const Splitter = mongoose.model('Splitter');
 const hienThiLoiHeThong = require('./xuly_loi');
 

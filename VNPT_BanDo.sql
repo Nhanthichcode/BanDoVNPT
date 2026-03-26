@@ -37,3 +37,23 @@ CREATE TABLE GoiCuoc (
     ten_goi_cuoc NVARCHAR(100) NOT NULL,
     loai_hinh_thue_bao NVARCHAR(50) NOT NULL
 );
+
+-- 4. Báo cáo sự cố
+CREATE TABLE BaoCaoSuCo (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    diem_ket_noi_id VARCHAR(50) NOT NULL, 
+    nguoi_tao_id INT FOREIGN KEY REFERENCES TaiKhoan(id), 
+    loai_su_co NVARCHAR(100) NOT NULL, 
+    mo_ta_ban_dau NVARCHAR(500) NULL,
+    thoi_gian_tao DATETIME DEFAULT GETDATE(),
+    trang_thai_xu_ly TINYINT DEFAULT 0 
+);
+-- 5. Chi tiết báo cáo
+CREATE TABLE ChiTietBaoCao (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    bao_cao_id INT FOREIGN KEY REFERENCES BaoCaoSuCo(id) ON DELETE CASCADE,
+    nguoi_cap_nhat_id INT FOREIGN KEY REFERENCES TaiKhoan(id),
+    thoi_gian_cap_nhat DATETIME DEFAULT GETDATE(),
+    noi_dung_cap_nhat NVARCHAR(MAX) NOT NULL, 
+    hinh_anh_minh_hoa VARCHAR(255) NULL 
+);

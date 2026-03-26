@@ -6,7 +6,8 @@ const session = require('express-session');
 const app = express();
 const port = 3000;
 
-//Cấu hình hệ thống và Session
+//1. Cấu hình hệ thống và Session
+
 app.use('/js', express.static('js'));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -22,98 +23,31 @@ app.use(session({
     cookie: { maxAge: 1000 * 60 * 60 * 8 }
 }));
 
-//Kết nối database MongoDB và khai báo Schema/Model
+//2. Kết nối MongoDB và khai báo Models
+
 const uri = 'mongodb+srv://sa:admin123@vnpt-mapping.ep8txj8.mongodb.net/VNPT_Mapping?appName=VNPT-Mapping';
 mongoose.connect(uri)
     .then(() => console.log('Đã kết nối MongoDB!'))
     .catch(err => console.log('Lỗi kết nối MongoDB:', err));
 
-//Model splitter (Tủ chia/Hộp cáp)
-const splitterSchema = new mongoose.Schema({
-    ten_splitter: { type: String, required: true },
-    loai_splitter: { type: String, enum: ['1:4', '1:16'], required: true },
+require('./models/Splitter');
+require('./models/DiemKetNoi');
 
-    //SysID định danh trạm OLT mà nhánh này đang cắm vào
-    sys_id: { type: String, required: true },
-
-    //Tọa độ của tủ cáp trên đường phố
-    vi_tri: {
-        type: { type: String, enum: ['Point'], default: 'Point' },
-        coordinates: { type: [Number], required: true } //[Kinh độ, Vĩ độ]
-    },
-
-    //Thiết kế phân cấp:
-    //Nếu là 1:16, trường này sẽ lưu ID của Splitter 1:4 mà nó cắm vào.
-    //Nếu là 1:4, trường này để null.
-    splitter_cha_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Splitter', default: null },
-
-    trang_thai: { type: String, default: 'Hoạt động' }
-}, { collection: 'Splitter' });
-
-//Model: Điểm kết nối
-const diemKetNoiSchema = new mongoose.Schema({
-    ten_khach_hang: String,
-    loai_khach_hang: String,
-    dia_chi: String,
-
-    //Tọa độ khách hàng
-    vi_tri: {
-        type: { type: String, enum: ['Point'], default: 'Point' },
-        coordinates: { type: [Number] }
-    },
-    //Tham chiếu đến bảng GoiCuoc trong SQL Server
-    thong_tin_hop_dong: {
-        goi_cuoc_id: Number,
-        ngay_dang_ky: Date,
-        thoi_gian_su_dung_thang: Number,
-        ngay_het_han: Date
-    },
-
-    //Hạ tầng viễn thông (PON & PPPoE)
-    //Khách hàng đang cắm dây mạng vào Splitter 1:16 nào?
-    splitter_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Splitter' },
-
-    thong_tin_pppoe: {
-        username: { type: String, required: true },
-        password: { type: String, required: true }, //Trên thông tin sẽ hiện "******"
-
-        //Thông số Circuit ID
-        circuit_id: {
-            rack: { type: String, required: true },
-            shelf: { type: String, required: true },
-            slot: { type: String, required: true },
-            port: { type: String, required: true },
-            vpi: { type: String, default: '0' },
-            vci: { type: String, default: '33' } //VNPT thường dùng VPI/VCI là 0/33
-        }
-    },
-
-    trang_thai_ket_noi: {
-        mau_sac: String,
-        cuong_do_tin_hieu: Number,
-        do_tre_ping_ms: Number,
-        lan_kiem_tra_cuoi: Date
-    },
-    nguoi_tao: String
-}, { collection: 'DiemKetNoi' });
-
-//Đăng ký Model để các file khác có thể gọi lại
-mongoose.model('DiemKetNoi', diemKetNoiSchema);
-mongoose.model('Splitter', splitterSchema);
-
-//Kết nối Router
+//3. Khai báo Router
+//--- Hệ thống chung & Xác thực ---
 const indexRouter = require('./routes/index');
-const vitriRouter = require('./routes/vitri');
-const goicuocRouter = require('./routes/goicuoc');
-const taikhoanRouter = require('./routes/taikhoan');
-const splitterRouter = require('./routes/splitter');
 const dangnhapRouter = require('./routes/dangnhap');
 const dangnhapXulyRouter = require('./routes/dangnhap_xuly');
 const dangxuatXulyRouter = require('./routes/dangxuat_xuly');
+
+//--- Hồ sơ cá nhân ---
+const taikhoanRouter = require('./routes/taikhoan');
 const capnhatTaikhoanRouter = require('./routes/capnhat_taikhoan');
 const capnhatTaikhoanXulyRouter = require('./routes/capnhat_taikhoan_xuly');
 const matkhauDoiRouter = require('./routes/matkhau_doi');
 const matkhauDoiXulyRouter = require('./routes/matkhau_doi_xuly');
+
+//--- Quản trị: Người dùng ---
 const quanlyNguoiDungRouter = require('./routes/quanly_nguoidung');
 const quanlyThemNguoiDungRouter = require('./routes/quanly_them_nguoidung');
 const quanlyThemNguoiDungXulyRouter = require('./routes/quanly_them_nguoidung_xuly');
@@ -124,40 +58,60 @@ const quanlyChiTietNguoiDungRouter = require('./routes/quanly_chitiet_nguoidung'
 const quanlyChiTietNguoiDungXulyRouter = require('./routes/quanly_chitiet_nguoidung_xuly');
 const quanlyCapNhatNguoiDungRouter = require('./routes/quanly_capnhat_nguoidung');
 const quanlyCapNhatNguoiDungXulyRouter = require('./routes/quanly_capnhat_nguoidung_xuly');
-const goicuocXoaXulyRouter = require('./routes/goicuoc_xoa_xuly');
+
+//--- Quản trị: Gói cước ---
+const goicuocRouter = require('./routes/goicuoc');
 const goicuocThemXulyRouter = require('./routes/goicuoc_them_xuly');
+const goicuocXoaXulyRouter = require('./routes/goicuoc_xoa_xuly');
+
+//--- Quản trị: Tủ Splitter ---
+const splitterRouter = require('./routes/splitter');
 const splitterThemXulyRouter = require('./routes/splitter_them_xuly');
+
+//--- Quản trị: Điểm kết nối ---
+const vitriRouter = require('./routes/vitri');
 const vitriThemXulyRouter = require('./routes/vitri_them_xuly');
 
-// Khai báo tiền tố cho các đường dẫn
-app.use('/', indexRouter);                  //Các trang chung
-app.use('/quanly/vitri', vitriRouter);      //Phân hệ quản lý điểm kết nối
-app.use('/quanly/goicuoc', goicuocRouter);  //Phân hệ quản lý gói cước
-app.use('/taikhoan', taikhoanRouter);       //Phân hệ tài khoản cá nhân
-app.use('/quanly/splitter', splitterRouter); //Phân hệ quản lý tủ Splitter
-app.use('/', dangnhapRouter);           //Trang đăng nhập
-app.use('/', dangnhapXulyRouter);       //Xử lý đăng nhập
-app.use('/', dangxuatXulyRouter);       //Xử lý đăng xuất
-app.use('/taikhoan', capnhatTaikhoanRouter);     //Giao diện cập nhật hồ sơ cá nhân
-app.use('/taikhoan', capnhatTaikhoanXulyRouter);    //Xử lý cập nhật hồ sơ cá nhân
-app.use('/taikhoan', matkhauDoiRouter);     //Giao diện đổi mật khẩu
-app.use('/taikhoan', matkhauDoiXulyRouter);    //Xử lý đổi mật khẩu
-app.use('/quanly/taikhoan', quanlyNguoiDungRouter);  //Phân hệ quản lý người dùng
-app.use('/quanly/taikhoan', quanlyThemNguoiDungRouter); //Giao diện thêm người dùng mới
-app.use('/quanly/taikhoan', quanlyThemNguoiDungXulyRouter); //Xử lý thêm người dùng mới
-app.use('/quanly/taikhoan', quanlyKhoaTaiKhoanXulyRouter); //Xử lý khóa tài khoản
-app.use('/quanly/taikhoan', quanlyMoKhoaTaiKhoanXulyRouter); //Xử lý mở khóa tài khoản
-app.use('/quanly/taikhoan', quanlyDatLaiMatKhauXulyRouter); //Xử lý đặt lại mật khẩu
-app.use('/quanly/taikhoan', quanlyChiTietNguoiDungRouter); //Giao diện chi tiết người dùng (có xác thực bảo mật)
-app.use('/quanly/taikhoan', quanlyChiTietNguoiDungXulyRouter); //Xử lý xác thực bảo mật để xem thông tin nhạy cảm trong chi tiết người dùng
-app.use('/quanly/taikhoan', quanlyCapNhatNguoiDungRouter); //Giao diện cập nhật người dùng
-app.use('/quanly/taikhoan', quanlyCapNhatNguoiDungXulyRouter); //Xử lý cập nhật người dùng
-app.use('/quanly/goicuoc', goicuocXoaXulyRouter); //Xử lý xóa gói cước
-app.use('/quanly/goicuoc', goicuocThemXulyRouter); //Xử lý thêm gói cước
-app.use('/quanly/splitter', splitterThemXulyRouter); //Xử lý thêm tủ Splitter mới
-app.use('/quanly/vitri', vitriThemXulyRouter); //Xử lý thêm điểm kết nối mới
+//4. Khai báo tiền tố cho đường dẫn
+//--- Hệ thống chung và Xác thực ---
+app.use('/', indexRouter);
+app.use('/', dangnhapRouter);
+app.use('/', dangnhapXulyRouter);
+app.use('/', dangxuatXulyRouter);
 
-//Khởi chạy Server
+//--- Hồ sơ cá nhân ---
+app.use('/taikhoan', taikhoanRouter);
+app.use('/taikhoan', capnhatTaikhoanRouter);
+app.use('/taikhoan', capnhatTaikhoanXulyRouter);
+app.use('/taikhoan', matkhauDoiRouter);
+app.use('/taikhoan', matkhauDoiXulyRouter);
+
+//--- Quản trị: Người dùng ---
+app.use('/quanly/taikhoan', quanlyNguoiDungRouter);
+app.use('/quanly/taikhoan', quanlyThemNguoiDungRouter);
+app.use('/quanly/taikhoan', quanlyThemNguoiDungXulyRouter);
+app.use('/quanly/taikhoan', quanlyKhoaTaiKhoanXulyRouter);
+app.use('/quanly/taikhoan', quanlyMoKhoaTaiKhoanXulyRouter);
+app.use('/quanly/taikhoan', quanlyDatLaiMatKhauXulyRouter);
+app.use('/quanly/taikhoan', quanlyChiTietNguoiDungRouter);
+app.use('/quanly/taikhoan', quanlyChiTietNguoiDungXulyRouter);
+app.use('/quanly/taikhoan', quanlyCapNhatNguoiDungRouter);
+app.use('/quanly/taikhoan', quanlyCapNhatNguoiDungXulyRouter);
+
+//--- Quản trị: Gói cước ---
+app.use('/quanly/goicuoc', goicuocRouter);
+app.use('/quanly/goicuoc', goicuocThemXulyRouter);
+app.use('/quanly/goicuoc', goicuocXoaXulyRouter);
+
+//--- Quản trị: Tủ Splitter ---
+app.use('/quanly/splitter', splitterRouter);
+app.use('/quanly/splitter', splitterThemXulyRouter);
+
+//--- Quản trị: Điểm kết nối ---
+app.use('/quanly/vitri', vitriRouter);
+app.use('/quanly/vitri', vitriThemXulyRouter);
+
+//5. Khởi chạy Server
 app.listen(port, () => {
     console.log(`Server đang chạy tại: http://localhost:${port}`);
 });

@@ -3,7 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const hienThiLoiHeThong = require('./xuly_loi');
 
-const DiemKetNoi = mongoose.model('DiemKetNoi');
+const DiemKetNoi = require('../models/DiemKetNoi');
 
 //Route: Giao diện chính bản đồ
 router.get('/', (req, res) => {

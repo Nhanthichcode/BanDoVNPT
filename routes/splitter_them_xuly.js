@@ -3,7 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const hienThiLoiHeThong = require('./xuly_loi');
 
-const Splitter = mongoose.model('Splitter');
+const Splitter = require('../models/Splitter');
 
 const kiemTraDangNhap = (req, res, next) => {
     if (req.session.user) next(); else res.redirect('/dangnhap');
