@@ -40,7 +40,7 @@ const diemKetNoiSchema = new mongoose.Schema({
     },
 
     nguoi_tao: { type: String, required: true }
-});
+}, { collection: 'DiemKetNoi' });
 
 diemKetNoiSchema.index({ vi_tri: '2dsphere' });
 

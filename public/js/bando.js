@@ -87,8 +87,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     <hr style="margin: 5px 0;">
                     <b>Loại:</b> ${diem.loai_khach_hang}<br>
                     <b>Địa chỉ:</b> ${diem.dia_chi}<br>
-                    <b>Tín hiệu:</b> ${diem.trang_thai_ket_noi.cuong_do_tin_hieu} %<br>
-                    <b>Ping:</b> ${diem.trang_thai_ket_noi.do_tre_ping_ms ? diem.trang_thai_ket_noi.do_tre_ping_ms + ' ms' : 'N/A'}<br>
+                    <b>Trạng thái:</b> <span style="color: ${ma_mau}; font-weight: bold;">${diem.trang_thai_ket_noi.mau_sac}</span><br>
+                    ${diem.trang_thai_ket_noi.mau_sac === 'Đỏ' && diem.trang_thai_ket_noi.ly_do_su_co ? `<b class="text-danger">Lý do:</b> ${diem.trang_thai_ket_noi.ly_do_su_co}<br>` : ''}
                 </div>
             `;
             marker.bindPopup(noi_dung_popup);

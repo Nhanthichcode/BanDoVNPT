@@ -100,8 +100,10 @@ app.use('/taikhoan', capnhatTaikhoanXulyRouter);
 app.use('/taikhoan', matkhauDoiRouter);
 app.use('/taikhoan', matkhauDoiXulyRouter);
 
-//--- Quản trị: Người dùng ---
+//Kiểm tra quyền quản trị trước khi vào các route quản lý
 app.use('/quanly', kiemTraQuyenQuanTri);
+
+//--- Quản trị: Người dùng ---
 app.use('/quanly/taikhoan', quanlyNguoiDungRouter);
 app.use('/quanly/taikhoan', quanlyThemNguoiDungRouter);
 app.use('/quanly/taikhoan', quanlyThemNguoiDungXulyRouter);
@@ -114,18 +116,15 @@ app.use('/quanly/taikhoan', quanlyCapNhatNguoiDungRouter);
 app.use('/quanly/taikhoan', quanlyCapNhatNguoiDungXulyRouter);
 
 //--- Quản trị: Gói cước ---
-app.use('/quanly', kiemTraQuyenQuanTri);
 app.use('/quanly/goicuoc', goicuocRouter);
 app.use('/quanly/goicuoc', goicuocThemXulyRouter);
 app.use('/quanly/goicuoc', goicuocXoaXulyRouter);
 
 //--- Quản trị: Tủ Splitter ---
-app.use('/quanly', kiemTraQuyenQuanTri);
 app.use('/quanly/splitter', splitterRouter);
 app.use('/quanly/splitter', splitterThemXulyRouter);
 
 //--- Quản trị: Điểm kết nối ---
-app.use('/quanly', kiemTraQuyenQuanTri);
 app.use('/quanly/vitri', vitriRouter);
 app.use('/quanly/vitri', vitriThemXulyRouter);
 
