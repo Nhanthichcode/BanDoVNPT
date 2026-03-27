@@ -18,12 +18,17 @@ router.get('/', (req, res) => {
 //Route: API lấy điểm kết nối
 router.get('/api/diem-ket-noi', async (req, res) => {
     try {
-        const danhSachDiem = await DiemKetNoi.find({}).populate('splitter_id');
+        const danhSachDiem = await DiemKetNoi.find({}).populate({
+            path: 'splitter_id',
+            populate: {
+                path: 'splitter_cha_id'
+            }
+        });
         res.status(200).json(danhSachDiem);
     } catch (error) {
-        console.error("Lỗi API lấy điểm kết nối:", error);
-        hienThiLoiHeThong(req, res);
+        console.error("Lỗi API lấy điểm kết nối MongoDB:", error);
+        const hienThiLoiHeThong = require('./routes/xuly_loi');
+        hienThiLoiHeThong(req, res); 
     }
 });
-
 module.exports = router;
