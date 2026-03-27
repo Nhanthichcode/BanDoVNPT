@@ -76,6 +76,16 @@ const baocaoSucoRouter = require('./routes/baocao_suco');
 const baocaoLapXulyRouter = require('./routes/baocao_lap_xuly');
 const baocaoHopDongXulyRouter = require('./routes/baocao_hopdong_xuly');
 
+// --- Kiểm soát phân quyền ---
+const kiemTraQuyenQuanTri = (req, res, next) => {
+    if (req.session.user && (req.session.user.vai_tro_id === 1 || req.session.user.vai_tro_id === 2)) {
+        next();
+    } else {
+        const hienThiLoiHeThong = require('./routes/xuly_loi');
+        hienThiLoiHeThong(req, res, "TRUY CẬP BỊ TỪ CHỐI! Chức năng này chỉ dành cho Quản trị viên và Quản lý.");
+    }
+};
+
 //4. Khai báo tiền tố cho đường dẫn
 //--- Hệ thống chung và Xác thực ---
 app.use('/', indexRouter);
@@ -91,6 +101,7 @@ app.use('/taikhoan', matkhauDoiRouter);
 app.use('/taikhoan', matkhauDoiXulyRouter);
 
 //--- Quản trị: Người dùng ---
+app.use('/quanly', kiemTraQuyenQuanTri);
 app.use('/quanly/taikhoan', quanlyNguoiDungRouter);
 app.use('/quanly/taikhoan', quanlyThemNguoiDungRouter);
 app.use('/quanly/taikhoan', quanlyThemNguoiDungXulyRouter);
@@ -103,15 +114,18 @@ app.use('/quanly/taikhoan', quanlyCapNhatNguoiDungRouter);
 app.use('/quanly/taikhoan', quanlyCapNhatNguoiDungXulyRouter);
 
 //--- Quản trị: Gói cước ---
+app.use('/quanly', kiemTraQuyenQuanTri);
 app.use('/quanly/goicuoc', goicuocRouter);
 app.use('/quanly/goicuoc', goicuocThemXulyRouter);
 app.use('/quanly/goicuoc', goicuocXoaXulyRouter);
 
 //--- Quản trị: Tủ Splitter ---
+app.use('/quanly', kiemTraQuyenQuanTri);
 app.use('/quanly/splitter', splitterRouter);
 app.use('/quanly/splitter', splitterThemXulyRouter);
 
 //--- Quản trị: Điểm kết nối ---
+app.use('/quanly', kiemTraQuyenQuanTri);
 app.use('/quanly/vitri', vitriRouter);
 app.use('/quanly/vitri', vitriThemXulyRouter);
 
