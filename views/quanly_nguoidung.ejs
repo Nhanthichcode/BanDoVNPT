@@ -174,7 +174,10 @@
                                                                             title="Đã khóa - Nhấn để Mở khóa"
                                                                             data-bs-toggle="modal"
                                                                             data-bs-target="#modalMoKhoaTaiKhoan"
-                                                                            onclick="chuanBiMoKhoa('<%= tk.ten_dang_nhap %>', '<%= tk.ho_ten %>', '<%= tk.ly_do_khoa || ',' %>')">
+                                                                            data-tendangnhap="<%= tk.ten_dang_nhap %>"
+                                                                            data-hoten="<%= tk.ho_ten %>"
+                                                                            data-lydo="<%= tk.ly_do_khoa || '' %>"
+                                                                            onclick="chuanBiMoKhoa(this)">
                                                                             <i
                                                                                 class="bi bi-lock-fill fs-6 icon-dong-mac-dinh"></i>
                                                                             <i
@@ -387,7 +390,11 @@
                     document.getElementById('input_ten_dang_nhap_bi_khoa').value = tenDangNhap;
                 }
 
-                function chuanBiMoKhoa(tenDangNhap, hoTen, lyDoKhoa) {
+                function chuanBiMoKhoa(btn) {
+                    const tenDangNhap = btn.getAttribute('data-tendangnhap');
+                    const hoTen = btn.getAttribute('data-hoten');
+                    const lyDoKhoa = btn.getAttribute('data-lydo');
+
                     document.getElementById('ten_hien_thi_mokhoa').innerText = hoTen + ' (' + tenDangNhap + ')';
                     document.getElementById('input_ten_dang_nhap_duoc_mo').value = tenDangNhap;
                     document.getElementById('hien_thi_ly_do_khoa_cu').value = lyDoKhoa || 'Không có ghi chú lý do.';

@@ -29,7 +29,10 @@ router.get('/', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, res) => {
 
         //Truy vấn lấy toàn bộ tài khoản cùng tên vai trò, sắp xếp theo vai trò và tên
         let result = await pool.request().query(`
-            SELECT tk.*, vt.ten_vai_tro 
+            SELECT 
+                tk.id, tk.ten_dang_nhap, tk.ho_ten, tk.so_dien_thoai, 
+                tk.email_lien_he, tk.trang_thai, tk.ly_do_khoa, tk.vai_tro_id, 
+                vt.ten_vai_tro 
             FROM TaiKhoan tk 
             LEFT JOIN VaiTro vt ON tk.vai_tro_id = vt.id
             ORDER BY tk.vai_tro_id ASC, tk.ho_ten ASC

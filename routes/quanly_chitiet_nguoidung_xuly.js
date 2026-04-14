@@ -10,7 +10,8 @@ const sqlConfig = {
 
 const kiemTraDangNhap = (req, res, next) => { if (req.session.user) next(); else res.redirect('/dangnhap'); };
 const kiemTraQuyenQuanTri = (req, res, next) => {
-    if (req.session.user.vai_tro_id === 1 || req.session.user.vai_tro_id === 2) next(); 
+    const vaiTro = req.session.user.vai_tro_id;
+    if (vaiTro === 1) next(); 
     else hienThiLoiHeThong(req, res, "TRUY CẬP BỊ TỪ CHỐI!");
 };
 
