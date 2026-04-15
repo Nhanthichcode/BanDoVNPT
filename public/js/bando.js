@@ -256,4 +256,4 @@ document.addEventListener('DOMContentLoaded', function () {
         locDuLieu();
     };
 
-}); // Kết thúc DOMContentLoaded
+});
