@@ -25,7 +25,8 @@ app.use(session({
 
 //2. Kết nối MongoDB và khai báo Models
 
-const uri = 'mongodb+srv://sa:admin123@vnpt-mapping.ep8txj8.mongodb.net/VNPT_Mapping?appName=VNPT-Mapping';
+const uri = 'mongodb+srv://sa:admin123@vnpt-mapping.ep8txj8.mongodb.net/?appName=VNPT-Mapping';
+
 mongoose.connect(uri)
     .then(() => console.log('Đã kết nối MongoDB!'))
     .catch(err => console.log('Lỗi kết nối MongoDB:', err));
