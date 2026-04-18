@@ -52,9 +52,8 @@ router.get('/lichsu', kiemTraDangNhap, async (req, res) => {
 
         //Hàm chuyển đổi mã trường hợp báo cáo 6 ký tự
         const taoMaTruongHop = (loaiSuCo, id) => {
-            //Ký tự đầu tiên: Viết in hoa dựa trên loại sự cố
-            let kyTuDau = 'K'; //Mặc định: Khác/Không rõ
-            const loai = loaiSuCo.toLowerCase();
+            let kyTuDau = 'K'; 
+            const loai = loaiSuCo ? loaiSuCo.toLowerCase() : "";
             
             if (loai.includes('cấu hình') || loai.includes('pppoe')) kyTuDau = 'C';
             else if (loai.includes('đứt cáp')) kyTuDau = 'D';
@@ -64,12 +63,9 @@ router.get('/lichsu', kiemTraDangNhap, async (req, res) => {
             else if (loai.includes('trộm') || loai.includes('mất dây')) kyTuDau = 'T';
             else if (loai.includes('hết hạn') || loai.includes('thu hồi')) kyTuDau = 'E';
 
-            //Ký tự thứ hai: Chọn từ mảng 62 ký tự (0-9, A-Z, a-z)
             const tapKyTu = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
             let viTriKyTu = Math.floor(id / 10000) % 62; 
             let kyTuThuHai = tapKyTu[viTriKyTu];
-
-            //4 ký tự cuối: Định dạng số 0000 - 9999
             let bonSoCuoi = String(id % 10000).padStart(4, '0');
 
             return `${kyTuDau}${kyTuThuHai}${bonSoCuoi}`;
@@ -79,7 +75,7 @@ router.get('/lichsu', kiemTraDangNhap, async (req, res) => {
         danhSachBaoCao = danhSachBaoCao.map(bc => ({
             ...bc,
             ma_truong_hop: taoMaTruongHop(bc.loai_su_co, bc.truong_hop),
-            dia_chi: mapDiaChi[bc.diem_ket_noi_id] || 'Không xác định / Điểm đã bị xóa'
+            dia_chi: mapDiaChi[bc.diem_ket_noi_id] || 'Không xác định/Điểm đã bị xóa'
         }));
 
         res.render('baocao_lichsu', {
@@ -90,7 +86,7 @@ router.get('/lichsu', kiemTraDangNhap, async (req, res) => {
 
     } catch (error) {
         console.error("Lỗi khi lấy lịch sử báo cáo:", error);
-        hienThiLoiHeThong(req, res, "Không thể tải dữ liệu lịch sử báo cáo.");
+        hienThiLoiHeThong(req, res); 
     }
 });
 

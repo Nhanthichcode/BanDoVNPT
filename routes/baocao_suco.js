@@ -57,7 +57,7 @@ router.get('/suco', kiemTraDangNhap, async (req, res) => {
 
     } catch (error) {
         console.error("Lỗi khi lấy danh sách sự cố:", error);
-        hienThiLoiHeThong(req, res, "Không thể tải danh sách báo cáo sự cố.");
+        hienThiLoiHeThong(req, res);
     }
 });
 
