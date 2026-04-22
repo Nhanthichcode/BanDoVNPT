@@ -1,0 +1,200 @@
+  <title>
+        <%= title %> - Hệ thống giám sát mạng lưới VNPT
+    </title>
+     
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .bg-vnpt {
+            background-color: #0072BC !important;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f1f8ff;
+            transition: 0.2s;
+        }
+    </style>
+ 
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 mb-5">            
+
+                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                    <div>
+                        <h3 class="text-primary fw-bold mb-0"><i class="bi bi-hdd-rack text-danger"></i> QUẢN LÝ
+                            SPLITTER/Tủ PON</h3>
+                    </div>
+                    <div>
+                        <button class="btn bg-vnpt text-white fw-bold shadow-sm" data-bs-toggle="modal"
+                            data-bs-target="#modalThemSplitter">
+                            <i class="bi bi-plus-circle"></i> Thêm Splitter
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light text-secondary">
+                                    <tr>
+                                        <th class="text-center py-3">STT</th>
+                                        <th class="py-3">Tên tủ</th>
+                                        <th class="py-3 text-center">Loại</th>
+                                        <th class="py-3">SysID</th>
+                                        <th class="py-3">Nguồn cáp</th>
+                                        <th class="py-3 text-center">Trạng thái</th>
+                                        <th class="py-3 text-center">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (typeof danhSachSplitter !=='undefined' && danhSachSplitter.length> 0) { %>
+                                        <% danhSachSplitter.forEach(function(sp, index) { %>
+                                            <tr>
+                                                <td class="text-center text-muted fw-bold">
+                                                    <%= index + 1 %>
+                                                </td>
+                                                <td><span class="fw-bold text-dark"><i class="bi bi-hdd-network"></i>
+                                                        <%= sp.ten_splitter %>
+                                                    </span></td>
+                                                <td class="text-center">
+                                                    <% if(sp.loai_splitter==='1:4' ) { %>
+                                                        <span class="badge bg-primary px-2 py-1">Cấp 1 (<%=
+                                                                sp.loai_splitter %>)</span>
+                                                        <% } else { %>
+                                                            <span class="badge bg-info text-dark px-2 py-1">Cấp 2 (<%=
+                                                                    sp.loai_splitter %>)</span>
+                                                            <% } %>
+                                                </td>
+                                                <td class="text-danger fw-bold">
+                                                    <%= sp.sys_id %>
+                                                </td>
+                                                <td>
+                                                    <% if(sp.splitter_cha_id) { %>
+                                                        <span class="text-primary fw-bold">
+                                                            <%= sp.splitter_cha_id.ten_splitter %>
+                                                        </span>
+                                                        <% } else { %>
+                                                            <span class="text-success fw-bold"><i
+                                                                    class="bi bi-server"></i> Nối thẳng trạm OLT</span>
+                                                            <% } %>
+                                                </td>
+                                                <td class="text-center">
+                                                    <% if(sp.trang_thai === 'Hoạt động') { %>
+                                                    <span class="badge bg-success rounded-pill">
+                                                        Hoạt động
+                                                    </span>
+                                                    <% } else { %>
+                                                        <span class="badge bg-warning rounded-pill text">
+                                                            Ngưng hoạt động
+                                                        </span>
+                                                        <% } %>
+                                                </td>
+                                                <td class="text-center">
+                                                   <form action="/quanly/splitter/xoa/<%= sp._id %>" method="POST" onsubmit="return confirm('Bạn chắc chắn muốn xóa?')">
+                                                        <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                            <% }); %>
+                                                <% } else { %>
+                                                    <tr>
+                                                        <td colspan="7" class="text-center py-5 text-muted">
+                                                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                                            Chưa có tủ Splitter nào trong CSDL.
+                                                        </td>
+                                                    </tr>
+                                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+           
+
+            <div class="modal fade" id="modalThemSplitter" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-vnpt text-white">
+                            <h5 class="modal-title fw-bold"><i class="bi bi-node-plus"></i> THÊM TỦ PON</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form action="/quanly/splitter/them" method="POST">
+                            <div class="modal-body p-4">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Tên tủ</label>
+                                    <input type="text" name="ten_splitter" class="form-control"
+                                        placeholder="VD: Tủ cấp 1 - Nguyễn Thái Học..." required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">SysID</label> // Mã trạm OLT
+                                    <input type="text" name="sys_id" class="form-control text-danger fw-bold"
+                                        value="AGG-LX-01" required>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Vĩ độ</label>
+                                        <input type="number" step="any" name="vi_do" class="form-control"
+                                            placeholder="VD: 10.37..." required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Kinh độ</label>
+                                        <input type="number" step="any" name="kinh_do" class="form-control"
+                                            placeholder="VD: 105.43..." required>
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-primary">Loại tủ</label>
+                                    <select name="loai_splitter" id="loai_splitter" class="form-select border-primary"
+                                        required onchange="kiemTraLoaiSplitter()">
+                                        <option value="1:4">Cấp 1 (Chia 1:4) - Nối thẳng OLT</option>
+                                        <option value="1:16">Cấp 2 (Chia 1:16) - Nối từ tủ Cấp 1</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3 d-none bg-light p-3 border rounded" id="khung_splitter_cha">
+                                    <label class="form-label fw-bold text-danger"><i class="bi bi-link-45deg"></i> Nối
+                                        vào tủ Cấp 1 nào?</label>
+                                    <select name="splitter_cha_id" class="form-select">
+                                        <option value="">-- Chọn tủ nguồn --</option>
+                                        <% if (typeof danhSachSplitterCap1 !=='undefined' ) { %>
+                                            <% danhSachSplitterCap1.forEach(function(sp) { %>
+                                                <option value="<%= sp._id %>">
+                                                    <%= sp.ten_splitter %> (<%= sp.sys_id %>)
+                                                </option>
+                                                <% }); %>
+                                                    <% } %>
+                                    </select>
+                                </div>
+
+                            </div>
+                            <div class="modal-footer bg-light">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                <button type="submit" class="btn bg-vnpt text-white fw-bold shadow-sm"><i
+                                        class="bi bi-floppy"></i> Lưu Tủ</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            </main>
+        
+                <script>
+                    function kiemTraLoaiSplitter() {
+                        var loai = document.getElementById('loai_splitter').value;
+                        var khungCha = document.getElementById('khung_splitter_cha');
+                        if (loai === '1:16') {
+                            khungCha.classList.remove('d-none');
+                        } else {
+                            khungCha.classList.add('d-none');
+                        }
+                    }
+                </script>
+ 

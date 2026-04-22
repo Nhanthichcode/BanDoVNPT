@@ -2,10 +2,11 @@ const express = require('express');
 const router = express.Router();
 const sql = require('mssql');
 const hienThiLoiHeThong = require('./xuly_loi');
-const sqlConfig = {
-    user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
-    options: { encrypt: false, trustServerCertificate: true }
-};
+const dbManager = require('../database');//thêm cái này
+// const sqlConfig = {
+//     user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
+//     options: { encrypt: false, trustServerCertificate: true }
+// };
 
 const kiemTraDangNhap = (req, res, next) => {
     if (req.session.user) next(); else res.redirect('/dangnhap');
@@ -14,7 +15,7 @@ const kiemTraDangNhap = (req, res, next) => {
 //Route: Trang quản lý gói cước
 router.get('/', kiemTraDangNhap, async (req, res) => {
     try {
-        let pool = await sql.connect(sqlConfig);
+        const pool = await dbManager.getSQLPool();
         const limit = 20;
         const page = parseInt(req.query.page) || 1;
         const offset = (page - 1) * limit;
@@ -39,7 +40,7 @@ router.get('/', kiemTraDangNhap, async (req, res) => {
             OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
         `);
 
-        res.render('goicuoc', { title: 'Quản lý gói cước', user: req.session.user, danhSachGoiCuoc: result.recordset, currentPage: page, totalPages: totalPages, loaiHienTai: loaiFilter });
+        res.render('pages/goicuoc', { title: 'Quản lý gói cước', user: req.session.user, danhSachGoiCuoc: result.recordset, currentPage: page, totalPages: totalPages, loaiHienTai: loaiFilter, activePage: 'goicuoc' });
     }  catch (error) {
         console.error("Lỗi Server:", error);
         hienThiLoiHeThong(req, res);

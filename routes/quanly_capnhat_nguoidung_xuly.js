@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const sql = require('mssql');
 const hienThiLoiHeThong = require('./xuly_loi');
-
-const sqlConfig = {
-    user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
-    options: { encrypt: false, trustServerCertificate: true }
-};
+const dbManager = require('../database');//thêm cái này
+// const sqlConfig = {
+//     user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
+//     options: { encrypt: false, trustServerCertificate: true }
+// };
 
 const kiemTraDangNhap = (req, res, next) => { if (req.session.user) next(); else res.redirect('/dangnhap'); };
 
@@ -28,7 +28,7 @@ router.post('/sua_xuly', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, res) 
             vaiTroMoi = req.session.user.vai_tro_id; 
         }
 
-        let pool = await sql.connect(sqlConfig);
+        const pool = await dbManager.getSQLPool();
 
         await pool.request()
             .input('ho_ten', sql.NVarChar, ho_ten)

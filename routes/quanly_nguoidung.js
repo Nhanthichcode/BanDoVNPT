@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const sql = require('mssql');
 const hienThiLoiHeThong = require('./xuly_loi');
-
-const sqlConfig = {
-    user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
-    options: { encrypt: false, trustServerCertificate: true }
-};
+const dbManager = require('../database');//thêm cái này
+// const sqlConfig = {
+//     user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
+//     options: { encrypt: false, trustServerCertificate: true }
+// };
 const kiemTraDangNhap = (req, res, next) => {
     if (req.session.user) next(); else res.redirect('/dangnhap');
 };
@@ -25,7 +25,7 @@ const kiemTraQuyenQuanTri = (req, res, next) => {
 //Route: Hiển thị danh sách người dùng
 router.get('/', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, res) => {
     try {
-        let pool = await sql.connect(sqlConfig);
+        const pool = await dbManager.getSQLPool();
 
         //Truy vấn lấy toàn bộ tài khoản cùng tên vai trò, sắp xếp theo vai trò và tên
         let result = await pool.request().query(`
@@ -38,10 +38,11 @@ router.get('/', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, res) => {
             ORDER BY tk.vai_tro_id ASC, tk.ho_ten ASC
         `);
 
-        res.render('quanly_nguoidung', {
+        res.render('pages/quanly_nguoidung', {
             title: 'Quản lý người dùng',
             user: req.session.user,
-            danhSachTaiKhoan: result.recordset
+            danhSachTaiKhoan: result.recordset,
+            activePage: 'taikhoan'
         });
     } catch (error) {
         console.error("Lỗi tải danh sách tài khoản:", error);

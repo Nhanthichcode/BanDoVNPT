@@ -3,14 +3,14 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const sql = require('mssql');
 const hienThiLoiHeThong = require('./xuly_loi');
-
+const dbManager = require('../database');//thêm cái này
 const DiemKetNoi = require('../models/DiemKetNoi');
 
 //Cấu hình SQL Server
-const sqlConfig = {
-    user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
-    options: { encrypt: false, trustServerCertificate: true }
-};
+// const sqlConfig = {
+//     user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
+//     options: { encrypt: false, trustServerCertificate: true }
+// };
 
 const kiemTraDangNhap = (req, res, next) => {
     if (req.session.user) next(); else res.redirect('/dangnhap');
@@ -32,7 +32,7 @@ router.get('/suco', kiemTraDangNhap, async (req, res) => {
         }).sort({ ten_khach_hang: 1 });
 
         //Kiểm tra SQL Server xem điểm nào đang được xử lý
-        let pool = await sql.connect(sqlConfig);
+        const pool = await dbManager.getSQLPool();
         let resultSQL = await pool.request().query(`
             SELECT id AS bao_cao_id, diem_ket_noi_id 
             FROM BaoCaoSuCo 
@@ -45,14 +45,15 @@ router.get('/suco', kiemTraDangNhap, async (req, res) => {
             mapDangXuLy[r.diem_ket_noi_id] = r.bao_cao_id;
         });
 
-        res.render('baocao_suco', {
+        res.render('pages/baocao_suco', {
             title: 'Báo cáo sự cố mạng lưới',
             user: req.session.user,
             danhSachSuCo: danhSachSuCo,
             soLuongDo: diemSuaChua.length,
             soLuongXam: diemThuHoi.length,
             mapDangXuLy: mapDangXuLy,
-            danhSachBinhThuong: danhSachBinhThuong
+            danhSachBinhThuong: danhSachBinhThuong,
+            activePage: 'baocao_suco'
         });
 
     } catch (error) {

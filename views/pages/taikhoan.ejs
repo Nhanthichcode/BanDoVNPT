@@ -1,0 +1,148 @@
+ <title>
+        <%= title %> - Hệ thống giám sát mạng lưới VNPT
+    </title>
+     
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .bg-vnpt {
+            background-color: #0072BC !important;
+        }
+
+        .form-control:disabled,
+        .form-control[readonly],
+        .input-group-text.locked-icon {
+            background-color: #e9ecef;
+            opacity: 1;
+            font-weight: 500;
+        }
+
+        .form-control:not([readonly]).truong-cho-phep-sua {
+            background-color: #fff;
+            border-color: #0072BC;
+            box-shadow: 0 0 0 3px rgba(0, 114, 188, 0.15);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .input-group:focus-within .input-group-text {
+            background-color: #e3f2fd;
+            border-color: #0072BC;
+            color: #0072BC !important;
+            transition: all 0.3s ease-in-out;
+        }
+    </style>
+ 
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 mb-5">
+                <div class="container" style="max-width: 800px;">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="card-header bg-vnpt text-white py-3">
+                        <h4 class="mb-0 fw-bold"><i class="bi bi-person-vcard"></i> THÔNG TIN TÀI KHOẢN</h4>
+                    </div>
+
+                    <div class="card-body p-5">
+                        <form action="/taikhoan/capnhat" method="POST" id="form-hoso">
+                            <div class="row g-4">
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-secondary">Tên đăng nhập</label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text locked-icon text-secondary"><i
+                                                class="bi bi-person-bounding-box"></i></span>
+                                        <input type="text" class="form-control" name="ten_dang_nhap"
+                                            value="<%= thongTin.ten_dang_nhap %>" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Họ và tên</label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text text-primary icon-truong-sua"><i
+                                                class="bi bi-person-fill"></i></span>
+                                        <input type="text" class="form-control border-primary truong-cho-phep-sua"
+                                            name="ho_ten" value="<%= thongTin.ho_ten %>" readonly required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Số điện thoại</label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text text-primary icon-truong-sua"><i
+                                                class="bi bi-telephone-fill"></i></span>
+                                        <input type="text" class="form-control border-primary truong-cho-phep-sua"
+                                            name="so_dien_thoai" value="<%= thongTin.so_dien_thoai %>" readonly
+                                            required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Email/Liên hệ khác</label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text text-primary icon-truong-sua"><i
+                                                class="bi bi-envelope-fill"></i></span>
+                                        <input type="text" class="form-control border-primary truong-cho-phep-sua"
+                                            name="email_lien_he" value="<%= thongTin.email_lien_he %>"
+                                            placeholder="Chưa nhập..." readonly>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label fw-bold text-danger">Địa chỉ</label>
+                                    <div class="input-group shadow-sm">
+                                        <span
+                                            class="input-group-text bg-danger text-white border-danger icon-truong-sua"><i
+                                                class="bi bi-geo-alt-fill"></i></span>
+                                        <input type="text" class="form-control border-danger truong-cho-phep-sua"
+                                            name="dia_chi" value="<%= thongTin.dia_chi %>" placeholder="Chưa nhập..."
+                                            readonly>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <hr class="text-muted opacity-25 my-1">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-secondary">Vai trò hệ thống</label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text locked-icon text-secondary"><i
+                                                class="bi bi-shield-lock-fill"></i></span>
+                                        <input type="text" class="form-control fw-bold text-primary"
+                                            value="<%= thongTin.ten_vai_tro %>" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-secondary">Trạng thái tài khoản</label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text locked-icon text-secondary"><i
+                                                class="bi bi-activity"></i></span>
+                                        <% if (thongTin.trang_thai==1) { %>
+                                            <input type="text" class="form-control text-success fw-bold"
+                                                value="Đang hoạt động" readonly>
+                                            <% } else { %>
+                                                <input type="text" class="form-control text-danger fw-bold"
+                                                    value="Bị khóa" readonly>
+                                                <% } %>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="d-flex justify-content-end mt-5 pt-3 border-top">
+                                <a href="/" class="btn btn-outline-secondary me-2 fw-bold px-4 rounded-pill shadow-sm">
+                                    Quay lại
+                                </a>
+                                <a href="/taikhoan/capnhat"
+                                    class="btn bg-vnpt text-white fw-bold px-4 rounded-pill shadow-sm">
+                                    <i class="bi bi-pencil-square"></i> Cập nhật hồ sơ
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            </main>
+        

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 const session = require('express-session');
 const dbManager = require('./database');
+const layouts = require('express-ejs-layouts');
 
 const app = express();
 const port = 3000;
@@ -16,13 +17,25 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/data', express.static('data'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(layouts);
+app.set('layout', 'layouts/layout'); // đường dẫn tới layout.ejs
 app.use(session({
     secret: 'vnpt-secret-key-2026',
     resave: false,
     saveUninitialized: true,
     cookie: { maxAge: 1000 * 60 * 60 * 8 }
 }));
+
+// Middleware gán user vào res.locals
+app.use((req, res, next) => {
+  // Nếu bạn dùng session để lưu user
+  if (req.session && req.session.user) {
+    res.locals.user = req.session.user;
+  } else {
+    res.locals.user = null;  // hoặc {} để tránh lỗi
+    }
+next();
+});
 
 //2. Kết nối MongoDB và khai báo Models
 async function startDatabases() {

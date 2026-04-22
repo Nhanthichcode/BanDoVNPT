@@ -2,11 +2,12 @@ const express = require('express');
 const router = express.Router();
 const sql = require('mssql');
 const hienThiLoiHeThong = require('./xuly_loi');
+const dbManager = require('../database');//thêm cái này
 
-const sqlConfig = {
-    user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
-    options: { encrypt: false, trustServerCertificate: true }
-};
+// const sqlConfig = {
+//     user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
+//     options: { encrypt: false, trustServerCertificate: true }
+// }; không dùng này nữa
 
 const kiemTraDangNhap = (req, res, next) => {
     if (req.session.user) next(); else res.redirect('/dangnhap');
@@ -23,7 +24,7 @@ router.post('/them_xuly', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, res)
     try {
         const { ten_dang_nhap, mat_khau, ho_ten, so_dien_thoai, email_lien_he, dia_chi, vai_tro_id, trang_thai } = req.body;
 
-        let pool = await sql.connect(sqlConfig);
+       const pool = await dbManager.getSQLPool();
 
         //Kiểm tra xem tên đăng nhập có bị trùng không
         let checkExist = await pool.request()

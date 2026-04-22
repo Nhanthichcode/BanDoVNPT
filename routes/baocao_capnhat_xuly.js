@@ -3,11 +3,12 @@ const router = express.Router();
 const sql = require('mssql');
 const hienThiLoiHeThong = require('./xuly_loi');
 const DiemKetNoi = require('../models/DiemKetNoi');
+const dbManager = require('../database');//thêm cái này
 
-const sqlConfig = {
-    user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
-    options: { encrypt: false, trustServerCertificate: true }
-};
+// const sqlConfig = {
+//     user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
+//     options: { encrypt: false, trustServerCertificate: true }
+// };
 
 const kiemTraDangNhap = (req, res, next) => {
     if (req.session.user) next(); else res.redirect('/dangnhap');
@@ -17,9 +18,9 @@ router.post('/cap-nhat', kiemTraDangNhap, async (req, res) => {
     try {
         const { bao_cao_id, diem_ket_noi_id, noi_dung_cap_nhat, trang_thai_moi } = req.body;
         const nguoi_cap_nhat_id = req.session.user.id;
-
-        let pool = await sql.connect(sqlConfig);
         
+        const pool = await dbManager.getSQLPool();
+
         //Lưu vào bảng ChiTietBaoCao
         await pool.request()
             .input('bao_cao_id', sql.Int, bao_cao_id)

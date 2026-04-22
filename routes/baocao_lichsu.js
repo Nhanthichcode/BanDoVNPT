@@ -4,11 +4,12 @@ const sql = require('mssql');
 const mongoose = require('mongoose');
 const hienThiLoiHeThong = require('./xuly_loi');
 const DiemKetNoi = require('../models/DiemKetNoi');
+const dbManager = require('../database');//thêm cái này 
 
-const sqlConfig = {
-    user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
-    options: { encrypt: false, trustServerCertificate: true }
-};
+// const sqlConfig = {
+//     user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
+//     options: { encrypt: false, trustServerCertificate: true }
+// };
 
 const kiemTraDangNhap = (req, res, next) => {
     if (req.session.user) next(); else res.redirect('/dangnhap');
@@ -18,7 +19,7 @@ const kiemTraDangNhap = (req, res, next) => {
 router.get('/lichsu', kiemTraDangNhap, async (req, res) => {
     try {
         //Lấy dữ liệu từ SQL Server 
-        let pool = await sql.connect(sqlConfig);
+        const pool = await dbManager.getSQLPool();
         let resultSQL = await pool.request().query(`
             SELECT 
                 b.id AS truong_hop,
@@ -78,10 +79,11 @@ router.get('/lichsu', kiemTraDangNhap, async (req, res) => {
             dia_chi: mapDiaChi[bc.diem_ket_noi_id] || 'Không xác định/Điểm đã bị xóa'
         }));
 
-        res.render('baocao_lichsu', {
+        res.render('pages/baocao_lichsu', {
             title: 'Lịch sử báo cáo sự cố',
             user: req.session.user,
-            danhSachBaoCao: danhSachBaoCao
+            danhSachBaoCao: danhSachBaoCao,
+            activePage: 'baocao_lichsu'
         });
 
     } catch (error) {

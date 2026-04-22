@@ -17,10 +17,11 @@ router.post('/them', kiemTraDangNhap, async (req, res) => {
         const tuCapMoi = new Splitter({
             ten_splitter: ten_splitter,
             loai_splitter: loai_splitter,
+            trang_thai: 'Hoạt động',
             sys_id: sys_id,
             vi_tri: {
                 type: 'Point',
-                coordinates: [parseFloat(kinh_do), parseFloat(vi_do)]
+                coordinates: [kinh_do, vi_do]
             },
             splitter_cha_id: (loai_splitter === '1:16' && splitter_cha_id) ? splitter_cha_id : null
         });
@@ -28,11 +29,11 @@ router.post('/them', kiemTraDangNhap, async (req, res) => {
         await tuCapMoi.save();
         
         // Lưu thành công, tải lại trang danh sách tủ cáp
-        res.redirect('/quanly/splitter');
+        return res.redirect('/quanly/splitter');
 
     } catch (error) {
         console.error("Lỗi khi thêm Splitter:", error);
-        hienThiLoiHeThong(req, res, "Đã xảy ra lỗi khi lưu Tủ cáp vào hệ thống.");
+        hienThiLoiHeThong(req, res  , "Đã xảy ra lỗi khi lưu Tủ cáp vào hệ thống.");
     }
 });
 

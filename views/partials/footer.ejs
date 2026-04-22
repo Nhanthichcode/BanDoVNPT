@@ -1,0 +1,60 @@
+<footer class="bg-vnpt text-white py-3 mt-auto">
+    <div class="container-fluid px-4">
+        <div class="text-start" style="font-size: 0.9rem;">
+            <p class="mb-1">
+                <strong>Bản quyền &copy; 2026. VNPT An Giang.</strong> 
+                Địa chỉ: Số 25 Điện Biên Phủ, P. Rạch Giá, Tỉnh An Giang.
+            </p>
+            <p class="mb-0">
+                Hệ thống giám sát mạng lưới | Phát triển bởi Đàm Thanh Phong.
+            </p>
+        </div>
+    </div>
+</footer>
+
+
+<script>
+    // 1. Khởi tạo: Ưu tiên lấy giá trị đã lưu trong localStorage, nếu không có thì mặc định là 1.0
+    let currentScale = parseFloat(localStorage.getItem('interfaceScale')) || 1.0;
+
+    // Hàm áp dụng tỷ lệ scale lên giao diện
+    function applyScale() {
+        const mainContent = document.querySelector('main');
+        if (!mainContent) return;
+
+        // Áp dụng CSS zoom
+        mainContent.style.zoom = currentScale;
+        
+        // Cập nhật con số hiển thị trên Navbar (nếu có)
+        const scaleDisplay = document.getElementById('scale-level');
+        if (scaleDisplay) {
+            scaleDisplay.innerText = Math.round(currentScale * 100) + '%';
+        }
+
+        // Kích hoạt lại resize để bản đồ Leaflet tự căn chỉnh
+        window.dispatchEvent(new Event('resize'));
+    }
+
+    // Hàm điều khiển thu phóng
+    function scaleContent(action) {
+        if (action === 'in' && currentScale < 1.5) {
+            currentScale += 0.1;
+        } else if (action === 'out' && currentScale > 0.5) {
+            currentScale -= 0.1;
+        } else if (action === 'reset') {
+            currentScale = 1.0;
+        }
+
+        currentScale = Math.round(currentScale * 10) / 10;
+
+        // LƯU TRỮ: Ghi nhớ giá trị này vào trình duyệt
+        localStorage.setItem('interfaceScale', currentScale);
+
+        applyScale();
+    }
+
+    // 2. TỰ ĐỘNG CHẠY: Khi trang vừa load xong, áp dụng ngay mức zoom cũ
+    document.addEventListener('DOMContentLoaded', function() {
+        applyScale();
+    });
+</script>

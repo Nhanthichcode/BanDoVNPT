@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= locals.title || 'Trang chủ' %> - Hệ thống giám sát VNPT</title>
+
+    <!-- CSS dùng chung toàn hệ thống -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="icon" type="image/png" href="/images/Mini%20logo.png">
+
+    <!-- Style tùy chỉnh dùng chung -->
+    <style>
+        body { background-color: #f8f9fa; display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
+        .bg-vnpt { background-color: #0072BC !important; }
+        .stat-card { border: none; border-radius: 10px; box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); transition: transform 0.2s;}
+        .stat-card:hover { transform: translateY(-3px); }
+        .icon-box { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        
+        /* Hiệu ứng chớp nháy cho dấu chấm than đỏ */
+        @keyframes pulse-danger {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
+        .marker-danger-icon {
+            background-color: #dc3545; color: white; border-radius: 50%; border: 2px solid white;
+            display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px;
+            animation: pulse-danger 1.5s infinite;
+        }
+        .dropdown-menu-list { max-height: 300px; overflow-y: auto; width: 320px; }
+        .dropdown-menu-list::-webkit-scrollbar { width: 6px; }
+        .dropdown-menu-list::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 10px; }
+        .leaflet-container { z-index: 1 !important; }
+    </style>
+
+    <!-- Block để mỗi trang có thể thêm style riêng (nếu cần) -->
+   <%- typeof stylesheet !== 'undefined' ? stylesheet : '' %>
+</head>
+<body>
+    <%- include('../partials/banner.ejs') %>
+    <%- include('../partials/navbar.ejs') %>
+
+    <div class="container-fluid flex-grow-1">
+        <div class="row h-100">
+            <%- include('../partials/sidebar.ejs') %>
+
+            <!-- Nội dung chính của từng trang sẽ được chèn vào đây -->
+            <%- body %>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+
+    <!-- JS dùng chung toàn hệ thống (đặt cuối body để tăng tốc load) -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+    <!-- Block cho script riêng của từng trang -->
+  <%- typeof script !== 'undefined' ? script : '' %>
+</body>
+</html>
