@@ -1,21 +1,18 @@
 const mongoose = require('mongoose');
 
 const splitterSchema = new mongoose.Schema({
-    ten_splitter: { type: String, required: true },
-    loai_splitter: { type: String, enum: ['1:4', '1:16'], required: true },
-
-    sys_id: { type: String, required: true },
-
+    ten_splitter: String,
+    loai_splitter: String,
+    sys_id: String,
     vi_tri: {
-        type: { type: String, enum: ['Point'], default: 'Point' },
-        coordinates: { type: [Number], required: true } 
+        type: { type: String, default: 'Point' },
+        coordinates: [Number]
     },
-
+    // Đảm bảo ref trỏ đúng tên Model
     splitter_cha_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Splitter', default: null },
-
-    trang_thai: { type: String, default: 'Hoạt động' }
-}, { collection: 'Splitter' });
-
-splitterSchema.index({ vi_tri: '2dsphere' });
+    trang_thai: String
+}, {
+    collection: 'Splitter'
+});
 
 module.exports = mongoose.model('Splitter', splitterSchema);
