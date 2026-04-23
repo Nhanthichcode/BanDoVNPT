@@ -4,7 +4,7 @@ const router = express.Router();
 //Route: Đăng xuất
 router.get('/dangxuat', (req, res) => {
     req.session.destroy();
-    res.redirect('/');
+    res.redirect('/dangnhap');
 });
 
 module.exports = router;

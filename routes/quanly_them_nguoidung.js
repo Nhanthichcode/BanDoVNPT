@@ -14,7 +14,7 @@ const kiemTraQuyenQuanTri = (req, res, next) => {
 
 //Route: Hiển thị trang thêm người dùng
 router.get('/them', kiemTraDangNhap, kiemTraQuyenQuanTri, (req, res) => {
-    res.render('quanly_them_nguoidung', {
+    res.render('pages/quanly_them_nguoidung', {
         title: 'Thêm người dùng mới',
         user: req.session.user
     });

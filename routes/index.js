@@ -1,33 +1,83 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const sql = require('mssql'); // Thêm thư viện mssql
 const hienThiLoiHeThong = require('./xuly_loi');
-
+const dbManager = require('../database');
+const { kiemTraDangNhap } = require('../middleware/auth');
 const DiemKetNoi = require('../models/DiemKetNoi');
 
 //Route: Giao diện chính bản đồ
-router.get('/', (req, res) => {
+router.get('/dashboard', kiemTraDangNhap, async (req, res) => {
     try {
-        res.render('views', { title: 'Bản đồ giám sát mạng lưới', user: req.session.user || null });
+        const pool = await dbManager.getSQLPool();
+        const user = req.session.user;
+
+        const stats = {};
+        let pendingList = [];
+        let resolvedList = [];
+
+        // 1. Lấy dữ liệu thống kê và danh sách từ SQL
+        if (user.vai_tro_id === 1 || user.vai_tro_id === 2) {
+            const usersCount = await pool.request().query('SELECT COUNT(*) as count FROM TaiKhoan');
+            const issuesCount = await pool.request().query('SELECT COUNT(*) as count FROM BaoCaoSuCo WHERE trang_thai_xu_ly IN (0, 1)');
+            const pkgsCount = await pool.request().query('SELECT COUNT(*) as count FROM GoiCuoc');
+            
+            stats.users = usersCount.recordset[0].count;
+            stats.issues = issuesCount.recordset[0].count;
+            stats.packages = pkgsCount.recordset[0].count;
+        }
+
+        // Lấy top 15 sự cố đang chờ và đã khắc phục
+        const pendingQuery = await pool.request().query(`SELECT id, diem_ket_noi_id, loai_su_co, thoi_gian_tao FROM BaoCaoSuCo WHERE trang_thai_xu_ly IN (0, 1) ORDER BY thoi_gian_tao DESC`);
+        const resolvedQuery = await pool.request().query(`SELECT TOP 15 id, diem_ket_noi_id, loai_su_co, thoi_gian_tao FROM BaoCaoSuCo WHERE trang_thai_xu_ly = 2 ORDER BY thoi_gian_tao DESC`);
+        
+        pendingList = pendingQuery.recordset;
+        resolvedList = resolvedQuery.recordset;
+
+        // Nếu là nhân viên, đếm số liệu của riêng họ (hiển thị tạm bằng tổng số sự cố)
+        if (user.vai_tro_id === 3) {
+            stats.myPendingIssues = pendingList.length;
+            stats.myResolvedIssues = resolvedList.length;
+        }
+
+        // 2. Ghép tên Khách Hàng từ MongoDB sang danh sách SQL
+        const allIds = [...pendingList, ...resolvedList].map(r => r.diem_ket_noi_id);
+        const khachHangs = await DiemKetNoi.find({ _id: { $in: allIds } }, 'ten_khach_hang');
+        const khMap = {};
+        khachHangs.forEach(k => khMap[k._id.toString()] = k.ten_khach_hang);
+
+        const mapNames = (list) => list.map(item => ({
+            ...item, 
+            ten_khach_hang: khMap[item.diem_ket_noi_id] || 'KH đã bị xóa'
+        }));
+
+        pendingList = mapNames(pendingList);
+        resolvedList = mapNames(resolvedList);
+
+        res.render('pages/dashboard', { 
+            user, 
+            stats, 
+            pendingList, // Truyền danh sách chờ ra giao diện
+            resolvedList, // Truyền danh sách xong ra giao diện
+            activePage: 'dashboard',
+            title: 'Bảng điều khiển' 
+        });
     } catch (error) {
-        console.error("Lỗi tải giao diện trang chủ:", error);
-        hienThiLoiHeThong(req, res, "Không thể tải giao diện bản đồ.");
+        console.error("Lỗi Dashboard:", error);
+        hienThiLoiHeThong(req, res);
     }
 });
 
-//Route: API lấy điểm kết nối
+//Route: API lấy điểm kết nối (Giữ nguyên)
 router.get('/api/diem-ket-noi', async (req, res) => {
     try {
         const danhSachDiem = await DiemKetNoi.find({}).populate({
-            path: 'splitter_id',
-            populate: {
-                path: 'splitter_cha_id'
-            }
+            path: 'splitter_id', populate: { path: 'splitter_cha_id' }
         });
         res.status(200).json(danhSachDiem);
     } catch (error) {
         console.error("Lỗi API lấy điểm kết nối MongoDB:", error);
-        const hienThiLoiHeThong = require('./xuly_loi');
         hienThiLoiHeThong(req, res); 
     }
 });

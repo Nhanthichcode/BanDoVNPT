@@ -1,0 +1,405 @@
+    <title>
+        <%= title %> - Hệ thống giám sát VNPT
+    </title>
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .bg-vnpt {
+            background-color: #0072BC !important;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f1f8ff;
+            transition: 0.2s;
+        }
+        #map-picker { 
+        height: 500px; 
+        width: 100%; 
+        border-radius: 0 0 15px 15px;
+    }
+    /* Đảm bảo bản đồ không bị che bởi các thành phần khác của modal */
+    .leaflet-container { z-index: 1 !important; }
+    </style>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 mb-5">
+
+                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                    <div>
+                        <h3 class="text-primary fw-bold mb-0"><i class="bi bi-router text-danger"></i> DANH SÁCH ĐIỂM
+                            KẾT NỐI</h3>
+                    </div>
+                    <div>
+                        <button class="btn bg-vnpt text-white fw-bold shadow-sm" data-bs-toggle="modal"
+                            data-bs-target="#modalThemDiem">
+                            <i class="bi bi-plus-circle"></i> Thêm khách hàng mới
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0 text-center">
+                                <thead class="bg-light text-secondary">
+                                    <tr>
+                                        <th class="py-3 text-start ps-4">Khách hàng/Địa chỉ</th>
+                                        <th class="py-3">Tủ cáp</th>
+                                        <th class="py-3 text-start">Tài khoản PPPoE & Circuit ID</th>
+                                        <th class="py-3">Trạng thái kết nối</th>
+                                        <th class="py-3">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (typeof danhSachDiem !=='undefined' && danhSachDiem.length> 0) { %>
+                                        <% danhSachDiem.forEach(function(diem) { %>
+                                            <tr>
+                                                <td class="text-start ps-4">
+                                                    <div class="fw-bold text-dark">
+                                                        <%= diem.ten_khach_hang %>
+                                                    </div>
+                                                    <div class="small text-muted"><i class="bi bi-geo-alt"></i>
+                                                        <%= diem.dia_chi %>
+                                                    </div>
+                                                    <div class="small text-primary"><span
+                                                            class="badge bg-light text-primary border">
+                                                            <%= diem.loai_khach_hang %>
+                                                        </span></div>
+                                                </td>
+
+                                                <td>
+                                                    <% if(diem.splitter_id) { %>
+                                                        <span class="badge bg-info text-dark fw-bold px-2 py-1"><i
+                                                                class="bi bi-hdd-network"></i>
+                                                            <%= diem.splitter_id.ten_splitter %>
+                                                        </span>
+                                                        <% } else { %>
+                                                            <span class="text-danger small">Chưa cắm cáp</span>
+                                                            <% } %>
+                                                </td>
+
+                                                <td class="text-start">
+                                                    <% if(diem.thong_tin_pppoe) { %>
+                                                        <div class="fw-bold text-success"><i
+                                                                class="bi bi-person-badge"></i> User: <%=
+                                                                diem.thong_tin_pppoe.username %>
+                                                        </div>
+                                                        <div class="small text-secondary"
+                                                            style="font-family: monospace;">
+                                                            <i class="bi bi-diagram-3"></i>
+                                                            ID: <%= diem.splitter_id ? diem.splitter_id.sys_id : 'SYS'
+                                                                %>/<%= diem.thong_tin_pppoe.circuit_id.rack %>/<%=
+                                                                        diem.thong_tin_pppoe.circuit_id.shelf %>/<%=
+                                                                            diem.thong_tin_pppoe.circuit_id.slot %>/<%=
+                                                                                diem.thong_tin_pppoe.circuit_id.port %>
+                                                                                /0/33
+                                                        </div>
+                                                        <% } else { %>
+                                                            <span class="text-muted">Chưa cấu hình</span>
+                                                            <% } %>
+                                                </td>
+
+                                                <td>
+                                                    <% if(diem.trang_thai_ket_noi.mau_sac==="Xanh" ) { %>
+                                                        <span class="badge bg-success px-3 py-2 fs-6"><i
+                                                                class="bi bi-check-circle"></i> Đang hoạt động</span>
+                                                        <% } else if(diem.trang_thai_ket_noi.mau_sac==="Đỏ" ) { %>
+                                                            <span class="badge bg-danger px-3 py-2 fs-6"><i
+                                                                    class="bi bi-x-circle"></i> Mất kết nối</span>
+                                                            <% } else { %>
+                                                                <span class="badge bg-secondary px-3 py-2 fs-6"><i
+                                                                        class="bi bi-pause-circle"></i> Cần thu
+                                                                    hồi</span>
+                                                                <% } %>
+                                                </td>
+
+                                                <td>
+                                                    <form action="/quanly/vitri/xoa/<%= diem._id %>" method="POST" onsubmit="return confirm('Bạn chắc chắn muốn xóa?')">
+                                                        <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                            <% }); %>
+                                                <% } else { %>
+                                                    <tr>
+                                                        <td colspan="5" class="text-center py-5 text-muted"><i
+                                                                class="bi bi-inbox fs-1 d-block mb-2"></i> Chưa có khách
+                                                            hàng nào.</td>
+                                                    </tr>
+                                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            
+
+            <div class="modal fade" id="modalThemDiem" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-vnpt text-white">
+                            <h5 class="modal-title fw-bold"><i class="bi bi-person-plus"></i> THÊM KHÁCH HÀNG MỚI</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form action="/quanly/vitri/them" method="POST">
+                            <div class="modal-body p-4">
+
+                                <h6 class="text-primary fw-bold border-bottom pb-2 mb-3"><i
+                                        class="bi bi-info-circle"></i>1. THÔNG TIN KHÁCH HÀNG</h6>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Tên khách hàng</label>
+                                        <input type="text" name="ten_khach_hang" class="form-control" required>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold">Loại hình mạng</label>
+                                        <select id="chon_loai_hinh" class="form-select border-primary"
+                                            onchange="capNhatGoiCuoc()" required>
+                                            <option value="">-- Chọn loại --</option>
+                                            <option value="Hộ gia đình">Hộ gia đình</option>
+                                            <option value="Doanh nghiệp">Doanh nghiệp</option>
+                                            <option value="Điểm công cộng">Điểm công cộng</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold text-primary">Gói cước đăng ký</label>
+                                        <select name="goi_cuoc_id" id="chon_goi_cuoc"
+                                            class="form-select border-primary fw-bold" required>
+                                            <option value="">-- Trống --</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold">Địa chỉ lắp đặt</label>
+                                        <input type="text" name="dia_chi" class="form-control" required>
+                                    </div>
+
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-bold text-success">Tọa độ vị trí</label>
+                                            <div class="input-group">
+                                                <input type="number" step="any" name="vi_do" id="input_vi_do" class="form-control" 
+                                        placeholder="Vĩ độ" min="-90" max="90" required>
+                                    <input type="number" step="any" name="kinh_do" id="input_kinh_do" class="form-control" 
+                                        placeholder="Kinh độ" min="-180" max="180" required>
+                                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalPickLocation">
+                                                    <i class="bi bi-geo-alt-fill"></i> Chọn từ bản đồ
+                                                </button>
+                                            </div>
+                                        </div>
+    
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold">Mô phỏng trạng thái</label>
+                                        <input type="number" name="ping" class="form-control" value="15" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Ngày đăng ký</label>
+                                        <input type="date" name="ngay_dang_ky" class="form-control" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Thời gian hợp đồng (Tháng)</label>
+                                        <input type="number" name="thoi_gian_su_dung_thang" class="form-control"
+                                            value="12" required>
+                                    </div>
+                                </div>
+
+                                <h6 class="text-danger fw-bold border-bottom pb-2 mb-3"><i
+                                        class="bi bi-diagram-3"></i>2. HẠ TẦNG QUANG & PPPoE</h6>
+                                <div class="bg-light p-3 rounded border">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold text-danger">Tủ cáp (Splitter 1:16)</label>
+                                        <select name="splitter_id" class="form-select border-danger fw-bold" required>
+                                            <option value="">-- Chọn tủ cáp để nối dây --</option>
+                                            <% if (typeof danhSachSplitter !=='undefined' ) { %>
+                                                <% danhSachSplitter.forEach(function(sp) { %>
+                                                    <option value="<%= sp._id %>">
+                                                        <%= sp.ten_splitter %> (SysID: <%= sp.sys_id %>)
+                                                    </option>
+                                                    <% }); %>
+                                                        <% } %>
+                                        </select>
+                                    </div>
+
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold">Mã trạm<span
+                                                    class="text-danger">*</span></label>
+                                            <input type="text" name="sys_id" class="form-control border-success"
+                                                placeholder="VD: AGG-LX-01" required>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold">Username PPPoE <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="text" name="username" class="form-control"
+                                                placeholder="hcm_lx_..." required>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold">Password PPPoE <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="password" name="password" class="form-control"
+                                                placeholder="******" required>
+                                        </div>
+                                    </div>
+
+                                    <label class="form-label fw-bold text-success mb-1">Thông số Circuit ID</label>
+                                    <div class="row g-2">
+                                        <div class="col-3">
+                                            <input type="text" name="rack" class="form-control border-warning shadow-sm"
+                                                placeholder="Rack (VD: a1)" maxlength="2" pattern="[a-z][a-zA-Z0-9]"
+                                                required>
+                                        </div>
+                                        <div class="col-3">
+                                            <input type="number" name="shelf" class="form-control bg-light text-muted"
+                                                value="0" readonly>
+                                        </div>
+                                        <div class="col-3">
+                                            <input type="number" name="slot" class="form-control" placeholder="Slot"
+                                                min="0" required>
+                                        </div>
+                                        <div class="col-3">
+                                            <input type="number" name="port" class="form-control" placeholder="Port"
+                                                min="1" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-text mt-2"><i class="bi bi-info-circle"></i> Tham số VPI/VCI sẽ
+                                        được tự động gán là 0/33.</div>
+
+                                </div>
+                                <div class="modal-footer bg-light">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn bg-vnpt text-white fw-bold"><i
+                                            class="bi bi-floppy"></i>Lưu khách hàng</button>
+                                </div>
+                        </form>
+                    </div>
+                </div>                             
+            </main>        
+
+            <div class="modal fade" id="modalPickLocation" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-geo-alt"></i> CHỌN VỊ TRÍ KHÁCH HÀNG</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div id="map-picker"></div>
+            </div>
+            <div class="modal-footer bg-light d-flex justify-content-between">
+                <div>
+                    <span class="badge bg-dark">Vĩ độ: <span id="display-lat">0</span></span>
+                    <span class="badge bg-dark">Kinh độ: <span id="display-lng">0</span></span>
+                </div>
+                <div>
+                    <!-- <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Hủy</button> -->
+                    <button type="button" class="btn btn-secondary fw-bold" data-bs-target="#modalThemDiem" data-bs-toggle="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary fw-bold" onclick="xacNhanToaDo()">Xác nhận vị trí</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>  
+
+<script>
+    // 1. XỬ LÝ GÓI CƯỚC
+    const mangGoiCuoc = <%- JSON.stringify(typeof danhSachGoiCuoc !== 'undefined' ? danhSachGoiCuoc : []) %>;
+    function capNhatGoiCuoc() {
+        const loaiHinh = document.getElementById('chon_loai_hinh').value;
+        const selectGoiCuoc = document.getElementById('chon_goi_cuoc');
+        selectGoiCuoc.innerHTML = '<option value="">-- Chọn gói cước --</option>';
+        if (!loaiHinh || !Array.isArray(mangGoiCuoc)) return;
+        mangGoiCuoc.filter(gc => gc.loai_hinh_thue_bao && gc.loai_hinh_thue_bao.includes(loaiHinh))
+            .forEach(gc => {
+                const option = document.createElement('option');
+                option.value = gc.id;
+                option.textContent = gc.ten_goi_cuoc;
+                selectGoiCuoc.appendChild(option);
+            });
+    }
+
+    // 2. XỬ LÝ BẢN ĐỒ VỚI CONSOLE.LOG ĐỂ DEBUG
+    let pickerMap;
+    let tempMarker;
+
+    console.log("🔥 [DEBUG]: Bắt đầu load Script...");
+
+    const modalEl = document.getElementById('modalPickLocation');
+    console.log("🔥 [DEBUG]: Tìm thấy Modal HTML:", modalEl);
+
+    // Lắng nghe sự kiện Modal MỞ LÊN
+    modalEl.addEventListener('shown.bs.modal', function () {
+        console.log("🔥 [DEBUG]: Modal đã mở (sự kiện shown.bs.modal kích hoạt)");
+        
+        if (!pickerMap) {
+            console.log("🔥 [DEBUG]: Khởi tạo bản đồ lần đầu tiên...");
+            try {
+                pickerMap = L.map('map-picker').setView([10.37, 105.43], 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(pickerMap);
+                console.log("🔥 [DEBUG]: Khởi tạo bản đồ THÀNH CÔNG!");
+
+                pickerMap.on('click', function(e) {
+                    console.log("🔥 [DEBUG]: Bạn vừa click vào tọa độ:", e.latlng);
+                    updateMarker(e.latlng.lat, e.latlng.lng);
+                });
+            } catch (err) {
+                console.error("❌ [LỖI]: Không thể khởi tạo bản đồ:", err);
+            }
+        } else {
+            console.log("🔥 [DEBUG]: Bản đồ đã có sẵn, không cần tạo lại.");
+        }
+        
+        console.log("🔥 [DEBUG]: Gọi hàm invalidateSize() để sửa lỗi khung xám...");
+        setTimeout(() => {
+            pickerMap.invalidateSize();
+            console.log("🔥 [DEBUG]: Xong invalidateSize()!");
+        }, 100);
+    });
+
+    function updateMarker(lat, lng) {
+        if (tempMarker) pickerMap.removeLayer(tempMarker);
+        tempMarker = L.marker([lat, lng], { draggable: true }).addTo(pickerMap);
+        
+        document.getElementById('display-lat').innerText = lat.toFixed(6);
+        document.getElementById('display-lng').innerText = lng.toFixed(6);
+
+        tempMarker.on('dragend', function(event) {
+            const pos = event.target.getLatLng();
+            console.log("🔥 [DEBUG]: Kéo thả Marker đến:", pos);
+            updateMarker(pos.lat, pos.lng);
+        });
+    }
+
+    function xacNhanToaDo() {
+        const lat = document.getElementById('display-lat').innerText;
+        const lng = document.getElementById('display-lng').innerText;
+        if (lat === "0") return alert("Vui lòng click chọn một điểm trên bản đồ!");
+        
+        console.log("🔥 [DEBUG]: Lưu tọa độ xuống form. Lat:", lat, "Lng:", lng);
+        document.getElementById('input_vi_do').value = lat;
+        document.getElementById('input_kinh_do').value = lng;
+        
+        // 1. Đóng Modal Bản đồ
+        const mapModalEl = document.getElementById('modalPickLocation');
+        const mapModal = bootstrap.Modal.getInstance(mapModalEl);
+        mapModal.hide();
+
+        // 2. Chờ 0.4s để hiệu ứng đóng bản đồ hoàn tất, sau đó mở lại Form Thêm Khách hàng
+        setTimeout(() => {
+            console.log("🔥 [DEBUG]: Mở lại Modal Thêm khách hàng...");
+            const formModalEl = document.getElementById('modalThemDiem');
+            let formModal = bootstrap.Modal.getInstance(formModalEl);
+            if (!formModal) {
+                formModal = new bootstrap.Modal(formModalEl);
+            }
+            formModal.show();
+        }, 400);}
+</script>       

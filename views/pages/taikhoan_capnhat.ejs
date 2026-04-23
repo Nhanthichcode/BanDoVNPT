@@ -1,0 +1,110 @@
+   <title>Cập nhật hồ sơ - Hệ thống giám sát mạng lưới VNPT</title>
+   
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .bg-vnpt {
+            background-color: #0072BC !important;
+        }
+
+        .input-group-text {
+            background-color: #e3f2fd;
+            color: #0072BC;
+            border-color: #0072BC;
+        }
+
+        .form-control {
+            border-color: #0072BC;
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 3px rgba(0, 114, 188, 0.15);
+            border-color: #0072BC;
+        }
+    </style>
+ 
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 mb-5">
+                <div class="container" style="max-width: 800px;">
+                <div class="card border-0 shadow rounded-4 overflow-hidden">
+                    <div class="card-header bg-success text-white py-3">
+                        <h4 class="mb-0 fw-bold"><i class="bi bi-pencil-square"></i> CẬP NHẬT THÔNG TIN</h4>
+                    </div>
+
+                    <div class="card-body p-5">
+                        <form action="/taikhoan/capnhat_xuly" method="POST">
+
+                            <div class="alert alert-info border-0 shadow-sm mb-4">
+                                <i class="bi bi-info-circle-fill"></i> Bạn đang cập nhật thông tin cho tài khoản:
+                                <strong>
+                                    <%= user.ten_dang_nhap %>
+                                </strong>
+                            </div>
+
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Họ và tên</label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                                        <input type="text" class="form-control" name="ho_ten" value="<%= thongTin.ho_ten %>"
+                                            required autofocus>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Số điện thoại</label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text"><i class="bi bi-telephone-fill"></i></span>
+                                        <input type="text" class="form-control" name="so_dien_thoai"
+                                            value="<%= thongTin.so_dien_thoai %>" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Email/Liên hệ khác</label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
+                                        <input type="text" class="form-control" name="email_lien_he"
+                                            value="<%= thongTin.email_lien_he %>" placeholder="Chưa nhập...">
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label fw-bold">Địa chỉ</label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text"><i class="bi bi-geo-alt-fill"></i></span>
+                                        <input type="text" class="form-control" name="dia_chi"
+                                            value="<%= thongTin.dia_chi %>" placeholder="Chưa nhập đầy đủ...">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top">
+                                <div>
+                                    <a href="/taikhoan/matkhau_doi" class="btn btn-warning fw-bold shadow-sm text-dark">
+                                        <i class="bi bi-key-fill"></i> Cập nhật mật khẩu
+                                    </a>
+                                </div>
+
+                                <div>
+                                    <a href="/taikhoan/hoso"
+                                        class="btn btn-outline-secondary me-2 fw-bold px-4 rounded-pill shadow-sm">
+                                        <i class="bi bi-x-circle"></i> Hủy
+                                    </a>
+                                    <button type="submit" class="btn btn-success fw-bold px-4 rounded-pill shadow-sm">
+                                        <i class="bi bi-floppy"></i> Lưu
+                                    </button>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+            </main>
+ 

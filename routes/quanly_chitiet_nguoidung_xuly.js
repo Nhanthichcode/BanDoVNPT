@@ -44,7 +44,7 @@ router.post('/chitiet_xuly', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, r
                 WHERE tk.ten_dang_nhap = @user
             `);
 
-        res.render('quanly_chitiet_nguoidung', {
+        res.render('pages/quanly_chitiet_nguoidung', {
             title: 'Chi tiết tài khoản',
             user: req.session.user,
             taiKhoanChiTiet: result.recordset[0],

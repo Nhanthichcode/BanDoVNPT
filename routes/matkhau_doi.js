@@ -7,11 +7,12 @@ const kiemTraDangNhap = (req, res, next) => {
 
 //Route: Hiển thị form kiểm tra danh tính
 router.get('/matkhau_doi', kiemTraDangNhap, (req, res) => {
-    res.render('matkhau_doi', { 
+    res.render('pages/matkhau_doi', { 
         title: 'Cập nhật mật khẩu', 
         user: req.session.user,
         step: 1,
-        error: null
+        error: null,
+        activePage: 'matkhau_doi'
     });
 });
 

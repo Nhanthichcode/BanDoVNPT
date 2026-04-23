@@ -5,10 +5,11 @@ document.addEventListener('DOMContentLoaded', function () {
     let toaDoTrungTam = [10.368422344066985, 105.43320325646403];
     let mucZoom = 14;
     var map = L.map('map-container').setView(toaDoTrungTam, mucZoom);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+    L.tileLayer('http://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+    maxZoom: 20,
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+    attribution: '© Google Maps'
+}).addTo(window.appMap);
 
     let danhSachGoc = [];
 
@@ -23,8 +24,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const iconVNPTServer = L.divIcon({
         className: 'custom-div-icon',
         html: `<div style="background-color: #dc3545; color: white; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.4);">
-                 <i class="bi bi-hdd-network-fill" style="font-size: 1.1rem;"></i>
-               </div>`,
+<i class="bi bi-hdd-network-fill" style="font-size: 1.1rem;"></i>
+</div>`,
         iconSize: [34, 34], iconAnchor: [17, 17], popupAnchor: [0, -17]
     });
 

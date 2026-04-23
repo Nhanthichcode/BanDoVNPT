@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const sql = require('mssql');
 const hienThiLoiHeThong = require('./xuly_loi');
-
-const sqlConfig = {
-    user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
-    options: { encrypt: false, trustServerCertificate: true }
-};
+const dbManager = require('../database');//thêm cái này
+// const sqlConfig = {
+//     user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
+//     options: { encrypt: false, trustServerCertificate: true }
+// };
 
 const kiemTraDangNhap = (req, res, next) => {
     if (req.session.user) next(); else res.redirect('/dangnhap');
@@ -29,7 +29,7 @@ router.post('/khoa_xuly', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, res)
             return hienThiLoiHeThong(req, res, "Lỗi bảo mật: Bạn không thể tự khóa tài khoản của chính mình!");
         }
 
-        let pool = await sql.connect(sqlConfig);
+        const pool = await dbManager.getSQLPool();
 
         //Kiểm tra mật khẩu của Admin
         let checkPass = await pool.request()

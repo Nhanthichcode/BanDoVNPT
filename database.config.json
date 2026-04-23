@@ -1,0 +1,34 @@
+{
+  "development": {
+    "sqlserver": {
+      "server": "localhost",
+      "database": "VNPT_BanDo_Admin",
+      "user": "sa",
+      "password": "1",
+      "options": {
+        "instanceName": "SQLEXPRESS02",
+        "encrypt": false,
+        "trustServerCertificate": true
+      }
+    },
+    "mongodb": {
+      "uri": "mongodb+srv://sa:admin123@vnpt-mapping.ep8txj8.mongodb.net/VNPT_Mapping?appName=VNPT-Mapping"
+    }
+  },
+  "production": {
+    "sqlserver": {
+      "server": "localhost",
+      "database": "VNPT_BanDo_Admin",
+      "user": "sa",
+      "password": "1",
+      "options": {
+        "instanceName": "SQLEXPRESS02",
+        "encrypt": false,
+        "trustServerCertificate": true
+      }
+    },
+    "mongodb": {
+      "uri": "mongodb+srv://sa:admin123@vnpt-mapping.ep8txj8.mongodb.net/VNPT_Mapping?appName=VNPT-Mapping"
+    }
+  }
+}

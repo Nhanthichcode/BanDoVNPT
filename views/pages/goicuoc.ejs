@@ -1,0 +1,257 @@
+ 
+    <title>
+        <%= title %> - Hệ thống giám sát mạng lưới VNPT
+    </title>
+     
+   
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .bg-vnpt {
+            background-color: #0072BC !important;
+        }
+
+        .card-goicuoc {
+            border: 1px solid #e0e0e0;
+            border-top: 5px solid #00a4e4 !important;
+            border-radius: 0;
+            transition: box-shadow 0.2s;
+        }
+
+        .card-goicuoc:hover {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .title-goicuoc {
+            color: #e6007e;
+            font-size: 1.4rem;
+        }
+    </style>
+ 
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 mb-5">
+
+                <div class="mb-4 border-bottom pb-3">
+                    <div class="text-center mb-4 mt-2">
+                        <h3 class="text-primary fw-bold mb-0"><i class="bi bi-wifi text-danger"></i> DANH SÁCH GÓI CƯỚC
+                            DỊCH VỤ</h3>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div style="width: 250px;">
+                            <select class="form-select border-primary text-primary fw-bold shadow-sm"
+                                onchange="window.location.href='/quanly/goicuoc?loai=' + encodeURIComponent(this.value)">
+                                <option value="Tất cả" <%=loaiHienTai==='Tất cả' ? 'selected' : '' %>>Tất cả gói cước
+                                </option>
+                                <option value="Hộ gia đình" <%=loaiHienTai==='Hộ gia đình' ? 'selected' : '' %>>Hộ gia
+                                    đình</option>
+                                <option value="Doanh nghiệp" <%=loaiHienTai==='Doanh nghiệp' ? 'selected' : '' %>>Doanh
+                                    nghiệp</option>
+                                <option value="Điểm công cộng" <%=loaiHienTai==='Điểm công cộng' ? 'selected' : '' %>
+                                    >Điểm công cộng</option>
+                            </select>
+                        </div>
+                        <% if (typeof user !== 'undefined' && user.vai_tro_id === 1) { %>
+                        <div>
+                            <button class="btn bg-vnpt text-white fw-bold shadow-sm" data-bs-toggle="modal"
+                                data-bs-target="#modalThemGoiCuoc">
+                                <i class="bi bi-plus-circle"></i> Thêm gói cước
+                            </button>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="modalThemGoiCuoc" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header bg-vnpt text-white">
+                                <h5 class="modal-title fw-bold"><i class="bi bi-node-plus"></i> THÊM GÓI CƯỚC MỚI</h5>
+                                <button type="button" class="btn-close btn-close-white"
+                                    data-bs-dismiss="modal"></button>
+                            </div>
+                            <form action="/quanly/goicuoc/them" method="POST">
+                                <div class="modal-body p-4">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Tên gói cước</label>
+                                        <input type="text" name="ten_goi_cuoc" class="form-control"
+                                            placeholder="VD: Home Net 1" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Loại hình thuê bao</label>
+                                        <select name="loai_hinh_thue_bao" class="form-select" required>
+                                            <option value="Hộ gia đình">Hộ gia đình</option>
+                                            <option value="Doanh nghiệp">Doanh nghiệp</option>
+                                            <option value="Điểm công cộng">Điểm công cộng</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="modal-footer bg-light">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy
+                                        bỏ</button>
+                                    <button type="submit" class="btn btn-primary fw-bold"><i class="bi bi-floppy"></i>
+                                        Lưu gói cước</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 row-cols-xl-5 g-4 mb-4">
+                    <% if (danhSachGoiCuoc.length> 0) { %>
+                        <% danhSachGoiCuoc.forEach(function(goi) { %>
+                            <div class="col">
+                                <div class="card h-100 bg-white card-goicuoc position-relative shadow-sm border-0"
+                                    style="border-top: 5px solid #00a4e4 !important;">
+                                    <span
+                                        class="position-absolute top-0 start-0 bg-light text-muted px-2 py-1 small border-bottom border-end fw-bold"
+                                        style="border-bottom-right-radius: 8px;">
+                                        ID: <%= goi.id %>
+                                    </span>
+
+                                    <div class="card-body p-4 d-flex flex-column text-center">
+
+                                        <div class="mb-3 mt-3 position-relative">
+                                            <% if (goi.loai_hinh_thue_bao.includes('Doanh nghiệp')) { %>
+                                                <div class="mb-2"><span
+                                                        class="badge bg-warning text-dark shadow-sm">Doanh nghiệp</span>
+                                                </div>
+                                                <i class="bi bi-buildings-fill text-warning"
+                                                    style="font-size: 3.0rem; text-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);"></i>
+                                                <% } else if (goi.loai_hinh_thue_bao.includes('Điểm công cộng')) { %>
+                                                    <div class="mb-2"><span
+                                                            class="badge bg-info text-dark shadow-sm">Công cộng</span>
+                                                    </div>
+                                                    <i class="bi bi-router-fill text-info"
+                                                        style="font-size: 3.0rem; text-shadow: 0 4px 10px rgba(13, 202, 240, 0.3);"></i>
+                                                    <% } else { %>
+                                                        <div class="mb-2"><span class="badge bg-success shadow-sm">Hộ
+                                                                gia đình</span></div>
+                                                        <i class="bi bi-house-door-fill text-success"
+                                                            style="font-size: 3.0rem; text-shadow: 0 4px 10px rgba(25, 135, 84, 0.3);"></i>
+                                                        <% } %>
+                                        </div>
+
+                                        <div class="flex-grow-1 d-flex align-items-center justify-content-center mt-2">
+                                            <h5 class="card-title fw-bolder mb-0" style="color: #004a8f;">
+                                                <%= goi.ten_goi_cuoc %>
+                                            </h5>
+                                        </div>
+
+                                        <% if (typeof user !=='undefined' && user.vai_tro_id===1) { %>
+                                            <div class="mt-3">
+                                                <button
+                                                    class="btn btn-sm btn-outline-danger px-3 rounded-pill fw-bold shadow-sm"
+                                                    title="Xóa gói cước" data-bs-toggle="modal"
+                                                    data-bs-target="#modalXoaGoiCuoc"
+                                                    onclick="chuanBiXoaGoiCuoc('<%= goi.id %>', '<%= goi.ten_goi_cuoc %>')">
+                                                    <i class="bi bi-trash"></i> Xóa
+                                                </button>
+                                            </div>
+                                            <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                                <% } else { %>
+                                    <div class="col-12 text-center py-5 text-muted">
+                                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                        Chưa có gói cước nào.
+                                    </div>
+                                    <% } %>
+                </div>
+
+                <% if (totalPages> 1) { %>
+                    <% let queryLoai="" ; if (typeof loaiHienTai !=='undefined' && loaiHienTai !=='Tất cả' ) {
+                        queryLoai="&loai=" + encodeURIComponent(loaiHienTai); } %>
+                        <nav aria-label="Page navigation" class="mt-4 mb-2">
+                            <ul class="pagination justify-content-center shadow-sm" style="border-radius: 8px;">
+                                <li class="page-item <%= currentPage == 1 ? 'disabled' : '' %>">
+                                    <a class="page-link"
+                                        href="/quanly/goicuoc?page=<%= parseInt(currentPage) - 1 %><%= queryLoai %>">Trước</a>
+                                </li>
+                                <% for(let i=1; i <=totalPages; i++) { %>
+                                    <li class="page-item <%= currentPage == i ? 'active' : '' %>">
+                                        <a class="page-link <%= currentPage == i ? 'bg-vnpt border-vnpt text-white fw-bold' : 'text-primary' %>"
+                                            href="/quanly/goicuoc?page=<%= i %><%= queryLoai %>">
+                                            <%= i %>
+                                        </a>
+                                    </li>
+                                    <% } %>
+                                        <li class="page-item <%= currentPage == totalPages ? 'disabled' : '' %>">
+                                            <a class="page-link"
+                                                href="/quanly/goicuoc?page=<%= parseInt(currentPage) + 1 %><%= queryLoai %>">Sau</a>
+                                        </li>
+                            </ul>
+                        </nav>
+                        <% } %>
+
+        
+
+            <div class="modal fade" id="modalXoaGoiCuoc" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content rounded-4 border-0 shadow-lg">
+                        <form action="/quanly/goicuoc/xoa" method="POST" onsubmit="return kiemTraXoa()">
+                            <div class="modal-header bg-danger text-white py-3">
+                                <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> XÁC NHẬN
+                                    XÓA GÓI CƯỚC</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                    aria-label="Đóng"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div class="alert alert-warning border-0 shadow-sm">
+                                    Cảnh báo: Bạn đang thực hiện xóa gói cước <strong id="hien_thi_ten_goi_xoa"
+                                        class="text-danger"></strong>. Dữ liệu sau khi xóa sẽ không thể khôi phục!
+                                </div>
+
+                                <input type="hidden" id="input_id_goi_cuoc_xoa" name="id">
+                                <input type="hidden" id="input_ten_goi_cuoc_goc">
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold text-danger">Xác nhận tên gói cước <span
+                                            class="text-danger">*</span></label>
+                                    <p class="small text-muted mb-2">Vui lòng nhập lại chính xác tên gói cước để tiếp
+                                        tục.</p>
+                                    <input type="text" class="form-control border-danger" id="xac_nhan_ten_goi"
+                                        placeholder="Nhập tên gói cước..." required autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="modal-footer bg-light mt-2">
+                                <button type="button" class="btn btn-outline-secondary fw-bold rounded-pill px-4"
+                                    data-bs-dismiss="modal">Hủy bỏ</button>
+                                <button type="submit" class="btn btn-danger fw-bold rounded-pill px-4 shadow-sm">
+                                    <i class="bi bi-trash-fill"></i> Xóa gói cước
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>            
+ 
+            <script>
+                function chuanBiXoaGoiCuoc(id, tenGoi) {
+                    document.getElementById('hien_thi_ten_goi_xoa').innerText = tenGoi;
+                    document.getElementById('input_id_goi_cuoc_xoa').value = id;
+                    document.getElementById('input_ten_goi_cuoc_goc').value = tenGoi;
+                    document.getElementById('xac_nhan_ten_goi').value = '';
+                }
+
+                function kiemTraXoa() {
+                    const tenGoc = document.getElementById('input_ten_goi_cuoc_goc').value.trim().toLowerCase();
+                    const tenNhapVao = document.getElementById('xac_nhan_ten_goi').value.trim().toLowerCase();
+
+                    if (tenGoc !== tenNhapVao) {
+                        let myModalEl = document.getElementById('modalXoaGoiCuoc');
+                        let modal = bootstrap.Modal.getInstance(myModalEl);
+                        modal.hide();
+
+                        return false;
+                    }
+                    return true;
+                }
+            </script>         
+ 

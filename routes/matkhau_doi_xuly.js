@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const sql = require('mssql');
 const hienThiLoiHeThong = require('./xuly_loi');
-
-const sqlConfig = {
-    user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
-    options: { encrypt: false, trustServerCertificate: true }
-};
+const dbManager = require('../database');//thêm cái này
+// const sqlConfig = {
+//     user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
+//     options: { encrypt: false, trustServerCertificate: true }
+// };
 
 const kiemTraDangNhap = (req, res, next) => {
     if (req.session.user) next(); else res.redirect('/dangnhap');
@@ -17,7 +17,7 @@ router.post('/matkhau_doi_xacthuc', kiemTraDangNhap, async (req, res) => {
     try {
         const { ten_dang_nhap, mat_khau_cu } = req.body;
         
-        let pool = await sql.connect(sqlConfig);
+        const pool = await dbManager.getSQLPool();
         let result = await pool.request()
             .input('user', sql.VarChar, ten_dang_nhap)
             .input('pass', sql.VarChar, mat_khau_cu)
@@ -25,7 +25,7 @@ router.post('/matkhau_doi_xacthuc', kiemTraDangNhap, async (req, res) => {
 
         if (result.recordset.length > 0) {
             //Đúng mật khẩu
-            res.render('matkhau_doi', {
+            res.render('pages/matkhau_doi', {
                 title: 'Cập nhật mật khẩu',
                 user: req.session.user,
                 step: 2, 
@@ -34,10 +34,10 @@ router.post('/matkhau_doi_xacthuc', kiemTraDangNhap, async (req, res) => {
             });
         } else {
             //Sai mật khẩu
-            res.render('matkhau_doi', {
+            res.render('pages/matkhau_doi', {
                 title: 'Cập nhật mật khẩu',
                 user: req.session.user,
-                step: 1,
+                step: 1,                
                 error: 'Tên đăng nhập hoặc mật khẩu hiện tại không chính xác!'
             });
         }
@@ -54,7 +54,7 @@ router.post('/matkhau_doi_xuly', kiemTraDangNhap, async (req, res) => {
 
         //Kiểm tra khớp mật khẩu
         if (mat_khau_moi !== nhap_lai_mat_khau_moi) {
-            return res.render('matkhau_doi', {
+            return res.render('pages/matkhau_doi', {
                 title: 'Cập nhật mật khẩu', user: req.session.user, step: 2, tenDangNhapXacThuc: tenDangNhap,
                 error: 'Mật khẩu nhập lại không khớp. Vui lòng thử lại!'
             });

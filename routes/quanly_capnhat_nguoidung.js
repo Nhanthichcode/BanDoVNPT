@@ -3,10 +3,10 @@ const router = express.Router();
 const sql = require('mssql');
 const hienThiLoiHeThong = require('./xuly_loi');
 
-const sqlConfig = {
-    user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
-    options: { encrypt: false, trustServerCertificate: true }
-};
+// const sqlConfig = {
+//     user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
+//     options: { encrypt: false, trustServerCertificate: true }
+// };
 
 const kiemTraDangNhap = (req, res, next) => { if (req.session.user) next(); else res.redirect('/dangnhap'); };
 const kiemTraQuyenQuanTri = (req, res, next) => {
@@ -18,7 +18,7 @@ const kiemTraQuyenQuanTri = (req, res, next) => {
 //Route: Lấy dữ liệu và hiển thị form sửa
 router.get('/sua/:username', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, res) => {
     try {
-        let pool = await sql.connect(sqlConfig);
+        const pool = await dbManager.getSQLPool();
         let result = await pool.request()
             .input('user', sql.VarChar, req.params.username)
             .query('SELECT * FROM TaiKhoan WHERE ten_dang_nhap = @user');
@@ -27,7 +27,7 @@ router.get('/sua/:username', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, r
             return hienThiLoiHeThong(req, res, "Không tìm thấy tài khoản cần sửa!");
         }
 
-        res.render('quanly_capnhat_nguoidung', {
+        res.render('pages/quanly_capnhat_nguoidung', {
             title: 'Cập nhật tài khoản',
             user: req.session.user,
             taiKhoanSua: result.recordset[0]

@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const session = require('express-session');
+const dbManager = require('./database');
+const layouts = require('express-ejs-layouts');
 
 const app = express();
 const port = 3000;
@@ -15,7 +17,8 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/data', express.static('data'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(layouts);
+app.set('layout', 'layouts/layout'); // đường dẫn tới layout.ejs
 app.use(session({
     secret: 'vnpt-secret-key-2026',
     resave: false,
@@ -23,15 +26,32 @@ app.use(session({
     cookie: { maxAge: 1000 * 60 * 60 * 8 }
 }));
 
+// Middleware gán user vào res.locals
+app.use((req, res, next) => {
+  // Nếu bạn dùng session để lưu user
+  if (req.session && req.session.user) {
+    res.locals.user = req.session.user;
+  } else {
+    res.locals.user = null;  // hoặc {} để tránh lỗi
+    }
+next();
+});
+
 //2. Kết nối MongoDB và khai báo Models
-
-const uri = 'mongodb+srv://sa:admin123@vnpt-mapping.ep8txj8.mongodb.net/VNPT_Mapping?appName=VNPT-Mapping';
-
-
-mongoose.connect(uri)
-    .then(() => console.log('Đã kết nối MongoDB!'))
-    .catch(err => console.log('Lỗi kết nối MongoDB:', err));
-
+async function startDatabases() {
+    try {
+        await dbManager.connectMongo();
+        await dbManager.connectSQL();
+        
+        // Khai báo models SAU KHI Mongoose kết nối thành công
+        require('./models/Splitter');
+        require('./models/DiemKetNoi');
+    } catch (err) {
+        console.error('❌ Không thể khởi động database. Dừng server!', err);
+        process.exit(1); // Dừng Node.js nếu DB chết
+    }
+}
+startDatabases();
 require('./models/Splitter');
 require('./models/DiemKetNoi');
 

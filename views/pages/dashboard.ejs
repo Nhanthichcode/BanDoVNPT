@@ -1,0 +1,385 @@
+
+    <style>
+        body { background-color: #f8f9fa; display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
+        .bg-vnpt { background-color: #0072BC !important; }
+        
+        .stat-card { border: none; border-radius: 10px; box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); transition: transform 0.2s;}
+        .stat-card:hover { transform: translateY(-3px); }
+        .icon-box { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        
+        /* Hiệu ứng chớp nháy cho Dấu chấm than đỏ */
+        @keyframes pulse-danger {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
+        .marker-danger-icon {
+            background-color: #dc3545; color: white; border-radius: 50%; border: 2px solid white;
+            display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px;
+            animation: pulse-danger 1.5s infinite;
+        }
+
+        /* Định dạng dropdown list mượt mà */
+        /* Tìm và thay thế đoạn này trong thẻ <style> */
+.dropdown-menu-list { 
+    max-height: 320px; 
+    overflow-y: auto; 
+    min-width: 260px; /* Thu gọn kích thước tối thiểu */
+    width: max-content; /* Tự động co giãn ôm vừa nội dung */
+    max-width: 350px; /* Khống chế không cho quá to */
+}
+.dropdown-menu-list::-webkit-scrollbar { width: 6px; }
+.dropdown-menu-list::-webkit-scrollbar-thumb { background-color: #adb5bd; border-radius: 10px; }
+        .leaflet-container {z-index: 1 !important;}
+    </style>
+
+
+ 
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 mb-5">
+   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3 mb-4" style="position: relative; z-index: 10;">    
+        <% if (user.vai_tro_id === 1 || user.vai_tro_id === 2) { %>
+            <div class="col">
+                <div class="card stat-card h-100 p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box bg-primary bg-opacity-10 text-primary me-3"><i class="bi bi-people-fill"></i></div>
+                        <div>
+                            <h6 class="text-muted mb-1">Tổng người dùng</h6>
+                            <h3 class="fw-bold mb-0 text-dark"><%= stats.users %></h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+
+        <div class="col">
+            <div class="card stat-card h-100 p-3 dropdown" style="cursor: pointer;">
+                <div data-bs-toggle="dropdown" title="Click để xem danh sách">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-box bg-info bg-opacity-10 text-info me-3"><i class="bi bi-hdd-network-fill"></i></div>
+                            <div>
+                                <h6 class="text-muted mb-1">Tủ cáp (Splitter) <i class="bi bi-caret-down-fill small"></i></h6>
+                                <h3 class="fw-bold mb-0 text-dark" id="splitter-count">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <ul class="dropdown-menu dropdown-menu-list shadow border-0 mt-2 p-2" id="splitter-dropdown-list">
+                    <li><span class="dropdown-item text-muted small text-center">Đang tải dữ liệu...</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card stat-card h-100 p-3 dropdown" style="cursor: pointer;">
+                <div data-bs-toggle="dropdown" title="Click để xem danh sách">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-box bg-danger bg-opacity-10 text-danger me-3"><i class="bi bi-tools"></i></div>
+                            <div>
+                                <h6 class="text-muted mb-1">Sự cố chờ xử lý <i class="bi bi-caret-down-fill small"></i></h6>
+                                <h3 class="fw-bold mb-0 text-dark"><%= stats.issues || stats.myPendingIssues || 0 %></h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-list shadow border-0 mt-2 p-2">
+                    <li><h6 class="dropdown-header text-danger fw-bold px-2 border-bottom pb-2 mb-2"><i class="bi bi-fire"></i> Đang chờ xử lý</h6></li>
+                    <% if (pendingList && pendingList.length > 0) { %>
+                        <% pendingList.forEach(item => { %>
+                            <li>
+                                <a class="dropdown-item py-2 px-3 rounded text-wrap" href="javascript:void(0)" onclick="zoomToMap('<%= item.diem_ket_noi_id %>')">
+                                    <div class="fw-bold text-dark"><%= item.ten_khach_hang %></div>
+                                    <div class="small text-danger"><i class="bi bi-exclamation-circle"></i> <%= item.loai_su_co %></div>
+                                    <div class="small text-muted" style="font-size: 0.7rem;"><%= new Date(item.thoi_gian_tao).toLocaleString('vi-VN') %></div>
+                                </a>
+                            </li>
+                        <% }) %>
+                    <% } else { %>
+                        <li><span class="dropdown-item text-muted small text-center">Không có sự cố nào!</span></li>
+                    <% } %>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card stat-card h-100 p-3 dropdown" style="cursor: pointer;">
+                <div data-bs-toggle="dropdown" title="Click để xem danh sách">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-box bg-success bg-opacity-10 text-success me-3"><i class="bi bi-check-circle-fill"></i></div>
+                            <div>
+                                <h6 class="text-muted mb-1">Đã khắc phục <i class="bi bi-caret-down-fill small"></i></h6>
+                                <h3 class="fw-bold mb-0 text-dark"><%= stats.myResolvedIssues !== undefined ? stats.myResolvedIssues : resolvedList.length %></h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-list shadow border-0 mt-2 p-2">
+                    <li><h6 class="dropdown-header text-success fw-bold px-2 border-bottom pb-2 mb-2"><i class="bi bi-check2-all"></i> Vừa khắc phục xong</h6></li>
+                    <% if (resolvedList && resolvedList.length > 0) { %>
+                        <% resolvedList.forEach(item => { %>
+                            <li>
+                                <a class="dropdown-item py-2 px-3 rounded text-wrap" href="/baocao/lichsu">
+                                    <div class="fw-bold text-dark"><%= item.ten_khach_hang %></div>
+                                    <div class="small text-success"><i class="bi bi-wrench"></i> <%= item.loai_su_co %></div>
+                                    <div class="small text-muted" style="font-size: 0.7rem;"><%= new Date(item.thoi_gian_tao).toLocaleString('vi-VN') %></div>
+                                </a>
+                            </li>
+                        <% }) %>
+                    <% } else { %>
+                        <li><span class="dropdown-item text-muted small text-center">Chưa có dữ liệu!</span></li>
+                    <% } %>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="card stat-card p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-map-fill me-2 text-primary"></i>Giám sát bản đồ trực tuyến</h5>
+                    <div id="map-dashboard" style="height: 480px; border-radius: 10px; z-index: 1;" class="border shadow-sm">
+                        <div class="h-100 d-flex align-items-center justify-content-center bg-light">
+                            <div class="spinner-border text-primary me-2" role="status"></div>
+                            <span>Đang tải dữ liệu mạng lưới...</span>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+
+<script>
+        // 1. Khai báo biến toàn cục
+        window.appMap = null;
+        window.appMarkers = {};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const mapContainer = document.getElementById('map-dashboard');
+
+            // Xóa bản đồ cũ nếu có để tránh lỗi đè lặp (gây liệt chuột)
+            if (window.appMap !== null) {
+                window.appMap.remove();
+                window.appMap = null;
+            }
+            if (mapContainer && mapContainer._leaflet_id) {
+                mapContainer._leaflet_id = null;
+            }
+
+            try {
+                // Khởi tạo bản đồ
+                window.appMap = L.map('map-dashboard').setView([10.37, 105.43], 14);
+
+                // CẤU HÌNH BỘ NHỚ ĐỆM (CACHE TỐI ƯU)
+               L.tileLayer('http://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+                    maxZoom: 20,
+                    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                    attribution: '© Google Maps'
+                }).addTo(window.appMap);
+            } catch (e) {
+                console.error("Lỗi khi tạo bản đồ:", e);
+            }
+
+            function getMarkerColor(mau_sac) {
+                if (mau_sac === 'Đỏ') return '#dc3545';
+                if (mau_sac === 'Xám') return '#6c757d';
+                return '#198754'; 
+            }
+
+           // 2. TẢI DỮ LIỆU & LỌC TỦ CÁP (CẤP 1 & CẤP 2)
+            window.appSplitterMarkers = {}; 
+
+            fetch('/api/diem-ket-noi')
+                .then(res => res.json())
+                .then(data => {
+                    const mapContainer = document.getElementById('map-dashboard');
+                    if (data.length === 0) {
+                        mapContainer.innerHTML = '<div class="alert alert-info m-3">Chưa có dữ liệu điểm kết nối.</div>';
+                        return;
+                    }
+
+                    const uniqueSplitters = {}; // Lưu Tủ cấp 2
+                    const uniqueSplittersCap1 = {}; // Lưu Tủ cấp 1 (Tủ cha)
+
+                    data.forEach(diem => {
+                        // --- A. XỬ LÝ KHÁCH HÀNG ---
+                        if (diem.vi_tri && diem.vi_tri.coordinates) {
+                            const [lng, lat] = diem.vi_tri.coordinates;
+                            const color = getMarkerColor(diem.trang_thai_ket_noi.mau_sac);
+                            let marker;
+
+                            if (diem.trang_thai_ket_noi.mau_sac === 'Đỏ') {
+                                const dangerIcon = L.divIcon({
+                                    className: 'custom-icon', html: '<div class="marker-danger-icon">!</div>',
+                                    iconSize: [24, 24], iconAnchor: [12, 12]
+                                });
+                                marker = L.marker([lat, lng], { icon: dangerIcon }).addTo(window.appMap);
+                            } else {
+                                marker = L.circleMarker([lat, lng], {
+                                    radius: 7, fillColor: color, color: "#fff", weight: 2, opacity: 1, fillOpacity: 0.9
+                                }).addTo(window.appMap);
+                            }
+
+                            const markerId = String(diem._id).toLowerCase().trim();
+                            window.appMarkers[markerId] = marker;
+
+                            let popupContent = `
+                                <div style="font-family: sans-serif; min-width: 200px;">
+                                    <strong class="text-primary">${diem.ten_khach_hang}</strong><br>
+                                    <small>${diem.dia_chi}</small><br>
+                                    <b>Trạng thái:</b> ${diem.trang_thai_ket_noi.mau_sac === 'Xanh' ? 'Ổn định' : '<span class="text-danger fw-bold">Gặp sự cố</span>'}
+                            `;
+                            if (diem.trang_thai_ket_noi.mau_sac !== 'Xanh') {
+                                popupContent += `<hr class="my-2"><a href="/baocao/suco" class="btn btn-sm btn-danger w-100 fw-bold text-white"><i class="bi bi-tools"></i> Xử lý sự cố ngay</a>`;
+                            }
+                            popupContent += `</div>`;
+                            marker.bindPopup(popupContent);
+
+                            // --- B. XỬ LÝ TỦ CÁP CẤP 2 (Khách hàng cắm vào) ---
+                            if (diem.splitter_id && diem.splitter_id.vi_tri && diem.splitter_id.vi_tri.coordinates) {
+                                const sp2Id = diem.splitter_id._id;
+                                const [sp2Lng, sp2Lat] = diem.splitter_id.vi_tri.coordinates;
+
+                                // Vẽ dây nối từ khách hàng -> Tủ cấp 2 (Nét đứt, mỏng)
+                               L.polyline([ [lat, lng], [sp2Lat, sp2Lng] ], {
+                                            color: color, 
+                                            weight: 4,          /* Đậm hơn */
+                                            opacity: 0.9,       /* Rõ nét hơn */
+                                            dashArray: '5, 4'   /* Nét đứt to và thưa hơn một chút */
+                                        }).addTo(window.appMap);
+
+                                // Kiểm tra và Vẽ Tủ Cấp 2
+                                if (!uniqueSplitters[sp2Id]) {
+                                    uniqueSplitters[sp2Id] = diem.splitter_id; // Lưu vào danh sách
+
+                                    // Điểm tủ cấp 2 (Màu xanh dương)
+                                    const sp2Marker = L.circleMarker([sp2Lat, sp2Lng], {
+                                        radius: 6, fillColor: '#0072BC', color: '#fff', weight: 2, fillOpacity: 1
+                                    }).addTo(window.appMap);
+                                    
+                                    sp2Marker.bindPopup(`
+                                        <div style="font-family: sans-serif; min-width: 150px; text-align: center;">
+                                            <h6 class="text-info fw-bold mb-1"><i class="bi bi-hdd-network"></i> ${diem.splitter_id.ten_splitter}</h6>
+                                            <small class="text-muted border bg-light px-2 py-1 rounded d-block mb-1">Cấp 2 | SysID: ${diem.splitter_id.sys_id || 'N/A'}</small>
+                                        </div>
+                                    `);
+                                    
+                                    window.appSplitterMarkers[String(sp2Id).toLowerCase().trim()] = sp2Marker;
+
+                                    // --- C. XỬ LÝ TỦ CÁP CẤP 1 (Tủ Cha) ---
+                                    if (diem.splitter_id.splitter_cha_id && diem.splitter_id.splitter_cha_id.vi_tri && diem.splitter_id.splitter_cha_id.vi_tri.coordinates) {
+                                        const sp1 = diem.splitter_id.splitter_cha_id;
+                                        const sp1Id = sp1._id;
+                                        const [sp1Lng, sp1Lat] = sp1.vi_tri.coordinates;
+
+                                        // Vẽ cáp trục chính (Feeder cable) từ Tủ 1 -> Tủ 2 (Nét liền, to, màu đen/xám đậm)                                     
+                                        L.polyline([ [sp1Lat, sp1Lng], [sp2Lat, sp2Lng] ], {
+                                            color: '#212529',   /* Đen đậm */
+                                            weight: 7,          /* Cực đậm để phân biệt dây trục chính */
+                                            opacity: 1.0
+                                        }).addTo(window.appMap);                        
+
+                                        // Kiểm tra và Vẽ Tủ Cấp 1
+                                        if (!uniqueSplittersCap1[sp1Id]) {
+                                            uniqueSplittersCap1[sp1Id] = sp1;
+
+                                            // Điểm tủ cấp 1 (Màu Cam to hơn)
+                                            const sp1Marker = L.circleMarker([sp1Lat, sp1Lng], {
+                                                radius: 9, fillColor: '#fd7e14', color: '#fff', weight: 3, fillOpacity: 1
+                                            }).addTo(window.appMap);
+
+                                            sp1Marker.bindPopup(`
+                                                <div style="font-family: sans-serif; min-width: 150px; text-align: center;">
+                                                    <h6 class="text-warning fw-bold mb-1"><i class="bi bi-hdd-rack-fill"></i> ${sp1.ten_splitter}</h6>
+                                                    <small class="text-white border bg-dark px-2 py-1 rounded d-block mb-1">TỦ CẤP 1 | ${sp1.sys_id || 'N/A'}</small>
+                                                </div>
+                                            `);
+
+                                            window.appSplitterMarkers[String(sp1Id).toLowerCase().trim()] = sp1Marker;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    // --- D. ĐỔ DỮ LIỆU TẤT CẢ TỦ CÁP VÀO DROPDOWN ---
+                    const splitterListEl = document.getElementById('splitter-dropdown-list');
+                    const splitterCountEl = document.getElementById('splitter-count');
+                    
+                    // Gộp mảng Tủ 1 và Tủ 2 lại để hiện lên Menu
+                    const splArr2 = Object.values(uniqueSplitters);
+                    const splArr1 = Object.values(uniqueSplittersCap1);
+                    const allSplitters = [...splArr1, ...splArr2];
+
+                    if(splitterCountEl) splitterCountEl.innerText = allSplitters.length;
+
+                    if(splitterListEl) {
+                        if(allSplitters.length > 0) {
+                            splitterListEl.innerHTML = ''; // Xóa chữ Đang tải...
+                            
+                            // Nhóm 1: In tủ cấp 1 trước (Màu cam)
+                            if(splArr1.length > 0) {
+                                splitterListEl.innerHTML += `<li><h6 class="dropdown-header text-warning fw-bold px-2 border-bottom pb-2 mb-2"><i class="bi bi-hdd-rack-fill"></i> TỦ CHÍNH (CẤP 1)</h6></li>`;
+                                splArr1.forEach(sp => {
+                                    splitterListEl.innerHTML += `
+                                        <li>
+                                            <a class="dropdown-item py-2 px-3 rounded text-wrap bg-light border-bottom" href="javascript:void(0)" onclick="zoomToSplitter('${sp._id}')">
+                                                <div class="fw-bold text-dark">${sp.ten_splitter}</div>
+                                                <div class="small text-muted"><i class="bi bi-hash"></i> ${sp.sys_id || 'Đang cập nhật'}</div>
+                                            </a>
+                                        </li>
+                                    `;
+                                });
+                            }
+
+                            // Nhóm 2: In tủ cấp 2 sau (Màu xanh)
+                            if(splArr2.length > 0) {
+                                splitterListEl.innerHTML += `<li><h6 class="dropdown-header text-info fw-bold px-2 border-bottom pb-2 mt-2 mb-2"><i class="bi bi-hdd-network"></i> TỦ PHỤ (CẤP 2)</h6></li>`;
+                                splArr2.forEach(sp => {
+                                    splitterListEl.innerHTML += `
+                                        <li>
+                                            <a class="dropdown-item py-2 px-3 rounded text-wrap" href="javascript:void(0)" onclick="zoomToSplitter('${sp._id}')">
+                                                <div class="fw-bold text-dark">${sp.ten_splitter}</div>
+                                                <div class="small text-muted"><i class="bi bi-hash"></i> ${sp.sys_id || 'Đang cập nhật'}</div>
+                                            </a>
+                                        </li>
+                                    `;
+                                });
+                            }
+
+                        } else {
+                            splitterListEl.innerHTML = `<li><span class="dropdown-item text-muted small text-center">Chưa có tủ cáp nào trên bản đồ!</span></li>`;
+                        }
+                    }
+                })
+                .catch(err => console.error("Lỗi tải API:", err));
+});
+        // 3. HÀM ZOOM TO KHÁCH HÀNG (Cũ)
+        function zoomToMap(diemKetNoiId) {
+            const cleanId = String(diemKetNoiId).toLowerCase().trim();
+            const targetMarker = window.appMarkers[cleanId];
+            if (targetMarker) performFlyTo(targetMarker);
+            else alert("Không tìm thấy vị trí khách hàng này trên bản đồ.");
+        }
+
+        // 4. HÀM ZOOM TO TỦ CÁP (Mới)
+        function zoomToSplitter(splitterId) {
+            const cleanId = String(splitterId).toLowerCase().trim();
+            const targetMarker = window.appSplitterMarkers[cleanId];
+            if (targetMarker) performFlyTo(targetMarker);
+            else alert("Không tìm thấy tủ cáp này trên bản đồ.");
+        }
+
+        // HÀM BAY DÙNG CHUNG (Để code gọn gàng, tránh lặp lại)
+        function performFlyTo(markerObj) {
+            window.appMap.closePopup();
+            document.getElementById('map-dashboard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => {
+                window.appMap.flyTo(markerObj.getLatLng(), 18, {
+                    animate: true, duration: 2.0, easeLinearity: 0.25
+                });
+                window.appMap.once('moveend', function() {
+                    markerObj.openPopup();
+                });
+            }, 400);
+        }    
+</script>

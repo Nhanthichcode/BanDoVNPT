@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const sql = require('mssql');
 const hienThiLoiHeThong = require('./xuly_loi');
-
-const sqlConfig = {
-    user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
-    options: { encrypt: false, trustServerCertificate: true }
-};
+const dbManager = require('../database');//thêm cái này
+// const sqlConfig = {
+//     user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
+//     options: { encrypt: false, trustServerCertificate: true }
+// };
 
 const kiemTraDangNhap = (req, res, next) => { if (req.session.user) next(); else res.redirect('/dangnhap'); };
 const kiemTraQuyenQuanTri = (req, res, next) => {
@@ -17,7 +17,7 @@ const kiemTraQuyenQuanTri = (req, res, next) => {
 //Route: Hiển thị giao diện
 router.get('/chitiet/:username', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, res) => {
     try {
-        let pool = await sql.connect(sqlConfig);
+        let pool = await dbManager.getSQLPool();
         let result = await pool.request()
             .input('user', sql.VarChar, req.params.username)
             .query(`
@@ -29,7 +29,7 @@ router.get('/chitiet/:username', kiemTraDangNhap, kiemTraQuyenQuanTri, async (re
 
         if (result.recordset.length === 0) return hienThiLoiHeThong(req, res, "Không tìm thấy người dùng này!");
 
-        res.render('quanly_chitiet_nguoidung', {
+        res.render('pages/quanly_chitiet_nguoidung', {
             title: 'Chi tiết tài khoản',
             user: req.session.user,
             taiKhoanChiTiet: result.recordset[0],
