@@ -18,7 +18,7 @@
 
     // Hàm áp dụng tỷ lệ scale lên giao diện
     function applyScale() {
-        const mainContent = document.body;
+        const mainContent = document.getElementById('main-content');
         if (!mainContent) return;
 
         // Áp dụng CSS zoom
@@ -46,7 +46,7 @@
 
         currentScale = Math.round(currentScale * 10) / 10;
 
-        // LƯU TRỮ: Ghi nhớ giá trị này vào trình duyệt
+        // Lưu giá trị này vào trình duyệt
         localStorage.setItem('interfaceScale', currentScale);
 
         applyScale();
