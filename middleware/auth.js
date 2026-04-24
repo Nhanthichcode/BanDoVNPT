@@ -33,8 +33,30 @@ const kiemTraQuyenQuanTri = (req, res, next) => {
     }
 };
 
+const kiemTraQuyenAdmin = (req, res, next) => {
+    // Để an toàn, kiểm tra xem có session chưa trước
+    if (!req.session || !req.session.user) {
+        return res.redirect('/dangnhap');
+    }
+
+    const vaiTro = req.session.user.vai_tro_id;
+
+    // Giả sử: 1 = Quản trị viên
+    if (vaiTro === 1) {
+        next(); // Hợp lệ -> Cho phép đi tiếp
+    } else {
+        // Không hợp lệ -> Báo lỗi
+        if (typeof hienThiLoiHeThong === 'function') {
+            hienThiLoiHeThong(req, res, "TRUY CẬP BỊ TỪ CHỐI! Chức năng này chỉ dành cho Quản trị viên.");
+        } else {
+            res.status(403).send("TRUY CẬP BỊ TỪ CHỐI! Bạn không có quyền thực hiện chức năng này.");
+        }
+    }
+};
+
 // Xuất các hàm này ra để dùng ở file khác
 module.exports = {
     kiemTraDangNhap,
-    kiemTraQuyenQuanTri
+    kiemTraQuyenQuanTri,
+    kiemTraQuyenAdmin
 };

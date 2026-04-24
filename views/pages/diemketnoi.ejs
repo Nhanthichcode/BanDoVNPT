@@ -28,7 +28,7 @@
     .leaflet-container { z-index: 1 !important; }
     </style>
 
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 mb-5">
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-3">
 
                 <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
                     <div>
@@ -45,7 +45,7 @@
 
                 <div class="card border-0 shadow-sm rounded-3">
                     <div class="card-body p-0">
-                        <div class="table-responsive">
+                        <div class="table-container-scroll">
                             <table class="table table-hover align-middle mb-0 text-center">
                                 <thead class="bg-light text-secondary">
                                     <tr>
@@ -119,10 +119,18 @@
                                                                 <% } %>
                                                 </td>
 
-                                                <td>
-                                                    <form action="/quanly/vitri/xoa/<%= diem._id %>" method="POST" onsubmit="return confirm('Bạn chắc chắn muốn xóa?')">
-                                                        <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
-                                                    </form>
+                                                <td class="text-center">
+                                                    <div class="d-flex justify-content-center gap-2">
+                                                        <a href="/diemketnoi/sua/<%= diem._id %>" class="btn btn-sm btn-warning fw-bold text-dark shadow-sm">
+                                                            <i class="bi bi-pencil-square"></i> Sửa
+                                                        </a>
+
+                                                        <form action="/diemketnoi/xoa/<%= diem._id %>" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa khách hàng này?')">
+                                                            <button type="submit" class="btn btn-sm btn-danger shadow-sm">
+                                                                <i class="bi bi-trash"></i>Xóa
+                                                            </button>
+                                                        </form>
+                                                    </div>
                                                 </td>
                                             </tr>
                                             <% }); %>
@@ -147,7 +155,7 @@
                             <h5 class="modal-title fw-bold"><i class="bi bi-person-plus"></i> THÊM KHÁCH HÀNG MỚI</h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
-                        <form action="/quanly/vitri/them" method="POST">
+                        <form action="/diemketnoi/them" method="POST">
                             <div class="modal-body p-4">
 
                                 <h6 class="text-primary fw-bold border-bottom pb-2 mb-3"><i
@@ -285,29 +293,29 @@
             </main>        
 
             <div class="modal fade" id="modalPickLocation" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold"><i class="bi bi-geo-alt"></i> CHỌN VỊ TRÍ KHÁCH HÀNG</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-0">
-                <div id="map-picker"></div>
-            </div>
-            <div class="modal-footer bg-light d-flex justify-content-between">
-                <div>
-                    <span class="badge bg-dark">Vĩ độ: <span id="display-lat">0</span></span>
-                    <span class="badge bg-dark">Kinh độ: <span id="display-lng">0</span></span>
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title fw-bold"><i class="bi bi-geo-alt"></i> CHỌN VỊ TRÍ KHÁCH HÀNG</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-0">
+                            <div id="map-picker"></div>
+                        </div>
+                        <div class="modal-footer bg-light d-flex justify-content-between">
+                            <div>
+                                <span class="badge bg-dark">Vĩ độ: <span id="display-lat">0</span></span>
+                                <span class="badge bg-dark">Kinh độ: <span id="display-lng">0</span></span>
+                            </div>
+                            <div>
+                                <!-- <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Hủy</button> -->
+                                <button type="button" class="btn btn-secondary fw-bold" data-bs-target="#modalThemDiem" data-bs-toggle="modal">Hủy</button>
+                                <button type="button" class="btn btn-primary fw-bold" onclick="xacNhanToaDo()">Xác nhận vị trí</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <!-- <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Hủy</button> -->
-                    <button type="button" class="btn btn-secondary fw-bold" data-bs-target="#modalThemDiem" data-bs-toggle="modal">Hủy</button>
-                    <button type="button" class="btn btn-primary fw-bold" onclick="xacNhanToaDo()">Xác nhận vị trí</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>  
+            </div>  
 
 <script>
     // 1. XỬ LÝ GÓI CƯỚC
@@ -330,31 +338,25 @@
     let pickerMap;
     let tempMarker;
 
-    console.log("🔥 [DEBUG]: Bắt đầu load Script...");
-
     const modalEl = document.getElementById('modalPickLocation');
-    console.log("🔥 [DEBUG]: Tìm thấy Modal HTML:", modalEl);
 
     // Lắng nghe sự kiện Modal MỞ LÊN
-    modalEl.addEventListener('shown.bs.modal', function () {
-        console.log("🔥 [DEBUG]: Modal đã mở (sự kiện shown.bs.modal kích hoạt)");
+    modalEl.addEventListener('shown.bs.modal', function () {      
         
-        if (!pickerMap) {
-            console.log("🔥 [DEBUG]: Khởi tạo bản đồ lần đầu tiên...");
+        if (!pickerMap) {      
             try {
                 pickerMap = L.map('map-picker').setView([10.37, 105.43], 15);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(pickerMap);
-                console.log("🔥 [DEBUG]: Khởi tạo bản đồ THÀNH CÔNG!");
-
+              
                 pickerMap.on('click', function(e) {
-                    console.log("🔥 [DEBUG]: Bạn vừa click vào tọa độ:", e.latlng);
+                  
                     updateMarker(e.latlng.lat, e.latlng.lng);
                 });
             } catch (err) {
                 console.error("❌ [LỖI]: Không thể khởi tạo bản đồ:", err);
             }
         } else {
-            console.log("🔥 [DEBUG]: Bản đồ đã có sẵn, không cần tạo lại.");
+       
         }
         
         console.log("🔥 [DEBUG]: Gọi hàm invalidateSize() để sửa lỗi khung xám...");
@@ -383,7 +385,7 @@
         const lng = document.getElementById('display-lng').innerText;
         if (lat === "0") return alert("Vui lòng click chọn một điểm trên bản đồ!");
         
-        console.log("🔥 [DEBUG]: Lưu tọa độ xuống form. Lat:", lat, "Lng:", lng);
+        
         document.getElementById('input_vi_do').value = lat;
         document.getElementById('input_kinh_do').value = lng;
         
@@ -394,7 +396,7 @@
 
         // 2. Chờ 0.4s để hiệu ứng đóng bản đồ hoàn tất, sau đó mở lại Form Thêm Khách hàng
         setTimeout(() => {
-            console.log("🔥 [DEBUG]: Mở lại Modal Thêm khách hàng...");
+           
             const formModalEl = document.getElementById('modalThemDiem');
             let formModal = bootstrap.Modal.getInstance(formModalEl);
             if (!formModal) {
@@ -402,4 +404,5 @@
             }
             formModal.show();
         }, 400);}
+
 </script>       

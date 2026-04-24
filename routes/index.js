@@ -6,6 +6,7 @@ const hienThiLoiHeThong = require('./xuly_loi');
 const dbManager = require('../database');
 const { kiemTraDangNhap } = require('../middleware/auth');
 const DiemKetNoi = require('../models/DiemKetNoi');
+const Splitter = require('../models/Splitter');
 
 //Route: Giao diện chính bản đồ
 router.get('/dashboard', kiemTraDangNhap, async (req, res) => {
@@ -47,13 +48,26 @@ router.get('/dashboard', kiemTraDangNhap, async (req, res) => {
         const khMap = {};
         khachHangs.forEach(k => khMap[k._id.toString()] = k.ten_khach_hang);
 
-        const mapNames = (list) => list.map(item => ({
-            ...item, 
-            ten_khach_hang: khMap[item.diem_ket_noi_id] || 'KH đã bị xóa'
-        }));
+        // Lọc bỏ những sự cố mồ côi (khách hàng đã bị thu hồi/xóa) và gán tên
+        const filterAndMapNames = (list) => list
+            .filter(item => khMap[item.diem_ket_noi_id] !== undefined) // Chốt chặn: Chỉ giữ lại KH có tồn tại
+            .map(item => ({
+                ...item, 
+                ten_khach_hang: khMap[item.diem_ket_noi_id]
+            }));
 
-        pendingList = mapNames(pendingList);
-        resolvedList = mapNames(resolvedList);
+        pendingList = filterAndMapNames(pendingList);
+        resolvedList = filterAndMapNames(resolvedList);
+        
+        // Đồng bộ lại các con số thống kê (Badge đếm số) để khớp với danh sách đã lọc
+        if (user.vai_tro_id === 1 || user.vai_tro_id === 2) {
+            stats.issues = pendingList.length; 
+        }
+        if (user.vai_tro_id === 3) {
+            stats.myPendingIssues = pendingList.length;
+            stats.myResolvedIssues = resolvedList.length;
+        }
+
 
         res.render('pages/dashboard', { 
             user, 
@@ -79,6 +93,17 @@ router.get('/api/diem-ket-noi', async (req, res) => {
     } catch (error) {
         console.error("Lỗi API lấy điểm kết nối MongoDB:", error);
         hienThiLoiHeThong(req, res); 
+    }
+});
+
+//Route: API lấy danh sách tủ cáp (Giữ nguyên)
+router.get('/api/splitters', async (req, res) => {
+    try {
+        const danhSachSplitter = await Splitter.find({});
+        res.status(200).json(danhSachSplitter);
+    } catch (error) {
+        console.error("Lỗi API lấy danh sách tủ cáp:", error);
+        res.status(500).json({ error: "Lỗi server" });
     }
 });
 module.exports = router;

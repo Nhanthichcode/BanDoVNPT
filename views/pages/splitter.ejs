@@ -19,9 +19,16 @@
             background-color: #f1f8ff;
             transition: 0.2s;
         }
+        /* Thêm vào bên trong thẻ <style> */
+        #map-picker { 
+            height: 500px; 
+            width: 100%; 
+            border-radius: 0 0 15px 15px;
+        }
+        .leaflet-container { z-index: 1 !important; }
     </style>
  
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 mb-5">            
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-3">            
 
                 <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
                     <div>
@@ -38,7 +45,7 @@
 
                 <div class="card border-0 shadow-sm rounded-3">
                     <div class="card-body p-0">
-                        <div class="table-responsive">
+                        <div class="table-container-scroll">
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="bg-light text-secondary">
                                     <tr>
@@ -94,11 +101,19 @@
                                                         </span>
                                                         <% } %>
                                                 </td>
-                                                <td class="text-center">
-                                                   <form action="/quanly/splitter/xoa/<%= sp._id %>" method="POST" onsubmit="return confirm('Bạn chắc chắn muốn xóa?')">
-                                                        <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                                           <td class="text-center">
+                                                <div class="d-flex justify-content-center gap-2">
+                                                    <button class="btn btn-sm btn-warning fw-bold text-dark shadow-sm"
+                                                        onclick="chuanBiSuaSplitter('<%= sp._id %>', '<%= sp.ten_splitter %>', '<%= sp.sys_id %>', '<%= sp.loai_splitter %>', '<%= sp.splitter_cha_id ? sp.splitter_cha_id._id : '' %>', '<%= sp.vi_tri.coordinates[1] %>', '<%= sp.vi_tri.coordinates[0] %>')"
+                                                        data-bs-toggle="modal" data-bs-target="#modalSuaSplitter">
+                                                        <i class="bi bi-pencil-square"></i> Sửa
+                                                    </button>
+                                                    
+                                                    <form action="/splitter/xoa/<%= sp._id %>" method="POST" onsubmit="return confirm('Bạn chắc chắn muốn xóa tủ cáp này?')">
+                                                        <button type="submit" class="btn btn-sm btn-danger fw-bold shadow-sm"><i class="bi bi-trash"></i> Xóa</button>
                                                     </form>
-                                                </td>
+                                                </div>
+                                            </td>
                                             </tr>
                                             <% }); %>
                                                 <% } else { %>
@@ -123,7 +138,7 @@
                             <h5 class="modal-title fw-bold"><i class="bi bi-node-plus"></i> THÊM TỦ PON</h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
-                        <form action="/quanly/splitter/them" method="POST">
+                        <form action="/splitter/them" method="POST">
                             <div class="modal-body p-4">
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Tên tủ</label>
@@ -135,16 +150,18 @@
                                     <input type="text" name="sys_id" class="form-control text-danger fw-bold"
                                         value="AGG-LX-01" required>
                                 </div>
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold">Vĩ độ</label>
-                                        <input type="number" step="any" name="vi_do" class="form-control"
-                                            placeholder="VD: 10.37..." required>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold">Kinh độ</label>
-                                        <input type="number" step="any" name="kinh_do" class="form-control"
-                                            placeholder="VD: 105.43..." required>
+                               <div class="row g-3 mb-3">
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-bold">Tọa độ vị trí</label>
+                                        <div class="input-group">
+                                            <input type="number" step="any" name="vi_do" id="input_vi_do" class="form-control"
+                                                placeholder="Vĩ độ (VD: 10.37)" min="-90" max="90" required>
+                                            <input type="number" step="any" name="kinh_do" id="input_kinh_do" class="form-control"
+                                                placeholder="Kinh độ (VD: 105.43)" min="-180" max="180" required>
+                                            <button type="button" class="btn btn-outline-primary fw-bold" data-bs-toggle="modal" data-bs-target="#modalPickLocation">
+                                                <i class="bi bi-geo-alt-fill"></i> Chọn từ bản đồ
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -176,15 +193,98 @@
 
                             </div>
                             <div class="modal-footer bg-light">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                <button type="button" class="btn btn-secondary fw-bold" data-bs-target="#modalThemSplitter" data-bs-toggle="modal">Hủy</button>
                                 <button type="submit" class="btn bg-vnpt text-white fw-bold shadow-sm"><i
                                         class="bi bi-floppy"></i> Lưu Tủ</button>
                             </div>
                         </form>
                     </div>
                 </div>
+            </div>     
+
+            <div class="modal fade" id="modalSuaSplitter" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-warning text-dark">
+                            <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square"></i> SỬA THÔNG TIN TỦ PON</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form id="formSuaSplitter" method="POST">
+                            <div class="modal-body p-4">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Tên tủ</label>
+                                    <input type="text" name="ten_splitter" id="sua_ten_splitter" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">SysID (Mã trạm OLT)</label>
+                                    <input type="text" name="sys_id" id="sua_sys_id" class="form-control text-danger fw-bold" required>
+                                </div>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-bold">Tọa độ vị trí</label>
+                                        <div class="input-group">
+                                            <input type="number" step="any" name="vi_do" id="sua_vi_do" class="form-control" required>
+                                            <input type="number" step="any" name="kinh_do" id="sua_kinh_do" class="form-control" required>
+                                            <button type="button" class="btn btn-outline-warning fw-bold text-dark" onclick="isEditingMap = true" data-bs-toggle="modal" data-bs-target="#modalPickLocation">
+                                                <i class="bi bi-geo-alt-fill"></i> Chọn lại trên bản đồ
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-primary">Loại tủ</label>
+                                    <select name="loai_splitter" id="sua_loai_splitter" class="form-select border-primary" required onchange="kiemTraLoaiSplitterSua()">
+                                        <option value="1:4">Cấp 1 (Chia 1:4) - Nối thẳng OLT</option>
+                                        <option value="1:16">Cấp 2 (Chia 1:16) - Nối từ tủ Cấp 1</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3 d-none bg-light p-3 border rounded" id="sua_khung_splitter_cha">
+                                    <label class="form-label fw-bold text-danger"><i class="bi bi-link-45deg"></i> Nối vào tủ Cấp 1 nào?</label>
+                                    <select name="splitter_cha_id" id="sua_splitter_cha_id" class="form-select">
+                                        <option value="">-- Chọn tủ nguồn --</option>
+                                        <% if (typeof danhSachSplitterCap1 !=='undefined' ) { %>
+                                            <% danhSachSplitterCap1.forEach(function(sp) { %>
+                                                <option value="<%= sp._id %>"><%= sp.ten_splitter %> (<%= sp.sys_id %>)</option>
+                                            <% }); %>
+                                        <% } %>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer bg-light">
+                                <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Hủy</button>
+                                <button type="submit" class="btn btn-warning text-dark fw-bold shadow-sm"><i class="bi bi-floppy"></i> Cập nhật Tủ</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
             </main>
+
+                <div class="modal fade" id="modalPickLocation" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title fw-bold"><i class="bi bi-geo-alt"></i> CHỌN VỊ TRÍ KHÁCH HÀNG</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-0">
+                            <div id="map-picker"></div>
+                        </div>
+                        <div class="modal-footer bg-light d-flex justify-content-between">
+                            <div>
+                                <span class="badge bg-dark">Vĩ độ: <span id="display-lat">0</span></span>
+                                <span class="badge bg-dark">Kinh độ: <span id="display-lng">0</span></span>
+                            </div>
+                            <div>
+                                <!-- <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Hủy</button> -->
+                                <button type="button" class="btn btn-secondary fw-bold" data-bs-target="#modalThemSplitter" data-bs-toggle="modal">Hủy</button>
+                                <button type="button" class="btn btn-primary fw-bold" onclick="xacNhanToaDo()">Xác nhận vị trí</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         
                 <script>
                     function kiemTraLoaiSplitter() {
@@ -196,5 +296,139 @@
                             khungCha.classList.add('d-none');
                         }
                     }
-                </script>
- 
+
+                        let pickerMap;
+    let tempMarker;
+
+    const modalEl = document.getElementById('modalPickLocation');
+
+    // Lắng nghe sự kiện Modal MỞ LÊN
+    modalEl.addEventListener('shown.bs.modal', function () {      
+        
+        if (!pickerMap) {      
+            try {
+                pickerMap = L.map('map-picker').setView([10.37, 105.43], 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(pickerMap);
+              
+                pickerMap.on('click', function(e) {
+                  
+                    updateMarker(e.latlng.lat, e.latlng.lng);
+                });
+            } catch (err) {
+                console.error("❌ [LỖI]: Không thể khởi tạo bản đồ:", err);
+            }
+        } else {
+       
+        }
+        
+        console.log("🔥 [DEBUG]: Gọi hàm invalidateSize() để sửa lỗi khung xám...");
+        setTimeout(() => {
+            pickerMap.invalidateSize();
+            console.log("🔥 [DEBUG]: Xong invalidateSize()!");
+        }, 100);
+    });
+
+    function updateMarker(lat, lng) {
+        if (tempMarker) pickerMap.removeLayer(tempMarker);
+        tempMarker = L.marker([lat, lng], { draggable: true }).addTo(pickerMap);
+        
+        document.getElementById('display-lat').innerText = lat.toFixed(6);
+        document.getElementById('display-lng').innerText = lng.toFixed(6);
+
+        tempMarker.on('dragend', function(event) {
+            const pos = event.target.getLatLng();
+            console.log("🔥 [DEBUG]: Kéo thả Marker đến:", pos);
+            updateMarker(pos.lat, pos.lng);
+        });
+    }
+
+    let isEditingMap = false;
+
+    // 1. Hàm nhận dữ liệu từ nút Sửa và đổ vào Form
+    function chuanBiSuaSplitter(id, ten, sys, loai, chaId, lat, lng) {
+        document.getElementById('formSuaSplitter').action = '/splitter/sua/' + id;
+        document.getElementById('sua_ten_splitter').value = ten;
+        document.getElementById('sua_sys_id').value = sys;
+        document.getElementById('sua_loai_splitter').value = loai;
+        document.getElementById('sua_vi_do').value = lat;
+        document.getElementById('sua_kinh_do').value = lng;
+
+        const khungCha = document.getElementById('sua_khung_splitter_cha');
+        if (loai === '1:16') {
+            khungCha.classList.remove('d-none');
+            document.getElementById('sua_splitter_cha_id').value = chaId;
+        } else {
+            khungCha.classList.add('d-none');
+            document.getElementById('sua_splitter_cha_id').value = '';
+        }
+    }
+
+    // 2. Ẩn/Hiện ô chọn Tủ Cấp 1 trong Form Sửa
+    function kiemTraLoaiSplitterSua() {
+        var loai = document.getElementById('sua_loai_splitter').value;
+        var khungCha = document.getElementById('sua_khung_splitter_cha');
+        if (loai === '1:16') {
+            khungCha.classList.remove('d-none');
+        } else {
+            khungCha.classList.add('d-none');
+        }
+    }
+
+    // 3. Thay thế/Nâng cấp hàm Xác nhận tọa độ cũ của bạn
+    function xacNhanToaDo() {
+        const lat = document.getElementById('display-lat').innerText;
+        const lng = document.getElementById('display-lng').innerText;
+        if (lat === "0") return alert("Vui lòng click chọn một điểm trên bản đồ!");
+        
+        // Trả tọa độ về đúng Form (Sửa hoặc Thêm)
+        if (isEditingMap) {
+            document.getElementById('sua_vi_do').value = lat;
+            document.getElementById('sua_kinh_do').value = lng;
+        } else {
+            document.getElementById('input_vi_do').value = lat;
+            document.getElementById('input_kinh_do').value = lng;
+        }
+        
+        // Đóng Modal Bản đồ
+        const mapModalEl = document.getElementById('modalPickLocation');
+        const mapModal = bootstrap.Modal.getInstance(mapModalEl);
+        mapModal.hide();
+
+        // Tự động mở lại đúng Form tương ứng
+        setTimeout(() => {
+            const targetModalId = isEditingMap ? 'modalSuaSplitter' : 'modalThemSplitter';
+            const formModalEl = document.getElementById(targetModalId);
+            let formModal = bootstrap.Modal.getInstance(formModalEl);
+            if (!formModal) formModal = new bootstrap.Modal(formModalEl);
+            formModal.show();
+        }, 400);
+    }
+
+        // Chức năng tự động bóc tách tọa độ từ đường dẫn Google Maps
+    const inputViDo = document.getElementById('input_vi_do');
+    
+    inputViDo.addEventListener('paste', function(e) {
+        // Lấy nội dung người dùng vừa dán vào ô
+        const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+        
+        // Kiểm tra xem đây có phải là đường dẫn Google Maps hay không
+        if (pastedText.includes('google.com/maps') || pastedText.includes('maps.app.goo.gl')) {
+            // Ngăn không cho dán nguyên đường dẫn dài ngoằng vào ô số
+            e.preventDefault();
+            
+            // Tìm kiếm chuỗi tọa độ (VD: @10.37,105.43)
+            const regex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+            const match = pastedText.match(regex);
+            
+            if (match) {
+                // Tự động phân bổ vào hai ô
+                document.getElementById('input_vi_do').value = match[1];
+                document.getElementById('input_kinh_do').value = match[2];
+                alert("Đã trích xuất tọa độ thành công từ đường dẫn!");
+            } else {
+                alert("Đường dẫn này không chứa tọa độ hiển thị rõ ràng. Hãy thử di chuyển bản đồ một chút và copy lại.");
+            }
+        }
+    });
+    
+</script>
