@@ -7,18 +7,7 @@ const hienThiLoiHeThong = require('./xuly_loi');
 const DiemKetNoi = require('../models/DiemKetNoi');
 
 //Cấu hình SQL Server
-const sqlConfig = {
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    server: process.env.DB_SERVER,
-    port: Number(process.env.DB_PORT),
-    options: {
-        encrypt: false,
-        trustServerCertificate: true
-    }
-};
-
+const { sqlConfig } = require('../database');
 const kiemTraDangNhap = (req, res, next) => {
     if (req.session.user) next(); else res.redirect('/dangnhap');
 };

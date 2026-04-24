@@ -1,10 +1,11 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const session = require('express-session');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 //1. Cấu hình hệ thống và Session
 
@@ -25,16 +26,13 @@ app.use(session({
 
 //2. Kết nối MongoDB và khai báo Models
 
-const uri = 'mongodb+srv://sa:admin123@vnpt-mapping.ep8txj8.mongodb.net/VNPT_Mapping?appName=VNPT-Mapping';
-
-
-mongoose.connect(uri)
-    .then(() => console.log('Đã kết nối MongoDB!'))
-    .catch(err => console.log('Lỗi kết nối MongoDB:', err));
+const uri = process.env.MONGO_URI; 
+const { connectMongoDB } = require('./database');
+connectMongoDB();
 
 require('./models/Splitter');
 require('./models/DiemKetNoi');
-require('dotenv').config();
+
 
 //3. Khai báo Router
 //--- Hệ thống chung & Xác thực ---
