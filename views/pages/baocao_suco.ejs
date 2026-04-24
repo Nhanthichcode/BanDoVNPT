@@ -1,9 +1,6 @@
- 
     <title>
         <%= title %> - Hệ thống giám sát mạng lưới VNPT
-    </title>
-   
-   
+    </title>     
     <style>
         body {
             background-color: #f8f9fa;
@@ -21,12 +18,8 @@
             background-color: #f1f8ff;
             transition: 0.2s;
         }
-    </style>
- 
-
-     
-    
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 mb-5">              
+    </style>         
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-1">              
                 <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
                     <div>
                         <h3 class="text-danger fw-bold mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Báo cáo sự
@@ -59,7 +52,7 @@
 
                 <div class="card border-0 shadow-sm rounded-3">
                     <div class="card-body p-0">
-                        <div class="table-responsive">
+                        <div class="table-container-scroll">
                             <table class="table table-hover align-middle mb-0 text-center">
                                 <thead class="bg-light text-secondary">
                                     <tr>
@@ -425,11 +418,8 @@
                 </div>
             </div>
 
-        </main> 
- 
-               
-             
-                <script>
+    </main>             
+    <script>
                     //Hàm chuẩn bị cho Modal Lập báo cáo
                     function chuanBiLapBaoCao(id, tenKhachHang) {
                         document.getElementById('diem_ket_noi_id').value = id;
@@ -469,5 +459,4 @@
                             document.getElementById('panel_thong_tin_diem').style.display = 'none';
                         }
                     }
-                </script>
- 
+    </script>

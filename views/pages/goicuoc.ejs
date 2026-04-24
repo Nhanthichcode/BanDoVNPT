@@ -1,9 +1,7 @@
- 
     <title>
         <%= title %> - Hệ thống giám sát mạng lưới VNPT
     </title>
-     
-   
+
     <style>
         body {
             background-color: #f8f9fa;
@@ -33,8 +31,8 @@
             font-size: 1.4rem;
         }
     </style>
- 
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 mb-5">
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-3">
 
                 <div class="mb-4 border-bottom pb-3">
                     <div class="text-center mb-4 mt-2">
@@ -45,7 +43,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div style="width: 250px;">
                             <select class="form-select border-primary text-primary fw-bold shadow-sm"
-                                onchange="window.location.href='/quanly/goicuoc?loai=' + encodeURIComponent(this.value)">
+                                onchange="window.location.href='/goicuoc?loai=' + encodeURIComponent(this.value)">
                                 <option value="Tất cả" <%=loaiHienTai==='Tất cả' ? 'selected' : '' %>>Tất cả gói cước
                                 </option>
                                 <option value="Hộ gia đình" <%=loaiHienTai==='Hộ gia đình' ? 'selected' : '' %>>Hộ gia
@@ -75,7 +73,7 @@
                                 <button type="button" class="btn-close btn-close-white"
                                     data-bs-dismiss="modal"></button>
                             </div>
-                            <form action="/quanly/goicuoc/them" method="POST">
+                            <form action="/goicuoc/them" method="POST">
                                 <div class="modal-body p-4">
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">Tên gói cước</label>
@@ -173,19 +171,19 @@
                             <ul class="pagination justify-content-center shadow-sm" style="border-radius: 8px;">
                                 <li class="page-item <%= currentPage == 1 ? 'disabled' : '' %>">
                                     <a class="page-link"
-                                        href="/quanly/goicuoc?page=<%= parseInt(currentPage) - 1 %><%= queryLoai %>">Trước</a>
+                                        href="/goicuoc?page=<%= parseInt(currentPage) - 1 %><%= queryLoai %>">Trước</a>
                                 </li>
                                 <% for(let i=1; i <=totalPages; i++) { %>
                                     <li class="page-item <%= currentPage == i ? 'active' : '' %>">
                                         <a class="page-link <%= currentPage == i ? 'bg-vnpt border-vnpt text-white fw-bold' : 'text-primary' %>"
-                                            href="/quanly/goicuoc?page=<%= i %><%= queryLoai %>">
+                                            href="/goicuoc?page=<%= i %><%= queryLoai %>">
                                             <%= i %>
                                         </a>
                                     </li>
                                     <% } %>
                                         <li class="page-item <%= currentPage == totalPages ? 'disabled' : '' %>">
                                             <a class="page-link"
-                                                href="/quanly/goicuoc?page=<%= parseInt(currentPage) + 1 %><%= queryLoai %>">Sau</a>
+                                                href="/goicuoc?page=<%= parseInt(currentPage) + 1 %><%= queryLoai %>">Sau</a>
                                         </li>
                             </ul>
                         </nav>
@@ -196,7 +194,7 @@
             <div class="modal fade" id="modalXoaGoiCuoc" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content rounded-4 border-0 shadow-lg">
-                        <form action="/quanly/goicuoc/xoa" method="POST" onsubmit="return kiemTraXoa()">
+                        <form action="/goicuoc/xoa" method="POST" onsubmit="return kiemTraXoa()">
                             <div class="modal-header bg-danger text-white py-3">
                                 <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> XÁC NHẬN
                                     XÓA GÓI CƯỚC</h5>
@@ -231,7 +229,7 @@
                     </div>
                 </div>
             </main>            
- 
+
             <script>
                 function chuanBiXoaGoiCuoc(id, tenGoi) {
                     document.getElementById('hien_thi_ten_goi_xoa').innerText = tenGoi;
@@ -254,4 +252,3 @@
                     return true;
                 }
             </script>         
- 

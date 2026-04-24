@@ -4,7 +4,7 @@
         .bg-vnpt { background-color: #0072BC !important; }
     </style>
  
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 mb-5">
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-3">
                 <div class="container" style="max-width: 800px;">
         <div class="card border-0 shadow rounded-4 overflow-hidden">
             <div class="card-header bg-vnpt text-white py-3">
@@ -16,7 +16,7 @@
                     <i class="bi bi-info-circle-fill"></i> Đang chỉnh sửa thông tin cho tài khoản: <strong><%= taiKhoanSua.ten_dang_nhap %></strong>
                 </div>
 
-                <form action="/quanly/taikhoan/sua_xuly" method="POST">
+                <form action="/taikhoan/sua" method="POST">
                     <input type="hidden" name="ten_dang_nhap" value="<%= taiKhoanSua.ten_dang_nhap %>">
 
                     <div class="row g-4">
@@ -52,7 +52,7 @@
                     </div>
 
                     <div class="d-flex justify-content-end mt-5 pt-3 border-top">
-                        <a href="/quanly/taikhoan" class="btn btn-outline-secondary me-2 fw-bold px-4 rounded-pill shadow-sm">
+                        <a href="/taikhoan" class="btn btn-outline-secondary me-2 fw-bold px-4 rounded-pill shadow-sm">
                             <i class="bi bi-x-circle"></i> Hủy
                         </a>
                         <button type="submit" class="btn btn-primary fw-bold px-4 rounded-pill shadow-sm">

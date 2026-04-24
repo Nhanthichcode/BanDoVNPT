@@ -29,9 +29,9 @@ app.use(session({
 // Middleware gán user vào res.locals
 app.use((req, res, next) => {
   // Nếu bạn dùng session để lưu user
-  if (req.session && req.session.user) {
+    if (req.session && req.session.user) {
     res.locals.user = req.session.user;
-  } else {
+    } else {
     res.locals.user = null;  // hoặc {} để tránh lỗi
     }
 next();
@@ -58,47 +58,25 @@ require('./models/DiemKetNoi');
 //3. Khai báo Router
 //--- Hệ thống chung & Xác thực ---
 const indexRouter = require('./routes/index');
-const dangnhapRouter = require('./routes/dangnhap');
-const dangnhapXulyRouter = require('./routes/dangnhap_xuly');
-const dangxuatXulyRouter = require('./routes/dangxuat_xuly');
+const authRouter = require('./routes/auth');
 
 //--- Hồ sơ cá nhân ---
 const taikhoanRouter = require('./routes/taikhoan');
-const capnhatTaikhoanRouter = require('./routes/capnhat_taikhoan');
-const capnhatTaikhoanXulyRouter = require('./routes/capnhat_taikhoan_xuly');
-const matkhauDoiRouter = require('./routes/matkhau_doi');
-const matkhauDoiXulyRouter = require('./routes/matkhau_doi_xuly');
-
-//--- Quản trị: Người dùng ---
-const quanlyNguoiDungRouter = require('./routes/quanly_nguoidung');
-const quanlyThemNguoiDungRouter = require('./routes/quanly_them_nguoidung');
-const quanlyThemNguoiDungXulyRouter = require('./routes/quanly_them_nguoidung_xuly');
-const quanlyKhoaTaiKhoanXulyRouter = require('./routes/quanly_khoa_taikhoan_xuly');
-const quanlyMoKhoaTaiKhoanXulyRouter = require('./routes/quanly_mokhoa_taikhoan_xuly');
-const quanlyDatLaiMatKhauXulyRouter = require('./routes/quanly_datlai_matkhau_xuly');
-const quanlyChiTietNguoiDungRouter = require('./routes/quanly_chitiet_nguoidung');
-const quanlyChiTietNguoiDungXulyRouter = require('./routes/quanly_chitiet_nguoidung_xuly');
-const quanlyCapNhatNguoiDungRouter = require('./routes/quanly_capnhat_nguoidung');
-const quanlyCapNhatNguoiDungXulyRouter = require('./routes/quanly_capnhat_nguoidung_xuly');
 
 //--- Quản trị: Gói cước ---
 const goicuocRouter = require('./routes/goicuoc');
-const goicuocThemXulyRouter = require('./routes/goicuoc_them_xuly');
-const goicuocXoaXulyRouter = require('./routes/goicuoc_xoa_xuly');
+
 
 //--- Quản trị: Tủ Splitter ---
 const splitterRouter = require('./routes/splitter');
-const splitterThemXulyRouter = require('./routes/splitter_them_xuly');
 
 //--- Quản trị: Điểm kết nối ---
-const vitriRouter = require('./routes/vitri');
-const vitriThemXulyRouter = require('./routes/vitri_them_xuly');
+const diemketnoiRouter = require('./routes/diemketnoi');
+
 // --- Báo cáo và giám sát ---
-const baocaoSucoRouter = require('./routes/baocao_suco');
-const baocaoLapXulyRouter = require('./routes/baocao_lap_xuly');
-const baocaoHopDongXulyRouter = require('./routes/baocao_hopdong_xuly');
-const baocaoLichSuRouter = require('./routes/baocao_lichsu');
-const baocaoCapNhatXulyRouter = require('./routes/baocao_capnhat_xuly');
+const baocaoRouter = require('./routes/baocao');
+
+const { kiemTraDangNhap } = require('./middleware/auth');
 
 // --- Kiểm soát phân quyền ---
 const kiemTraQuyenQuanTri = (req, res, next) => {
@@ -113,51 +91,22 @@ const kiemTraQuyenQuanTri = (req, res, next) => {
 //4. Khai báo tiền tố cho đường dẫn
 //--- Hệ thống chung và Xác thực ---
 app.use('/', indexRouter);
-app.use('/', dangnhapRouter);
-app.use('/', dangnhapXulyRouter);
-app.use('/', dangxuatXulyRouter);
-
-//--- Hồ sơ cá nhân ---
-app.use('/taikhoan', taikhoanRouter);
-app.use('/taikhoan', capnhatTaikhoanRouter);
-app.use('/taikhoan', capnhatTaikhoanXulyRouter);
-app.use('/taikhoan', matkhauDoiRouter);
-app.use('/taikhoan', matkhauDoiXulyRouter);
+app.use('/', authRouter);
 
 //Kiểm tra quyền quản trị trước khi vào các route quản lý
-app.use('/quanly', kiemTraQuyenQuanTri);
-
-//--- Quản trị: Người dùng ---
-app.use('/quanly/taikhoan', quanlyNguoiDungRouter);
-app.use('/quanly/taikhoan', quanlyThemNguoiDungRouter);
-app.use('/quanly/taikhoan', quanlyThemNguoiDungXulyRouter);
-app.use('/quanly/taikhoan', quanlyKhoaTaiKhoanXulyRouter);
-app.use('/quanly/taikhoan', quanlyMoKhoaTaiKhoanXulyRouter);
-app.use('/quanly/taikhoan', quanlyDatLaiMatKhauXulyRouter);
-app.use('/quanly/taikhoan', quanlyChiTietNguoiDungRouter);
-app.use('/quanly/taikhoan', quanlyChiTietNguoiDungXulyRouter);
-app.use('/quanly/taikhoan', quanlyCapNhatNguoiDungRouter);
-app.use('/quanly/taikhoan', quanlyCapNhatNguoiDungXulyRouter);
-
-//--- Quản trị: Gói cước ---
-app.use('/quanly/goicuoc', goicuocRouter);
-app.use('/quanly/goicuoc', goicuocThemXulyRouter);
-app.use('/quanly/goicuoc', goicuocXoaXulyRouter);
+app.use('/taikhoan', kiemTraDangNhap, taikhoanRouter);
 
 //--- Quản trị: Tủ Splitter ---
-app.use('/quanly/splitter', splitterRouter);
-app.use('/quanly/splitter', splitterThemXulyRouter);
+app.use('/splitter', splitterRouter);
+
+//--- Quản trị: Gói cước ---
+app.use('/goicuoc', goicuocRouter);
 
 //--- Quản trị: Điểm kết nối ---
-app.use('/quanly/vitri', vitriRouter);
-app.use('/quanly/vitri', vitriThemXulyRouter);
+app.use('/diemketnoi', diemketnoiRouter);
 
 // --- Báo cáo và giám sát ---
-app.use('/baocao', baocaoSucoRouter);
-app.use('/baocao', baocaoLapXulyRouter);
-app.use('/baocao', baocaoHopDongXulyRouter);
-app.use('/baocao', baocaoLichSuRouter);
-app.use('/baocao', baocaoCapNhatXulyRouter);
+app.use('/baocao', baocaoRouter);
 
 //5. Khởi chạy Server
 app.listen(port, () => {

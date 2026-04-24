@@ -7,17 +7,6 @@
         .stat-card:hover { transform: translateY(-3px); }
         .icon-box { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
         
-        /* Hiệu ứng chớp nháy cho Dấu chấm than đỏ */
-        @keyframes pulse-danger {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
-            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
-        }
-        .marker-danger-icon {
-            background-color: #dc3545; color: white; border-radius: 50%; border: 2px solid white;
-            display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px;
-            animation: pulse-danger 1.5s infinite;
-        }
 
         /* Định dạng dropdown list mượt mà */
         /* Tìm và thay thế đoạn này trong thẻ <style> */
@@ -31,11 +20,51 @@
 .dropdown-menu-list::-webkit-scrollbar { width: 6px; }
 .dropdown-menu-list::-webkit-scrollbar-thumb { background-color: #adb5bd; border-radius: 10px; }
         .leaflet-container {z-index: 1 !important;}
-    </style>
+  
+  /* Tạo hiệu ứng phát sáng cho đường trục (Trunk line) */
+.trunk-line-glow {
+    filter: drop-shadow(0 0 3px rgba(0,0,0,0.5));
+}
+
+/* Hiệu ứng đường nhánh trông mềm mại hơn */
+.dist-line-style {
+    stroke-linecap: round;
+}
+
+/* Bảng chú thích (Legend) nằm trên bản đồ */
+.map-legend {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    line-height: 1.5;
+    font-size: 12px;
+}
+.legend-item { display: flex; align-items: center; margin-bottom: 5px; }
+.legend-color { width: 20px; height: 10px; margin-right: 8px; border-radius: 2px; }
+
+.topo-node {
+            background-color: #212529; /* Nền đen xám đậm */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        
+        /* Viền đứt khúc và kích thước theo cấp độ */
+        .node-tucap1 { border: 3px dashed #fd7e14; width: 44px !important; height: 44px !important; }
+        .node-tucap2 { border: 3px dashed #0d6efd; width: 34px !important; height: 34px !important; }
+        
+        /* Trạng thái khách hàng */
+        .node-kh-xanh { border: 3px dashed #198754; width: 28px !important; height: 28px !important; }
+        .node-kh-do { border: 3px dashed #dc3545; width: 28px !important; height: 28px !important; animation: pulse-danger 1.5s infinite; }
+        .node-kh-xam { border: 3px dashed #6c757d; width: 28px !important; height: 28px !important; }
+</style>
 
 
  
-<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 mb-5">
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-3">
    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3 mb-4" style="position: relative; z-index: 10;">    
         <% if (user.vai_tro_id === 1 || user.vai_tro_id === 2) { %>
             <div class="col">
@@ -58,7 +87,7 @@
                         <div class="d-flex align-items-center">
                             <div class="icon-box bg-info bg-opacity-10 text-info me-3"><i class="bi bi-hdd-network-fill"></i></div>
                             <div>
-                                <h6 class="text-muted mb-1">Tủ cáp (Splitter) <i class="bi bi-caret-down-fill small"></i></h6>
+                                <h6 class="text-muted mb-1">Tủ cáp<i class="bi bi-caret-down-fill small"></i></h6>
                                 <h3 class="fw-bold mb-0 text-dark" id="splitter-count">0</h3>
                             </div>
                         </div>
@@ -120,7 +149,7 @@
                     <% if (resolvedList && resolvedList.length > 0) { %>
                         <% resolvedList.forEach(item => { %>
                             <li>
-                                <a class="dropdown-item py-2 px-3 rounded text-wrap" href="/baocao/lichsu">
+                                <a class="dropdown-item py-2 px-3 rounded text-wrap" href="/baocao/lich-su">
                                     <div class="fw-bold text-dark"><%= item.ten_khach_hang %></div>
                                     <div class="small text-success"><i class="bi bi-wrench"></i> <%= item.loai_su_co %></div>
                                     <div class="small text-muted" style="font-size: 0.7rem;"><%= new Date(item.thoi_gian_tao).toLocaleString('vi-VN') %></div>
@@ -146,240 +175,240 @@
                 </div>
             </main>
 
-
 <script>
-        // 1. Khai báo biến toàn cục
-        window.appMap = null;
-        window.appMarkers = {};
+    // 1. Khai báo biến toàn cục
+    window.appMap = null;
+    window.appMarkers = {};
+    window.appSplitterMarkers = {};
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const mapContainer = document.getElementById('map-dashboard');
+    document.addEventListener('DOMContentLoaded', function() {
+        const mapContainer = document.getElementById('map-dashboard');
 
-            // Xóa bản đồ cũ nếu có để tránh lỗi đè lặp (gây liệt chuột)
-            if (window.appMap !== null) {
-                window.appMap.remove();
-                window.appMap = null;
-            }
-            if (mapContainer && mapContainer._leaflet_id) {
-                mapContainer._leaflet_id = null;
-            }
+        if (window.appMap !== null) {
+            window.appMap.remove();
+            window.appMap = null;
+        }
+        if (mapContainer && mapContainer._leaflet_id) {
+            mapContainer._leaflet_id = null;
+        }
 
-            try {
-                // Khởi tạo bản đồ
-                window.appMap = L.map('map-dashboard').setView([10.37, 105.43], 14);
+        try {
+            window.appMap = L.map('map-dashboard').setView([10.37, 105.43], 14);
 
-                // CẤU HÌNH BỘ NHỚ ĐỆM (CACHE TỐI ƯU)
-               L.tileLayer('http://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-                    maxZoom: 20,
-                    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-                    attribution: '© Google Maps'
-                }).addTo(window.appMap);
-            } catch (e) {
-                console.error("Lỗi khi tạo bản đồ:", e);
-            }
+            L.tileLayer('http://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+                maxZoom: 20,
+                minZoom: 6,
+                noWrap: true,
+                bounds: [[8.0, 102.0], [24.0, 110.0]],
+                subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                attribution: '© Google Maps'
+            }).addTo(window.appMap);
 
-            function getMarkerColor(mau_sac) {
-                if (mau_sac === 'Đỏ') return '#dc3545';
-                if (mau_sac === 'Xám') return '#6c757d';
-                return '#198754'; 
-            }
+            window.appMap.setMaxBounds([[5.0, 95.0], [25.0, 115.0]]);
+        } catch (e) {
+            console.error("Lỗi khi tạo bản đồ:", e);
+        }
 
-           // 2. TẢI DỮ LIỆU & LỌC TỦ CÁP (CẤP 1 & CẤP 2)
-            window.appSplitterMarkers = {}; 
+        // 2. TẢI DỮ LIỆU ĐỒNG THỜI
+        Promise.all([
+            fetch('/api/diem-ket-noi').then(res => res.json()),
+            fetch('/api/splitters').then(res => res.json())
+        ])
+        .then(([khachHangData, splitterData]) => {
+            const uniqueSplitters = {}; 
+            const uniqueSplittersCap1 = {}; 
 
-            fetch('/api/diem-ket-noi')
-                .then(res => res.json())
-                .then(data => {
-                    const mapContainer = document.getElementById('map-dashboard');
-                    if (data.length === 0) {
-                        mapContainer.innerHTML = '<div class="alert alert-info m-3">Chưa có dữ liệu điểm kết nối.</div>';
-                        return;
-                    }
+            // --- BƯỚC A: VẼ HẠ TẦNG TỦ CÁP ---
+            if (splitterData && splitterData.length > 0) {
+                splitterData.forEach(sp => {
+                    if (sp.vi_tri && sp.vi_tri.coordinates) {
+                        const [spLng, spLat] = sp.vi_tri.coordinates;
+                        const spId = String(sp._id).toLowerCase().trim();
 
-                    const uniqueSplitters = {}; // Lưu Tủ cấp 2
-                    const uniqueSplittersCap1 = {}; // Lưu Tủ cấp 1 (Tủ cha)
+                        if (sp.loai_splitter === '1:4') {
+                            uniqueSplittersCap1[spId] = sp;
+                            const iconTu1 = L.divIcon({
+                                className: 'topo-node node-tucap1',
+                                html: '<i class="bi bi-hdd-rack-fill fs-5" style="color: #fd7e14"></i>',
+                                iconSize: [44, 44], iconAnchor: [22, 22]
+                            });
+                            const sp1Marker = L.marker([spLat, spLng], { icon: iconTu1 }).addTo(window.appMap);
 
-                    data.forEach(diem => {
-                        // --- A. XỬ LÝ KHÁCH HÀNG ---
-                        if (diem.vi_tri && diem.vi_tri.coordinates) {
-                            const [lng, lat] = diem.vi_tri.coordinates;
-                            const color = getMarkerColor(diem.trang_thai_ket_noi.mau_sac);
-                            let marker;
+                            sp1Marker.bindPopup(`
+                                <div style="min-width: 170px; text-align: center;">
+                                    <h6 class="text-warning fw-bold mb-2 border-bottom pb-2"><i class="bi bi-hdd-rack-fill"></i> ${sp.ten_splitter}</h6>
+                                    <span class="badge bg-dark text-white mb-3 px-3 py-2 rounded-pill shadow-sm">TỦ CẤP 1 | ${sp.sys_id || 'N/A'}</span>
+                                    <a href="/splitter" class="btn btn-sm btn-outline-warning text-dark w-100 fw-bold shadow-sm rounded-pill">
+                                        <i class="bi bi-pencil-square"></i> Quản lý / Sửa
+                                    </a>
+                                </div>
+                            `);
+                            window.appSplitterMarkers[spId] = sp1Marker;
+                        } else {
+                            uniqueSplitters[spId] = sp;
+                            const iconTu2 = L.divIcon({
+                                className: 'topo-node node-tucap2',
+                                html: '<i class="bi bi-router-fill" style="color: #0d6efd"></i>',
+                                iconSize: [34, 34], iconAnchor: [17, 17]
+                            });
+                            const sp2Marker = L.marker([spLat, spLng], { icon: iconTu2 }).addTo(window.appMap);
+                            
+                            sp2Marker.bindPopup(`
+                                <div style="min-width: 170px; text-align: center;">
+                                    <h6 class="text-info fw-bold mb-2 border-bottom pb-2"><i class="bi bi-router-fill"></i> ${sp.ten_splitter}</h6>
+                                    <span class="badge bg-light text-dark border mb-3 px-3 py-2 rounded-pill shadow-sm">TỦ CẤP 2 | ${sp.sys_id || 'N/A'}</span>
+                                    <a href="/splitter" class="btn btn-sm btn-outline-info text-dark w-100 fw-bold shadow-sm rounded-pill">
+                                        <i class="bi bi-pencil-square"></i> Quản lý / Sửa
+                                    </a>
+                                </div>
+                            `);
+                            window.appSplitterMarkers[spId] = sp2Marker;
 
-                            if (diem.trang_thai_ket_noi.mau_sac === 'Đỏ') {
-                                const dangerIcon = L.divIcon({
-                                    className: 'custom-icon', html: '<div class="marker-danger-icon">!</div>',
-                                    iconSize: [24, 24], iconAnchor: [12, 12]
-                                });
-                                marker = L.marker([lat, lng], { icon: dangerIcon }).addTo(window.appMap);
-                            } else {
-                                marker = L.circleMarker([lat, lng], {
-                                    radius: 7, fillColor: color, color: "#fff", weight: 2, opacity: 1, fillOpacity: 0.9
-                                }).addTo(window.appMap);
-                            }
-
-                            const markerId = String(diem._id).toLowerCase().trim();
-                            window.appMarkers[markerId] = marker;
-
-                            let popupContent = `
-                                <div style="font-family: sans-serif; min-width: 200px;">
-                                    <strong class="text-primary">${diem.ten_khach_hang}</strong><br>
-                                    <small>${diem.dia_chi}</small><br>
-                                    <b>Trạng thái:</b> ${diem.trang_thai_ket_noi.mau_sac === 'Xanh' ? 'Ổn định' : '<span class="text-danger fw-bold">Gặp sự cố</span>'}
-                            `;
-                            if (diem.trang_thai_ket_noi.mau_sac !== 'Xanh') {
-                                popupContent += `<hr class="my-2"><a href="/baocao/suco" class="btn btn-sm btn-danger w-100 fw-bold text-white"><i class="bi bi-tools"></i> Xử lý sự cố ngay</a>`;
-                            }
-                            popupContent += `</div>`;
-                            marker.bindPopup(popupContent);
-
-                            // --- B. XỬ LÝ TỦ CÁP CẤP 2 (Khách hàng cắm vào) ---
-                            if (diem.splitter_id && diem.splitter_id.vi_tri && diem.splitter_id.vi_tri.coordinates) {
-                                const sp2Id = diem.splitter_id._id;
-                                const [sp2Lng, sp2Lat] = diem.splitter_id.vi_tri.coordinates;
-
-                                // Vẽ dây nối từ khách hàng -> Tủ cấp 2 (Nét đứt, mỏng)
-                               L.polyline([ [lat, lng], [sp2Lat, sp2Lng] ], {
-                                            color: color, 
-                                            weight: 4,          /* Đậm hơn */
-                                            opacity: 0.9,       /* Rõ nét hơn */
-                                            dashArray: '5, 4'   /* Nét đứt to và thưa hơn một chút */
-                                        }).addTo(window.appMap);
-
-                                // Kiểm tra và Vẽ Tủ Cấp 2
-                                if (!uniqueSplitters[sp2Id]) {
-                                    uniqueSplitters[sp2Id] = diem.splitter_id; // Lưu vào danh sách
-
-                                    // Điểm tủ cấp 2 (Màu xanh dương)
-                                    const sp2Marker = L.circleMarker([sp2Lat, sp2Lng], {
-                                        radius: 6, fillColor: '#0072BC', color: '#fff', weight: 2, fillOpacity: 1
+                            if (sp.splitter_cha_id) {
+                                const spCha = splitterData.find(s => String(s._id) === String(sp.splitter_cha_id));
+                                if (spCha && spCha.vi_tri && spCha.vi_tri.coordinates) {
+                                    L.polyline([ [spCha.vi_tri.coordinates[1], spCha.vi_tri.coordinates[0]], [spLat, spLng] ], {
+                                        color: '#fd7e14', weight: 4, dashArray: '16, 25', opacity: 0.9, className: 'trunk-line-glow'
                                     }).addTo(window.appMap);
-                                    
-                                    sp2Marker.bindPopup(`
-                                        <div style="font-family: sans-serif; min-width: 150px; text-align: center;">
-                                            <h6 class="text-info fw-bold mb-1"><i class="bi bi-hdd-network"></i> ${diem.splitter_id.ten_splitter}</h6>
-                                            <small class="text-muted border bg-light px-2 py-1 rounded d-block mb-1">Cấp 2 | SysID: ${diem.splitter_id.sys_id || 'N/A'}</small>
-                                        </div>
-                                    `);
-                                    
-                                    window.appSplitterMarkers[String(sp2Id).toLowerCase().trim()] = sp2Marker;
-
-                                    // --- C. XỬ LÝ TỦ CÁP CẤP 1 (Tủ Cha) ---
-                                    if (diem.splitter_id.splitter_cha_id && diem.splitter_id.splitter_cha_id.vi_tri && diem.splitter_id.splitter_cha_id.vi_tri.coordinates) {
-                                        const sp1 = diem.splitter_id.splitter_cha_id;
-                                        const sp1Id = sp1._id;
-                                        const [sp1Lng, sp1Lat] = sp1.vi_tri.coordinates;
-
-                                        // Vẽ cáp trục chính (Feeder cable) từ Tủ 1 -> Tủ 2 (Nét liền, to, màu đen/xám đậm)                                     
-                                        L.polyline([ [sp1Lat, sp1Lng], [sp2Lat, sp2Lng] ], {
-                                            color: '#212529',   /* Đen đậm */
-                                            weight: 7,          /* Cực đậm để phân biệt dây trục chính */
-                                            opacity: 1.0
-                                        }).addTo(window.appMap);                        
-
-                                        // Kiểm tra và Vẽ Tủ Cấp 1
-                                        if (!uniqueSplittersCap1[sp1Id]) {
-                                            uniqueSplittersCap1[sp1Id] = sp1;
-
-                                            // Điểm tủ cấp 1 (Màu Cam to hơn)
-                                            const sp1Marker = L.circleMarker([sp1Lat, sp1Lng], {
-                                                radius: 9, fillColor: '#fd7e14', color: '#fff', weight: 3, fillOpacity: 1
-                                            }).addTo(window.appMap);
-
-                                            sp1Marker.bindPopup(`
-                                                <div style="font-family: sans-serif; min-width: 150px; text-align: center;">
-                                                    <h6 class="text-warning fw-bold mb-1"><i class="bi bi-hdd-rack-fill"></i> ${sp1.ten_splitter}</h6>
-                                                    <small class="text-white border bg-dark px-2 py-1 rounded d-block mb-1">TỦ CẤP 1 | ${sp1.sys_id || 'N/A'}</small>
-                                                </div>
-                                            `);
-
-                                            window.appSplitterMarkers[String(sp1Id).toLowerCase().trim()] = sp1Marker;
-                                        }
-                                    }
                                 }
                             }
                         }
-                    });
+                    }
+                });
+            }
 
-                    // --- D. ĐỔ DỮ LIỆU TẤT CẢ TỦ CÁP VÀO DROPDOWN ---
-                    const splitterListEl = document.getElementById('splitter-dropdown-list');
-                    const splitterCountEl = document.getElementById('splitter-count');
-                    
-                    // Gộp mảng Tủ 1 và Tủ 2 lại để hiện lên Menu
-                    const splArr2 = Object.values(uniqueSplitters);
-                    const splArr1 = Object.values(uniqueSplittersCap1);
-                    const allSplitters = [...splArr1, ...splArr2];
+            // ==========================================
+            // BƯỚC B: VẼ KHÁCH HÀNG & ĐƯỜNG DÂY SỰ CỐ
+            // ==========================================
+            if (khachHangData && khachHangData.length > 0) {
+                khachHangData.forEach(diem => {
+                    if (diem.vi_tri && diem.vi_tri.coordinates) {
+                        const [lng, lat] = diem.vi_tri.coordinates;
+                        const isError = diem.trang_thai_ket_noi.mau_sac === 'Đỏ';
+                        
+                        let iconClass = isError ? 'node-kh-do' : (diem.trang_thai_ket_noi.mau_sac === 'Xám' ? 'node-kh-xam' : 'node-kh-xanh');
+                        let iconColor = isError ? '#dc3545' : (diem.trang_thai_ket_noi.mau_sac === 'Xanh' ? '#198754' : '#6c757d');
 
-                    if(splitterCountEl) splitterCountEl.innerText = allSplitters.length;
+                        const iconKH = L.divIcon({
+                            className: `topo-node ${iconClass}`,
+                            html: `<i class="bi bi-house-door-fill" style="color: ${iconColor}"></i>`,
+                            iconSize: [28, 28], iconAnchor: [14, 14]
+                        });
 
-                    if(splitterListEl) {
-                        if(allSplitters.length > 0) {
-                            splitterListEl.innerHTML = ''; // Xóa chữ Đang tải...
+                        let marker = L.marker([lat, lng], { icon: iconKH }).addTo(window.appMap);
+                        window.appMarkers[String(diem._id).toLowerCase().trim()] = marker;
+
+                        // --- POPUP THÔNG TIN ---
+                        let popupContent = `
+                            <div style="min-width: 220px;">
+                                <div class="d-flex align-items-center mb-2 border-bottom pb-2">
+                                    <div class="bg-${isError ? 'danger' : 'success'} text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 36px; height: 36px; font-size: 16px;">
+                                        <i class="bi bi-house-door-fill"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold text-dark mb-0 text-wrap">${diem.ten_khach_hang}</h6>
+                                        <small class="text-${isError ? 'danger fw-bold' : 'success'}">${isError ? `Đang gặp sự cố` : 'Đang hoạt động'}</small>
+                                    </div>
+                                </div>
+                                <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-secondary"></i> ${diem.dia_chi}</p>
+                                <div class="d-flex gap-2">
+                                    <a href="/diemketnoi/sua/${diem._id}" class="btn btn-sm btn-outline-secondary w-100 fw-bold rounded-pill">Sửa KH</a>
+                                    ${isError ? `<a href="/baocao/su-co" class="btn btn-sm btn-danger w-100 fw-bold rounded-pill">Xử lý</a>` : ''}
+                                </div>
+                            </div>`;
+                        marker.bindPopup(popupContent);
+
+                        // --- LOGIC ĐỔI MÀU ĐƯỜNG DẪN KHI CÓ SỰ CỐ ---
+                        if (diem.splitter_id && diem.splitter_id.vi_tri) {
+                            const [sp2Lng, sp2Lat] = diem.splitter_id.vi_tri.coordinates;
                             
-                            // Nhóm 1: In tủ cấp 1 trước (Màu cam)
-                            if(splArr1.length > 0) {
-                                splitterListEl.innerHTML += `<li><h6 class="dropdown-header text-warning fw-bold px-2 border-bottom pb-2 mb-2"><i class="bi bi-hdd-rack-fill"></i> TỦ CHÍNH (CẤP 1)</h6></li>`;
-                                splArr1.forEach(sp => {
-                                    splitterListEl.innerHTML += `
-                                        <li>
-                                            <a class="dropdown-item py-2 px-3 rounded text-wrap bg-light border-bottom" href="javascript:void(0)" onclick="zoomToSplitter('${sp._id}')">
-                                                <div class="fw-bold text-dark">${sp.ten_splitter}</div>
-                                                <div class="small text-muted"><i class="bi bi-hash"></i> ${sp.sys_id || 'Đang cập nhật'}</div>
-                                            </a>
-                                        </li>
-                                    `;
-                                });
-                            }
-
-                            // Nhóm 2: In tủ cấp 2 sau (Màu xanh)
-                            if(splArr2.length > 0) {
-                                splitterListEl.innerHTML += `<li><h6 class="dropdown-header text-info fw-bold px-2 border-bottom pb-2 mt-2 mb-2"><i class="bi bi-hdd-network"></i> TỦ PHỤ (CẤP 2)</h6></li>`;
-                                splArr2.forEach(sp => {
-                                    splitterListEl.innerHTML += `
-                                        <li>
-                                            <a class="dropdown-item py-2 px-3 rounded text-wrap" href="javascript:void(0)" onclick="zoomToSplitter('${sp._id}')">
-                                                <div class="fw-bold text-dark">${sp.ten_splitter}</div>
-                                                <div class="small text-muted"><i class="bi bi-hash"></i> ${sp.sys_id || 'Đang cập nhật'}</div>
-                                            </a>
-                                        </li>
-                                    `;
-                                });
-                            }
-
-                        } else {
-                            splitterListEl.innerHTML = `<li><span class="dropdown-item text-muted small text-center">Chưa có tủ cáp nào trên bản đồ!</span></li>`;
+                            L.polyline([ [lat, lng], [sp2Lat, sp2Lng] ], {
+                                color: isError ? '#dc3545' : '#aea', // ĐỎ khi lỗi, XÁM khi thường
+                                weight: isError ? 5 : 3,               // Dày hơn khi lỗi
+                                opacity: isError ? 8.0 : 0.7,
+                                dashArray: isError ? '6, 15' : '6, 6', // Nét đứt thưa hơn khi lỗi
+                                lineCap: 'round'
+                            }).addTo(window.appMap);
                         }
                     }
-                })
-                .catch(err => console.error("Lỗi tải API:", err));
-});
-        // 3. HÀM ZOOM TO KHÁCH HÀNG (Cũ)
-        function zoomToMap(diemKetNoiId) {
-            const cleanId = String(diemKetNoiId).toLowerCase().trim();
-            const targetMarker = window.appMarkers[cleanId];
-            if (targetMarker) performFlyTo(targetMarker);
-            else alert("Không tìm thấy vị trí khách hàng này trên bản đồ.");
-        }
-
-        // 4. HÀM ZOOM TO TỦ CÁP (Mới)
-        function zoomToSplitter(splitterId) {
-            const cleanId = String(splitterId).toLowerCase().trim();
-            const targetMarker = window.appSplitterMarkers[cleanId];
-            if (targetMarker) performFlyTo(targetMarker);
-            else alert("Không tìm thấy tủ cáp này trên bản đồ.");
-        }
-
-        // HÀM BAY DÙNG CHUNG (Để code gọn gàng, tránh lặp lại)
-        function performFlyTo(markerObj) {
-            window.appMap.closePopup();
-            document.getElementById('map-dashboard').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => {
-                window.appMap.flyTo(markerObj.getLatLng(), 18, {
-                    animate: true, duration: 2.0, easeLinearity: 0.25
                 });
-                window.appMap.once('moveend', function() {
-                    markerObj.openPopup();
-                });
-            }, 400);
-        }    
+            }                        
+            
+            // ==========================================
+            // BƯỚC C: ĐỔ DỮ LIỆU VÀO MENU DROPDOWN TỦ CÁP
+            // ==========================================
+            const splitterListEl = document.getElementById('splitter-dropdown-list');
+            const splitterCountEl = document.getElementById('splitter-count');
+            
+            // Chuyển đối tượng thành mảng để xử lý
+            const splArr1 = Object.values(uniqueSplittersCap1);
+            const splArr2 = Object.values(uniqueSplitters);
+            const allSplitters = [...splArr1, ...splArr2];
+
+            // 1. Cập nhật số lượng tủ cáp lên nhãn hiển thị
+            if (splitterCountEl) {
+                splitterCountEl.innerText = allSplitters.length;
+            }
+
+            // 2. Đổ danh sách vào Dropdown
+            if (splitterListEl) {
+                splitterListEl.innerHTML = ''; // Xóa trắng nội dung cũ
+
+                if (allSplitters.length === 0) {
+                    splitterListEl.innerHTML = '<li><a class="dropdown-item disabled">Không có dữ liệu tủ</a></li>';
+                } else {
+                    // Thêm tiêu đề nhóm Tủ Cấp 1
+                    if (splArr1.length > 0) {
+                        splitterListEl.innerHTML += `<li><h6 class="dropdown-header text-warning"><i class="bi bi-hdd-rack-fill"></i> TỦ CẤP 1 (1:4)</h6></li>`;
+                        splArr1.forEach(sp => {
+                            splitterListEl.innerHTML += `
+                                <li>
+                                    <a class="dropdown-item d-flex justify-content-between align-items-center" href="javascript:void(0)" onclick="zoomToSplitter('${sp._id}')">
+                                        <span>${sp.ten_splitter}</span>
+                                        <small class="text-muted" style="font-size: 0.65rem;">${sp.sys_id || ''}</small>
+                                    </a>
+                                </li>`;
+                        });
+                    }
+
+                    // Thêm gạch ngang phân cách
+                    splitterListEl.innerHTML += `<li><hr class="dropdown-divider"></li>`;
+
+                    // Thêm tiêu đề nhóm Tủ Cấp 2
+                    if (splArr2.length > 0) {
+                        splitterListEl.innerHTML += `<li><h6 class="dropdown-header text-primary"><i class="bi bi-router-fill"></i> TỦ CẤP 2 (1:16)</h6></li>`;
+                        splArr2.forEach(sp => {
+                            splitterListEl.innerHTML += `
+                                <li>
+                                    <a class="dropdown-item d-flex justify-content-between align-items-center" href="javascript:void(0)" onclick="zoomToSplitter('${sp._id}')">
+                                        <span>${sp.ten_splitter}</span>
+                                        <small class="text-muted" style="font-size: 0.65rem;">${sp.sys_id || ''}</small>
+                                    </a>
+                                </li>`;
+                        });
+                    }
+                }
+            }
+        })
+        .catch(err => console.error("Lỗi tải API Bản đồ:", err));
+    });
+
+    function zoomToMap(id) {
+        const marker = window.appMarkers[String(id).toLowerCase().trim()];
+        if (marker) performFlyTo(marker);
+    }
+
+    function zoomToSplitter(id) {
+        const marker = window.appSplitterMarkers[String(id).toLowerCase().trim()];
+        if (marker) performFlyTo(marker);
+    }
+
+    function performFlyTo(markerObj) {
+        window.appMap.closePopup();
+        document.getElementById('map-dashboard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+            window.appMap.flyTo(markerObj.getLatLng(), 18, { animate: true, duration: 2.0 });
+            window.appMap.once('moveend', () => markerObj.openPopup());
+        }, 400);
+    }    
 </script>

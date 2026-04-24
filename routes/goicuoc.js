@@ -3,14 +3,8 @@ const router = express.Router();
 const sql = require('mssql');
 const hienThiLoiHeThong = require('./xuly_loi');
 const dbManager = require('../database');//thêm cái này
-// const sqlConfig = {
-//     user: 'sa', password: 'sql2019', database: 'VNPT_BanDo_Admin', server: 'localhost', port: 1433,
-//     options: { encrypt: false, trustServerCertificate: true }
-// };
+const {kiemTraDangNhap, kiemTraQuyenQuanTri} = require('../middleware/auth'); // Sử dụng middleware đã tạo
 
-const kiemTraDangNhap = (req, res, next) => {
-    if (req.session.user) next(); else res.redirect('/dangnhap');
-};
 
 //Route: Trang quản lý gói cước
 router.get('/', kiemTraDangNhap, async (req, res) => {
@@ -44,6 +38,42 @@ router.get('/', kiemTraDangNhap, async (req, res) => {
     }  catch (error) {
         console.error("Lỗi Server:", error);
         hienThiLoiHeThong(req, res);
+    }
+});
+
+//Route: Xử lý thêm gói cước mới
+router.post('/them', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, res) => {
+    try {
+        const { ten_goi_cuoc, loai_hinh_thue_bao } = req.body;
+        
+        const pool = await dbManager.getSQLPool();
+        await pool.request()
+            .input('ten', sql.NVarChar, ten_goi_cuoc)
+            .input('loai', sql.NVarChar, loai_hinh_thue_bao)
+            .query(`INSERT INTO GoiCuoc (ten_goi_cuoc, loai_hinh_thue_bao) VALUES (@ten, @loai)`);
+            
+        res.redirect('/goicuoc');
+    } catch (err) {
+        console.error("Lỗi thêm gói cước:", err);
+        hienThiLoiHeThong(req, res);
+    }
+});
+
+//Route: Xử lý xóa gói cước
+router.post('/xoa', kiemTraDangNhap, kiemTraQuyenQuanTri, async (req, res) => {
+    try {
+        const idCanXoa = req.body.id;
+
+        //Xóa gói cước khỏi Database
+        const pool = await dbManager.getSQLPool();
+        await pool.request()
+            .input('id', sql.Int, idCanXoa)
+            .query('DELETE FROM GoiCuoc WHERE id = @id');
+        res.redirect('/goicuoc');
+
+    } catch (error) {
+        console.error("Lỗi xóa gói cước:", error);
+        hienThiLoiHeThong(req, res, "Không thể xóa gói cước này vì có thể nó đang được sử dụng ở Điểm kết nối.");
     }
 });
 

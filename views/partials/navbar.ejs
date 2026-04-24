@@ -1,50 +1,64 @@
-<nav class="navbar navbar-expand-lg bg-vnpt navbar-dark shadow-sm">
+<nav class="navbar navbar-expand-lg bg-vnpt navbar-dark shadow-sm py-2">
     <div class="container-fluid px-4">
-        <a class="navbar-brand" href="/dashboard" title="Về trang chủ Dashboard">
+        <a class="navbar-brand d-flex align-items-center" href="/dashboard" title="Về trang chủ Dashboard">
             <img src="/images/Mini logo.png" alt="VNPT Logo" height="38" class="bg-white rounded-circle p-1 shadow-sm">
             <span class="ms-2 fw-bold d-none d-sm-inline">VNPT AN GIANG</span>
         </a>
         
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-               
-            </ul>
-<div class="d-none d-lg-flex align-items-center bg-light rounded-pill px-2 py-1 me-4 shadow-sm border">
-    <span class="text-muted small fw-bold me-2 ps-2"><i class="bi bi-display"></i> Giao diện:</span>
-    <button class="btn btn-sm btn-white rounded-circle border shadow-sm" onclick="scaleContent('out')" title="Thu nhỏ (-10%)"><i class="bi bi-dash"></i></button>
-    <span id="scale-level" class="mx-2 fw-bolder text-primary small" style="min-width: 45px; text-align: center;">100%</span>
-    <button class="btn btn-sm btn-white rounded-circle border shadow-sm" onclick="scaleContent('in')" title="Phóng to (+10%)"><i class="bi bi-plus"></i></button>
-    <button class="btn btn-sm btn-white rounded-circle border shadow-sm ms-1" onclick="scaleContent('reset')" title="Trở về Mặc định"><i class="bi bi-arrow-clockwise"></i></button>
-</div>
-            <ul class="navbar-nav ms-3 mb-2 mb-lg-0">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
+
+            <div class="d-flex align-items-center flex-shrink-0 bg-white rounded-pill px-3 py-1 me-3 shadow-sm border">
+                <span class="text-secondary small fw-bold me-2 ps-1 d-none d-xl-inline">
+                    <i class="bi bi-display"></i> Giao diện:
+                </span>
+                
+                <button class="btn btn-sm btn-light rounded-circle p-1 lh-1" onclick="scaleContent('out')" title="Thu nhỏ (-10%)">
+                    <i class="bi bi-dash fs-6"></i>
+                </button>
+                
+                <span id="scale-level" class="mx-2 fw-bolder text-primary small" style="min-width: 45px; text-align: center;">
+                    100%
+                </span>
+                
+                <button class="btn btn-sm btn-light rounded-circle p-1 lh-1" onclick="scaleContent('in')" title="Phóng to (+10%)">
+                    <i class="bi bi-plus fs-6"></i>
+                </button>
+
+                <div class="vr mx-2 text-secondary"></div> <button class="btn btn-sm btn-light text-danger rounded-circle p-1 lh-1" onclick="scaleContent('reset')" title="Trở về Mặc định">
+                    <i class="bi bi-arrow-clockwise fs-6"></i>
+                </button>
+            </div>
+
+            <ul class="navbar-nav mb-2 mb-lg-0">
                 <% if (typeof user !== 'undefined' && user) { %>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-white fw-bold" href="/#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle"></i> <%= user.ho_ten %>
+                        <a class="nav-link dropdown-toggle text-white fw-bold d-flex align-items-center px-2" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle fs-5 me-2"></i> <%= user.ho_ten %>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 rounded-3">
                             <li>
-                                <a class="dropdown-item py-2" href="/taikhoan/hoso">
-                                    <i class="bi bi-person-badge me-2"></i> Hồ sơ cá nhân
+                                <a class="dropdown-item py-2" href="/taikhoan/ho-so">
+                                    <i class="bi bi-person-vcard text-primary me-2"></i> Hồ sơ cá nhân
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item py-2" href="/taikhoan/capnhat">
-                                    <i class="bi bi-pencil-square me-2"></i> Cập nhật thông tin
+                                <a class="dropdown-item py-2" href="/taikhoan/cap-nhat">
+                                    <i class="bi bi-pencil-square text-success me-2"></i> Cập nhật thông tin
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item py-2" href="/taikhoan/matkhau_doi">
-                                    <i class="bi bi-key me-2"></i> Đổi mật khẩu
+                                <a class="dropdown-item py-2" href="/taikhoan/doi-mat-khau">
+                                    <i class="bi bi-shield-lock text-warning me-2"></i> Đổi mật khẩu
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item text-danger py-2" href="/dangxuat">
+                                <a class="dropdown-item text-danger fw-bold py-2" href="/dangxuat">
                                     <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
                                 </a>
                             </li>
@@ -53,7 +67,7 @@
                 <% } else { %>
                     <li class="nav-item">
                         <a href="/dangnhap" class="btn btn-light text-primary fw-bold px-4 rounded-pill shadow-sm">
-                            <i class="bi bi-box-arrow-in-right"></i> ĐĂNG NHẬP
+                            <i class="bi bi-box-arrow-in-right me-1"></i> ĐĂNG NHẬP
                         </a>
                     </li>
                 <% } %>
