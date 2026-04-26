@@ -32,8 +32,22 @@ app.use(flash());
 //2. Kết nối MongoDB và khai báo Models
 
 const uri = process.env.MONGO_URI; 
-const { connectMongoDB } = require('./database');
-connectMongoDB();
+const dbManager = require('./database');
+//2. Kết nối MongoDB và khai báo Models
+async function startDatabases() {
+    try {
+        await dbManager.connectMongo();
+        await dbManager.connectSQL();
+        
+        // Khai báo models SAU KHI Mongoose kết nối thành công
+        require('./models/Splitter');
+        require('./models/DiemKetNoi');
+    } catch (err) {
+        console.error('Không thể khởi động database. Dừng server!', err);
+        process.exit(1); // Dừng Node.js nếu DB chết
+    }
+}
+startDatabases();
 
 require('./models/Splitter');
 require('./models/DiemKetNoi');
