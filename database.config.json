@@ -4,7 +4,8 @@
       "server": "localhost",
       "database": "VNPT_BanDo_Admin",
       "user": "sa",
-      "password": "sql2019",
+      "password": "1", 
+      "_comment": "Đổi password thành '1' để phù hợp với cấu hình của Trí Nhàn",
       "options": {
         "instanceName": "SQLEXPRESS02",
         "encrypt": false,
@@ -21,7 +22,8 @@
       "server": "localhost",
       "database": "VNPT_BanDo_Admin",
       "user": "sa",
-      "password": "sql2019",
+        "password": "1", 
+      "_comment": "Đổi password thành '1' để phù hợp với cấu hình của Trí Nhàn",
       "options": {
         "instanceName": "SQLEXPRESS02",
         "encrypt": false,
