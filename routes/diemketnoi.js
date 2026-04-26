@@ -150,7 +150,7 @@ router.get('/sua/:id', kiemTraDangNhap, async (req, res) => {
     }
 });
 // Route: Xử lý cập nhật/sửa thông tin điểm kết nối (Update)
-router.post('/sua/:id', kiemTraDangNhap, async (req, res) => {
+router.put('/sua/:id', kiemTraDangNhap, async (req, res) => {
     try {
         const { id } = req.params;
         const {

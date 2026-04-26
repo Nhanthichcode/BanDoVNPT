@@ -57,11 +57,7 @@ router.post('/dangnhap', async (req, res) => {
             };
 
             // Chuyển hướng dựa theo vai trò
-            if (user.vai_tro_id === 1 || user.vai_tro_id === 2) {
-                res.redirect('/dashboard'); // Quản trị viên & Quản lý
-            } else {
-                res.redirect('/dashboard'); // Nhân viên hoặc người dùng bình thường
-            }
+           res.redirect('/');
 
         } else {
             // Đăng nhập thất bại

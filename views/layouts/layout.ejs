@@ -65,6 +65,13 @@
             font-size: 0.75rem; 
             border-top: 1px solid rgba(255,255,255,0.1);
         }
+
+         #map-picker { 
+            height: 500px; 
+            width: 100%; 
+            border-radius: 0 0 15px 15px;
+        }
+        .leaflet-container { z-index: 1 !important; }
     </style>
 
     <%- typeof stylesheet !== 'undefined' ? stylesheet : '' %>
@@ -86,31 +93,60 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
-       // 1. Khởi tạo: Ưu tiên lấy giá trị đã lưu trong localStorage, nếu không có thì mặc định là 1.0
-    let currentScale = parseFloat(localStorage.getItem('interfaceScale')) || 1.0;
+    // 1. Khai báo biến toàn cục
+    window.appMap = null;
+    window.appMarkers = {};
+    window.appSplitterMarkers = {};
 
-    // Hàm áp dụng tỷ lệ scale lên giao diện
+    // Biến cho modal picker
+    let pickerMap;
+    let tempMarker;
+    let isEditingMap = false;
+    let currentScale = parseFloat(localStorage.getItem('interfaceScale')) || 0.8;
+
+                    const mangGoiCuoc = <%- JSON.stringify(typeof danhSachGoiCuoc !== 'undefined' ? danhSachGoiCuoc : []) %>;
+
+                    function capNhatGoiCuoc() {
+                        const loaiHinh = document.getElementById('chon_loai_hinh').value;
+                        const selectGoiCuoc = document.getElementById('chon_goi_cuoc');
+                        selectGoiCuoc.innerHTML = '<option value="">-- Chọn gói cước --</option>';
+
+                        if (!loaiHinh) return;
+                        const danhSachLoc = mangGoiCuoc.filter(gc => gc.loai_hinh_thue_bao && gc.loai_hinh_thue_bao.includes(loaiHinh));
+
+                        danhSachLoc.forEach(gc => {
+                            const option = document.createElement('option');
+                            option.value = gc.id;
+                            option.textContent = gc.ten_goi_cuoc;
+                            selectGoiCuoc.appendChild(option);
+                        });
+                    }
+                
+
+    // ==========================================
+    // HÀM ÁP DỤNG SCALE GIAO DIỆN
+    // ==========================================
     function applyScale() {
-    const mainContent = document.querySelector('main');
-    if (!mainContent) return;
+        const mainContent = document.querySelector('main');
+        if (!mainContent) return;
 
-    mainContent.style.zoom = currentScale;
-    
-    const scaleDisplay = document.getElementById('scale-level');
-    if (scaleDisplay) {
-        scaleDisplay.innerText = Math.round(currentScale * 100) + '%';
+        mainContent.style.zoom = currentScale;
+        
+        const scaleDisplay = document.getElementById('scale-level');
+        if (scaleDisplay) {
+            scaleDisplay.innerText = Math.round(currentScale * 100) + '%';
+        }
+
+        // Ép bản đồ vẽ lại sau khi zoom
+        if (window.appMap) {
+            setTimeout(() => {
+                window.appMap.invalidateSize();
+            }, 300);
+        }
     }
 
-    // Quan trọng: Ép bản đồ vẽ lại để không bị lỗi vị trí
-    if (window.appMap) {
-        setTimeout(() => {
-            window.appMap.invalidateSize();
-        }, 300); // Đợi hiệu ứng zoom hoàn tất
-    }
-}
-
-    // Hàm điều khiển thu phóng
     function scaleContent(action) {
         if (action === 'in' && currentScale < 1.5) {
             currentScale += 0.1;
@@ -121,16 +157,454 @@
         }
 
         currentScale = Math.round(currentScale * 10) / 10;
-
-        // LƯU TRỮ: Ghi nhớ giá trị này vào trình duyệt
         localStorage.setItem('interfaceScale', currentScale);
-
         applyScale();
     }
 
-    // 2. TỰ ĐỘNG CHẠY: Khi trang vừa load xong, áp dụng ngay mức zoom cũ
-    document.addEventListener('DOMContentLoaded', function() {
+    // ==========================================
+    // HÀM DÙNG CHUNG CHO BẢN ĐỒ
+    // ==========================================
+    function performFlyTo(markerObj) {
+        if (!window.appMap) return;
+        window.appMap.closePopup();
+        document.getElementById('map-dashboard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+            window.appMap.flyTo(markerObj.getLatLng(), 18, { animate: true, duration: 2.0 });
+            window.appMap.once('moveend', () => markerObj.openPopup());
+        }, 400);
+    }
+
+    function zoomToMap(id) {
+        const marker = window.appMarkers[String(id).toLowerCase().trim()];
+        if (marker) performFlyTo(marker);
+    }
+
+    function zoomToSplitter(id) {
+        const marker = window.appSplitterMarkers[String(id).toLowerCase().trim()];
+        if (marker) performFlyTo(marker);
+    }
+
+    // ==========================================
+    // HÀM CHO MODAL CHỌN VỊ TRÍ (PICKER)
+    // ==========================================
+    function updateMarker(lat, lng) {
+        if (tempMarker) pickerMap.removeLayer(tempMarker);
+        tempMarker = L.marker([lat, lng], { draggable: true }).addTo(pickerMap);
+        
+        document.getElementById('display-lat').innerText = lat.toFixed(6);
+        document.getElementById('display-lng').innerText = lng.toFixed(6);
+
+        tempMarker.on('dragend', function(event) {
+            const pos = event.target.getLatLng();
+            updateMarker(pos.lat, pos.lng);
+        });
+    }
+    let currentModal = '', input_vi_do='', input_kinh_do='';
+
+function SetDataModal(name, inputViDoId, inputKinhDoId) {
+    currentModal = name;
+    input_vi_do = inputViDoId;
+    input_kinh_do = inputKinhDoId;
+}
+
+function xacNhanToaDo() {  
+    const lat = document.getElementById('display-lat').innerText;
+    const lng = document.getElementById('display-lng').innerText;
+    if (lat === "0") return alert("Vui lòng click chọn một điểm trên bản đồ!");
+    
+    // Điền tọa độ vào form (nếu có)
+    const inputViDo = document.getElementById(input_vi_do);
+    const inputKinhDo = document.getElementById(input_kinh_do);
+    if (inputViDo && inputKinhDo) {
+        inputViDo.value = lat;
+        inputKinhDo.value = lng;
+    }
+
+    // Đóng modal picker an toàn
+    const mapModalEl = document.getElementById('modalPickLocation');
+    const mapModal = bootstrap.Modal.getInstance(mapModalEl);
+    if (mapModal) {
+        mapModal.hide();
+    }
+
+    // Đợi picker ẩn hoàn toàn rồi mở modal nguồn
+    setTimeout(() => {
+        if (!currentModal) {
+            console.warn('Chưa set modal nguồn (currentModal rỗng)');
+            return;
+        }
+        const formModalEl = document.getElementById(currentModal);
+        if (!formModalEl) {
+            console.error('Không tìm thấy modal:', currentModal);
+            return;
+        }
+        let formModal = bootstrap.Modal.getInstance(formModalEl);
+        if (!formModal) {
+            formModal = new bootstrap.Modal(formModalEl);
+        }
+        formModal.show();
+    }, 400);
+}
+
+    // ==========================================
+    // HÀM SỬA SPLITTER
+    // ==========================================
+    function chuanBiSuaSplitter(id, ten, sys, loai, chaId, lat, lng) {
+        document.getElementById('formSuaSplitter').action = '/splitter/sua/' + id;
+        document.getElementById('sua_ten_splitter').value = ten;
+        document.getElementById('sua_sys_id').value = sys;
+        document.getElementById('sua_loai_splitter_sua').value = loai;
+        document.getElementById('vi_do_tu_pon_sua').value = lat;
+        document.getElementById('kinh_do_tu_pon_sua').value = lng;
+
+        const khungCha = document.getElementById('sua_khung_splitter_cha_sua');
+        if (loai === '1:16') {
+            khungCha.classList.remove('d-none');
+            document.getElementById('sua_splitter_cha_id').value = chaId;
+        } else {
+            khungCha.classList.add('d-none');
+            document.getElementById('sua_splitter_cha_id').value = '';
+        }
+    }
+
+    function kiemTraLoaiSplitterSua() {
+        const loai = document.getElementById('sua_loai_splitter_sua').value;
+        const khungCha = document.getElementById('sua_khung_splitter_cha_sua');
+        if (loai === '1:16') {
+            khungCha.classList.remove('d-none');
+        } else {
+            khungCha.classList.add('d-none');
+        }
+    }
+
+        function kiemTraLoaiSplitterThem() {
+        const loai_them = document.getElementById('sua_loai_splitter_them').value;
+        const khungCha = document.getElementById('sua_khung_splitter_cha_them');
+        if (loai_them === '1:16') {
+            khungCha.classList.remove('d-none');
+        } else {
+            khungCha.classList.add('d-none');
+        }
+    }
+
+    // ==========================================
+    // SỰ KIỆN KHI CLICK BẢN ĐỒ DASHBOARD (THÊM NÚT)
+    // ==========================================
+    let mapClickPopup = null;
+
+    function onMapClick(e) {
+        const { lat, lng } = e.latlng;
+        if (mapClickPopup) {
+            window.appMap.closePopup(mapClickPopup);
+            mapClickPopup = null;
+        }
+        const popupContent = `
+            <div style="min-width:200px;text-align:center;padding:10px;">
+                <h6 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                    <i class="bi bi-geo-alt-fill text-danger"></i> Vị trí đã chọn
+                </h6>
+                <div class="mb-3"><small class="text-muted"><i class="bi bi-globe2"></i> ${lat.toFixed(6)}, ${lng.toFixed(6)}</small></div>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-sm btn-warning fw-bold text-dark shadow-sm rounded-pill"
+                            onclick="themSplitterTaiViTri(${lat}, ${lng})">
+                        <i class="bi bi-hdd-network-fill"></i> Thêm Tủ Cáp tại đây
+                    </button>
+                    <button class="btn btn-sm btn-success fw-bold text-white shadow-sm rounded-pill"
+                            onclick="themKhachHangTaiViTri(${lat}, ${lng})">
+                        <i class="bi bi-person-plus-fill"></i> Thêm Khách Hàng tại đây
+                    </button>
+                </div>
+            </div>`;
+        mapClickPopup = L.popup({ closeButton: true, autoClose: true, closeOnClick: true })
+            .setLatLng([lat, lng])
+            .setContent(popupContent)
+            .openOn(window.appMap);
+    }
+
+    function themSplitterTaiViTri(lat, lng) {
+        if (mapClickPopup) {
+            window.appMap.closePopup(mapClickPopup);
+            mapClickPopup = null;
+        }
+        const nut_them_dia_diem = document.getElementById('nut_chon_vi_tri_tu_pon');
+        nut_them_dia_diem.hidden = true; // Ẩn nút "Chọn trên bản đồ" trong modal thêm tủ vì đã chọn vị trí từ bản đồ rồi
+        // Điền tọa độ vào input của modal thêm tủ
+    const inputViDo = document.getElementById('vi_do_tu_pon');
+    const inputKinhDo = document.getElementById('kinh_do_tu_pon');
+    if (inputViDo && inputKinhDo) {
+        inputViDo.value = lat;
+        inputKinhDo.value = lng;
+    }
+const formModalEl = document.getElementById('modalThemSplitter');
+    if(!formModalEl) {
+        console.error('Không tìm thấy modal để thêm tủ!');
+        return;
+    }
+    // Mở modal thêm tủ
+    let formModal = bootstrap.Modal.getInstance(formModalEl);
+        if (!formModal) {
+            formModal = new bootstrap.Modal(formModalEl);
+        }
+        formModal.show();
+}
+
+    function themKhachHangTaiViTri(lat, lng) {
+        if (mapClickPopup) {
+            window.appMap.closePopup(mapClickPopup);
+            mapClickPopup = null;
+        }
+        const nut_them_dia_diem = document.getElementById('nut_chon_vi_tri_dia_diem'); 
+        nut_them_dia_diem.hidden = true; // Ẩn nút "Chọn trên bản đồ" trong modal thêm khách hàng vì đã chọn vị trí từ bản đồ rồi
+        // Điền tọa độ vào input của modal thêm khách hàng
+    const inputViDo = document.getElementById('vi_do_them_khach_hang');
+    const inputKinhDo = document.getElementById('kinh_do_them_khach_hang');
+    if (inputViDo && inputKinhDo) {
+        inputViDo.value = lat;
+        inputKinhDo.value = lng;
+    }
+    const formModalEl = document.getElementById('modalThemDiemKhachHang');
+    if(!formModalEl) {
+        console.error('Không tìm thấy modal để thêm khách hàng!');
+        return;
+    }
+    // Mở modal thêm khách hàng
+    let formModal = bootstrap.Modal.getInstance(formModalEl);
+        if (!formModal) {
+            formModal = new bootstrap.Modal(formModalEl);
+        }
+        formModal.show();
+}
+
+    // ==========================================
+    // KHỞI TẠO CHÍNH KHI DOM SẴN SÀNG
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', function () {
+        // Áp dụng scale giao diện
         applyScale();
+
+        // --- Khởi tạo bản đồ dashboard ---
+        const mapContainer = document.getElementById('map-dashboard');
+        if (window.appMap !== null) {
+            window.appMap.remove();
+            window.appMap = null;
+        }
+        if (mapContainer && mapContainer._leaflet_id) {
+            mapContainer._leaflet_id = null;
+        }
+
+        try {
+            window.appMap = L.map('map-dashboard').setView([10.37, 105.43], 14);
+            L.tileLayer('http://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+                maxZoom: 20,
+                minZoom: 6,
+                noWrap: true,
+                bounds: [[8.0, 102.0], [24.0, 110.0]],
+                subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                attribution: '© Google Maps'
+            }).addTo(window.appMap);
+            window.appMap.setMaxBounds([[5.0, 95.0], [25.0, 115.0]]);
+
+            // Gắn sự kiện click bản đồ (thêm popup 2 nút)
+            window.appMap.on('click', onMapClick);
+            document.getElementById('map-dashboard').style.cursor = 'crosshair';
+
+        } catch (e) {
+            console.error("Lỗi khi tạo bản đồ:", e);
+        }
+
+        // --- Tải dữ liệu và vẽ marker ---
+        Promise.all([
+            fetch('/api/diem-ket-noi').then(res => res.json()),
+            fetch('/api/splitters').then(res => res.json())
+        ])
+        .then(([khachHangData, splitterData]) => {
+            const uniqueSplitters = {};
+            const uniqueSplittersCap1 = {};
+
+            // Vẽ splitters
+            if (splitterData && splitterData.length > 0) {
+                splitterData.forEach(sp => {
+                    if (sp.vi_tri && sp.vi_tri.coordinates) {
+                        const [spLng, spLat] = sp.vi_tri.coordinates;
+                        const spId = String(sp._id).toLowerCase().trim();
+
+                        const popupContent = `
+                            <div style="min-width:170px;text-align:center;">
+                                <h6 class="text-info fw-bold mb-2 border-bottom pb-2">
+                                    <i class="bi bi-router-fill"></i> ${sp.ten_splitter}
+                                </h6>
+                                <span class="badge bg-light text-dark border mb-3 px-3 py-2 rounded-pill shadow-sm">
+                                    TỦ CẤP ${sp.loai_splitter === '1:4' ? '1' : '2'} | ${sp.sys_id || 'N/A'}
+                                </span>
+                                <div class="d-grid gap-2">
+                                    <a href="/splitter" class="btn btn-sm btn-outline-info text-dark fw-bold shadow-sm rounded-pill">
+                                        <i class="bi bi-pencil-square"></i> Quản lý
+                                    </a>
+                                    <button class="btn btn-sm btn-warning fw-bold text-dark shadow-sm rounded-pill"
+                                            onclick="chuanBiSuaSplitter('${sp._id}', '${sp.ten_splitter}', '${sp.sys_id}', '${sp.loai_splitter}', '${sp.splitter_cha_id ? sp.splitter_cha_id._id : ''}', '${sp.vi_tri.coordinates[1]}', '${sp.vi_tri.coordinates[0]}')"
+                                            data-bs-toggle="modal" data-bs-target="#modalSuaSplitter">
+                                        <i class="bi bi-pencil-square"></i> Sửa
+                                    </button>
+                                </div>
+                            </div>`;
+
+                        if (sp.loai_splitter === '1:4') {
+                            uniqueSplittersCap1[spId] = sp;
+                            const iconTu1 = L.divIcon({
+                                className: 'topo-node node-tucap1',
+                                html: '<i class="bi bi-hdd-rack-fill fs-5" style="color:#fd7e14"></i>',
+                                iconSize: [44, 44], iconAnchor: [22, 22]
+                            });
+                            const sp1Marker = L.marker([spLat, spLng], { icon: iconTu1 }).addTo(window.appMap);
+                            sp1Marker.bindPopup(popupContent);
+                            window.appSplitterMarkers[spId] = sp1Marker;
+                        } else {
+                            uniqueSplitters[spId] = sp;
+                            const iconTu2 = L.divIcon({
+                                className: 'topo-node node-tucap2',
+                                html: '<i class="bi bi-router-fill" style="color:#0d6efd"></i>',
+                                iconSize: [34, 34], iconAnchor: [17, 17]
+                            });
+                            const sp2Marker = L.marker([spLat, spLng], { icon: iconTu2 }).addTo(window.appMap);
+                            sp2Marker.bindPopup(popupContent);
+                            window.appSplitterMarkers[spId] = sp2Marker;
+
+                            if (sp.splitter_cha_id) {
+                                const spCha = splitterData.find(s => String(s._id) === String(sp.splitter_cha_id));
+                                if (spCha && spCha.vi_tri && spCha.vi_tri.coordinates) {
+                                    L.polyline([
+                                        [spCha.vi_tri.coordinates[1], spCha.vi_tri.coordinates[0]],
+                                        [spLat, spLng]
+                                    ], {
+                                        color: '#fd7e14', weight: 6, dashArray: '10, 8', opacity: 0.9, className: 'trunk-line-glow'
+                                    }).addTo(window.appMap);
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Vẽ khách hàng
+            if (khachHangData && khachHangData.length > 0) {
+                khachHangData.forEach(diem => {
+                    if (diem.vi_tri && diem.vi_tri.coordinates) {
+                        const [lng, lat] = diem.vi_tri.coordinates;
+                        const isError = diem.trang_thai_ket_noi.mau_sac === 'Đỏ';
+                        let iconClass = isError ? 'node-kh-do' : (diem.trang_thai_ket_noi.mau_sac === 'Xám' ? 'node-kh-xam' : 'node-kh-xanh');
+                        let iconColor = isError ? '#dc3545' : (diem.trang_thai_ket_noi.mau_sac === 'Xanh' ? '#198754' : '#6c757d');
+
+                        const iconKH = L.divIcon({
+                            className: `topo-node ${iconClass}`,
+                            html: `<i class="bi bi-house-door-fill" style="color:${iconColor}"></i>`,
+                            iconSize: [28, 28], iconAnchor: [14, 14]
+                        });
+
+                        const marker = L.marker([lat, lng], { icon: iconKH }).addTo(window.appMap);
+                        window.appMarkers[String(diem._id).toLowerCase().trim()] = marker;
+
+                        let popupContent = `
+                            <div style="min-width:220px;">
+                                <div class="d-flex align-items-center mb-2 border-bottom pb-2">
+                                    <div class="bg-${isError ? 'danger' : 'success'} text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" style="width:36px;height:36px;font-size:16px;">
+                                        <i class="bi bi-house-door-fill"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold text-dark mb-0 text-wrap">${diem.ten_khach_hang}</h6>
+                                        <small class="text-${isError ? 'danger fw-bold' : 'success'}">${isError ? 'Đang gặp sự cố' : 'Đang hoạt động'}</small>
+                                    </div>
+                                </div>
+                                <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-secondary"></i> ${diem.dia_chi}</p>
+                                <div class="d-flex gap-2">
+                                    <a href="/diemketnoi/sua/${diem._id}" class="btn btn-sm btn-outline-secondary w-100 fw-bold rounded-pill">Sửa KH</a>
+                                    ${isError ? `<a href="/baocao/su-co" class="btn btn-sm btn-danger w-100 fw-bold rounded-pill">Xử lý</a>` : ''}
+                                </div>
+                            </div>`;
+                        marker.bindPopup(popupContent);
+
+                        if (diem.splitter_id && diem.splitter_id.vi_tri) {
+                            const [sp2Lng, sp2Lat] = diem.splitter_id.vi_tri.coordinates;
+                            L.polyline([[lat, lng], [sp2Lat, sp2Lng]], {
+                                color: isError ? '#dc3545' : '#ada',
+                                weight: isError ? 7 : 5,
+                                opacity: isError ? 0.8 : 0.7,
+                                dashArray: isError ? '6, 15' : '6, 6',
+                                lineCap: 'round'
+                            }).addTo(window.appMap);
+                        }
+                    }
+                });
+            }
+
+            // Cập nhật dropdown danh sách tủ cáp
+            const splitterListEl = document.getElementById('splitter-dropdown-list');
+            const splitterCountEl = document.getElementById('splitter-count');
+            const splArr1 = Object.values(uniqueSplittersCap1);
+            const splArr2 = Object.values(uniqueSplitters);
+            const allSplitters = [...splArr1, ...splArr2];
+
+            if (splitterCountEl) splitterCountEl.innerText = allSplitters.length;
+
+            if (splitterListEl) {
+                splitterListEl.innerHTML = '';
+                if (allSplitters.length === 0) {
+                    splitterListEl.innerHTML = '<li><a class="dropdown-item disabled">Không có dữ liệu tủ</a></li>';
+                } else {
+                    if (splArr1.length > 0) {
+                        splitterListEl.innerHTML += `<li><h6 class="dropdown-header text-warning"><i class="bi bi-hdd-rack-fill"></i> TỦ CẤP 1 (1:4)</h6></li>`;
+                        splArr1.forEach(sp => {
+                            splitterListEl.innerHTML += `
+                                <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="javascript:void(0)" onclick="zoomToSplitter('${sp._id}')">
+                                    <span>${sp.ten_splitter}</span>
+                                    <small class="text-muted" style="font-size:0.65rem;">${sp.sys_id || ''}</small>
+                                </a></li>`;
+                        });
+                    }
+                    splitterListEl.innerHTML += `<li><hr class="dropdown-divider"></li>`;
+                    if (splArr2.length > 0) {
+                        splitterListEl.innerHTML += `<li><h6 class="dropdown-header text-primary"><i class="bi bi-router-fill"></i> TỦ CẤP 2 (1:16)</h6></li>`;
+                        splArr2.forEach(sp => {
+                            splitterListEl.innerHTML += `
+                                <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="javascript:void(0)" onclick="zoomToSplitter('${sp._id}')">
+                                    <span>${sp.ten_splitter}</span>
+                                    <small class="text-muted" style="font-size:0.65rem;">${sp.sys_id || ''}</small>
+                                </a></li>`;
+                        });
+                    }
+                }
+            }
+        })
+        .catch(err => console.error("Lỗi tải API Bản đồ:", err));
+
+        // --- Sự kiện modal chọn vị trí ---
+        const modalPickEl = document.getElementById('modalPickLocation');
+        if (modalPickEl) {
+            modalPickEl.addEventListener('shown.bs.modal', function () {
+                if (!pickerMap) {
+                    try {
+                        pickerMap = L.map('map-picker').setView([10.37, 105.43], 15);
+                        L.tileLayer('http://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+                            maxZoom: 20,
+                            minZoom: 6,
+                            noWrap: true,
+                            bounds: [[8.0, 102.0], [24.0, 110.0]],
+                            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                            attribution: '© Google Maps'
+                        }).addTo(pickerMap);
+                        pickerMap.on('click', function(e) {
+                            updateMarker(e.latlng.lat, e.latlng.lng);
+                        });
+                    } catch (err) {
+                        console.error("Lỗi khởi tạo bản đồ picker:", err);
+                    }
+                } else {
+                    pickerMap.invalidateSize();
+                }
+                setTimeout(() => {
+                    if (pickerMap) pickerMap.invalidateSize();
+                }, 100);
+            });
+        }
     });
 </script>
     <%- typeof script !== 'undefined' ? script : '' %>

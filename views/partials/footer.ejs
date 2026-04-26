@@ -1,3 +1,461 @@
+            <div class="modal fade" id="modalPickLocation" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title fw-bold"><i class="bi bi-geo-alt"></i> CHỌN VỊ TRÍ</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-0">
+                            <div id="map-picker"></div>
+                        </div>
+                        <div class="modal-footer bg-light d-flex justify-content-between">
+                            <div>
+                                <span class="badge bg-dark">Vĩ độ: <span id="display-lat">0</span></span>
+                                <span class="badge bg-dark">Kinh độ: <span id="display-lng">0</span></span>
+                            </div>
+                            <div>
+                                <!-- <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Hủy</button> -->                             
+                                <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Hủy</button>
+                                <button type="button" class="btn btn-primary fw-bold" onclick="xacNhanToaDo()">Xác nhận vị trí</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+
+            <div class="modal fade" id="modalThemSplitter" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-vnpt text-white">
+                            <h5 class="modal-title fw-bold"><i class="bi bi-node-plus"></i> THÊM TỦ PON</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form action="/splitter/them" method="POST">
+                            <div class="modal-body p-4">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Tên tủ</label>
+                                    <input type="text" name="ten_splitter" class="form-control"
+                                        placeholder="VD: Tủ cấp 1 - Nguyễn Thái Học..." required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">SysID</label> // Mã trạm OLT
+                                    <input type="text" name="sys_id" class="form-control text-danger fw-bold"
+                                        value="AGG-LX-01" required>
+                                </div>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-bold">Tọa độ vị trí</label>
+                                        <div class="input-group">
+                                            <input type="number" step="any" name="vi_do" id="vi_do_tu_pon" class="form-control"
+                                                placeholder="Vĩ độ (VD: 10.37)" min="-90" max="90" required>
+                                            <input type="number" step="any" name="kinh_do" id="kinh_do_tu_pon" class="form-control"
+                                                placeholder="Kinh độ (VD: 105.43)" min="-180" max="180" required>
+                                            <button type="button" id="nut_chon_vi_tri_tu_pon" class="btn btn-outline-primary fw-bold" data-bs-toggle="modal" data-bs-target="#modalPickLocation" onclick="SetDataModal('modalThemSplitter', 'vi_do_tu_pon', 'kinh_do_tu_pon')">
+                                                <i class="bi bi-geo-alt-fill"></i> Chọn từ bản đồ
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-primary">Loại tủ</label>
+                                    <select name="loai_splitter" id="sua_loai_splitter_them" class="form-select border-primary" required onchange="kiemTraLoaiSplitterThem()">
+                                        <option value="1:4">Cấp 1 (Chia 1:4) - Nối thẳng OLT</option>
+                                        <option value="1:16">Cấp 2 (Chia 1:16) - Nối từ tủ Cấp 1</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3 d-none bg-light p-3 border rounded" id="sua_khung_splitter_cha_them">
+                                    <label class="form-label fw-bold text-danger"><i class="bi bi-link-45deg"></i> Nối vào tủ Cấp 1 nào?</label>
+                                    <select name="splitter_cha_id" id="them_splitter_cha_id" class="form-select">
+                                        <option value="">-- Chọn tủ nguồn --</option>
+                                        <% if (typeof danhSachSplitterCap1 !=='undefined' ) { %>
+                                            <% danhSachSplitterCap1.forEach(function(sp) { %>
+                                                <option value="<%= sp._id %>"><%= sp.ten_splitter %> (<%= sp.sys_id %>)</option>
+                                            <% }); %>
+                                        <% } %>
+                                    </select>
+                                </div>
+
+                            </div>
+                            <div class="modal-footer bg-light">
+                                <button type="button" class="btn btn-secondary fw-bold" data-bs-target="#modalThemSplitter" data-bs-toggle="modal">Hủy</button>
+                                <button type="submit" class="btn bg-vnpt text-white fw-bold shadow-sm"><i
+                                        class="bi bi-floppy"></i> Lưu Tủ</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>   
+
+            <div class="modal fade" id="modalSuaSplitter" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-warning text-dark">
+                            <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square"></i> SỬA THÔNG TIN TỦ PON</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form id="formSuaSplitter" method="POST">
+                            <div class="modal-body p-4">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Tên tủ</label>
+                                    <input type="text" name="ten_splitter" id="sua_ten_splitter" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">SysID (Mã trạm OLT)</label>
+                                    <input type="text" name="sys_id" id="sua_sys_id" class="form-control text-danger fw-bold" required>
+                                </div>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-bold">Tọa độ vị trí</label>
+                                        <div class="input-group">
+                                            <input type="number" step="any" name="vi_do" id="vi_do_tu_pon_sua" class="form-control"
+                                                placeholder="Vĩ độ (VD: 10.37)" min="-90" max="90" required>
+                                            <input type="number" step="any" name="kinh_do" id="kinh_do_tu_pon_sua" class="form-control"
+                                                placeholder="Kinh độ (VD: 105.43)" min="-180" max="180" required>
+                                            <button type="button" class="btn btn-outline-primary fw-bold" data-bs-toggle="modal" data-bs-target="#modalPickLocation" onclick="SetDataModal('modalSuaSplitter', 'vi_do_tu_pon_sua', 'kinh_do_tu_pon_sua')">
+                                                <i class="bi bi-geo-alt-fill"></i> Chọn từ bản đồ
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-primary">Loại tủ</label>
+                                    <select name="loai_splitter" id="sua_loai_splitter_sua" class="form-select border-primary" required onchange="kiemTraLoaiSplitterSua()">
+                                        <option value="1:4">Cấp 1 (Chia 1:4) - Nối thẳng OLT</option>
+                                        <option value="1:16">Cấp 2 (Chia 1:16) - Nối từ tủ Cấp 1</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3 d-none bg-light p-3 border rounded" id="sua_khung_splitter_cha_sua">
+                                    <label class="form-label fw-bold text-danger"><i class="bi bi-link-45deg"></i> Nối vào tủ Cấp 1 nào?</label>
+                                    <select name="splitter_cha_id" id="sua_splitter_cha_id" class="form-select">
+                                        <option value="">-- Chọn tủ nguồn --</option>
+                                        <% if (typeof danhSachSplitterCap1 !=='undefined' ) { %>
+                                            <% danhSachSplitterCap1.forEach(function(sp) { %>
+                                                <option value="<%= sp._id %>"><%= sp.ten_splitter %> (<%= sp.sys_id %>)</option>
+                                            <% }); %>
+                                        <% } %>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer bg-light">
+                                <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Hủy</button>
+                                <button type="submit" class="btn btn-warning text-dark fw-bold shadow-sm"><i class="bi bi-floppy"></i> Cập nhật Tủ</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>         
+            
+            <div class="modal fade" id="modalLoiMongoDB" data-bs-backdrop="static" data-bs-keyboard="false"
+                tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content rounded-4 border-0 shadow-lg">
+                        <div class="modal-body p-4 text-center">
+                            <i class="bi bi-database-fill-exclamation text-danger" style="font-size: 4rem;"></i>
+                            <h5 class="fw-bold mt-3 text-danger">GIÁN ĐOẠN KẾT NỐI</h5>
+                            <p class="text-muted mt-2">
+                                Hệ thống đang bị lỗi, không thể kết nối với cơ sở dữ liệu. Người dùng lưu ý rằng một số
+                                chức năng của hệ thống sẽ không thể hoạt động bình thường.
+                            </p>
+                            <button type="button" class="btn btn-danger fw-bold px-5 rounded-pill mt-3 shadow-sm"
+                                data-bs-dismiss="modal">Đã hiểu</button>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+                            
+            <div class="modal fade" id="modalThemDiemKhachHang" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-vnpt text-white">
+                            <h5 class="modal-title fw-bold"><i class="bi bi-person-plus"></i> THÊM KHÁCH HÀNG MỚI</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form action="/diemketnoi/them" method="POST">
+                            <div class="modal-body p-4">
+
+                                <h6 class="text-primary fw-bold border-bottom pb-2 mb-3"><i
+                                        class="bi bi-info-circle"></i>1. THÔNG TIN KHÁCH HÀNG</h6>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Tên khách hàng</label>
+                                        <input type="text" name="ten_khach_hang" class="form-control" required>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold">Loại hình mạng</label>
+                                        <select id="chon_loai_hinh" class="form-select border-primary"
+                                            onchange="capNhatGoiCuoc()" required>
+                                            <option value="">-- Chọn loại --</option>
+                                            <option value="Hộ gia đình">Hộ gia đình</option>
+                                            <option value="Doanh nghiệp">Doanh nghiệp</option>
+                                            <option value="Điểm công cộng">Điểm công cộng</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold text-primary">Gói cước đăng ký</label>
+                                        <select name="goi_cuoc_id" id="chon_goi_cuoc"
+                                            class="form-select border-primary fw-bold" required>
+                                            <option value="">-- Trống --</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold">Địa chỉ lắp đặt</label>
+                                        <input type="text" name="dia_chi" class="form-control" required>
+                                    </div>
+
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-bold text-success">Tọa độ vị trí</label>
+                                            <div class="input-group">
+                                                <input type="number" step="any" name="vi_do" id="vi_do_them_khach_hang" class="form-control" 
+                                                    placeholder="Vĩ độ" min="-90" max="90" required>
+                                                <input type="number" step="any" name="kinh_do" id="kinh_do_them_khach_hang" class="form-control" 
+                                                    placeholder="Kinh độ" min="-180" max="180" required>
+                                            <button type="button" id="nut_chon_vi_tri_dia_diem" class="btn btn-outline-warning fw-bold text-dark" onclick="SetDataModal('modalThemDiemKhachHang', 'vi_do_them_khach_hang', 'kinh_do_them_khach_hang')" data-bs-toggle="modal" data-bs-target="#modalPickLocation">
+                                                <i class="bi bi-geo-alt-fill"></i> Chọn trên bản đồ
+                                            </button>
+                                            </div>
+                                        </div>
+    
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold">Mô phỏng trạng thái</label>
+                                        <input type="number" name="ping" class="form-control" value="15" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Ngày đăng ký</label>
+                                        <input type="date" name="ngay_dang_ky" class="form-control" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Thời gian hợp đồng (Tháng)</label>
+                                        <input type="number" name="thoi_gian_su_dung_thang" class="form-control"
+                                            value="12" required>
+                                    </div>
+                                </div>
+
+                                <h6 class="text-danger fw-bold border-bottom pb-2 mb-3"><i
+                                        class="bi bi-diagram-3"></i>2. HẠ TẦNG QUANG & PPPoE</h6>
+                                <div class="bg-light p-3 rounded border">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold text-danger">Tủ cáp (Splitter 1:16)</label>
+                                        <select name="splitter_id" class="form-select border-danger fw-bold" required>
+                                            <option value="">-- Chọn tủ cáp để nối dây --</option>
+                                            <% if (typeof danhSachSplitter !=='undefined' ) { %>
+                                                <% danhSachSplitter.forEach(function(sp) { %>
+                                                    <option value="<%= sp._id %>">
+                                                        <%= sp.ten_splitter %> (SysID: <%= sp.sys_id %>)
+                                                    </option>
+                                                    <% }); %>
+                                                        <% } %>
+                                        </select>
+                                    </div>
+
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold">Mã trạm<span
+                                                    class="text-danger">*</span></label>
+                                            <input type="text" name="sys_id" class="form-control border-success"
+                                                placeholder="VD: AGG-LX-01" required>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold">Username PPPoE <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="text" name="username" class="form-control"
+                                                placeholder="hcm_lx_..." required>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold">Password PPPoE <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="password" name="password" class="form-control"
+                                                placeholder="******" required>
+                                        </div>
+                                    </div>
+
+                                    <label class="form-label fw-bold text-success mb-1">Thông số Circuit ID</label>
+                                    <div class="row g-2">
+                                        <div class="col-3">
+                                            <input type="text" name="rack" class="form-control border-warning shadow-sm"
+                                                placeholder="Rack (VD: a1)" maxlength="2" pattern="[a-z][a-zA-Z0-9]"
+                                                required>
+                                        </div>
+                                        <div class="col-3">
+                                            <input type="number" name="shelf" class="form-control bg-light text-muted"
+                                                value="0" readonly>
+                                        </div>
+                                        <div class="col-3">
+                                            <input type="number" name="slot" class="form-control" placeholder="Slot"
+                                                min="0" required>
+                                        </div>
+                                        <div class="col-3">
+                                            <input type="number" name="port" class="form-control" placeholder="Port"
+                                                min="1" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-text mt-2"><i class="bi bi-info-circle"></i> Tham số VPI/VCI sẽ
+                                        được tự động gán là 0/33.</div>
+
+                                </div>
+                                <div class="modal-footer bg-light">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn bg-vnpt text-white fw-bold"><i
+                                            class="bi bi-floppy"></i>Lưu khách hàng</button>
+                                </div>
+                        </form>
+                    </div>
+                </div> 
+            </div>
+            
+            <!-- Modal Sửa Khách Hàng -->
+            <div class="modal fade" id="modalSuaDiemKhachHang" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-vnpt text-white">
+                            <h5 class="modal-title fw-bold"><i class="bi bi-person-plus"></i> SỬA KHÁCH HÀNG</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form action="/diemketnoi/sua/:id" method="POST">
+                            <div class="modal-body p-4">
+
+                                <h6 class="text-primary fw-bold border-bottom pb-2 mb-3"><i
+                                        class="bi bi-info-circle"></i>1. THÔNG TIN KHÁCH HÀNG</h6>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Tên khách hàng</label>
+                                        <input type="text" name="ten_khach_hang" class="form-control" required>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold">Loại hình mạng</label>
+                                        <select id="chon_loai_hinh" class="form-select border-primary"
+                                            onchange="capNhatGoiCuoc()" required>
+                                            <option value="">-- Chọn loại --</option>
+                                            <option value="Hộ gia đình">Hộ gia đình</option>
+                                            <option value="Doanh nghiệp">Doanh nghiệp</option>
+                                            <option value="Điểm công cộng">Điểm công cộng</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold text-primary">Gói cước đăng ký</label>
+                                        <select name="goi_cuoc_id" id="chon_goi_cuoc"
+                                            class="form-select border-primary fw-bold" required>
+                                            <option value="">-- Trống --</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold">Địa chỉ lắp đặt</label>
+                                        <input type="text" name="dia_chi" class="form-control" required>
+                                    </div>
+
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-bold text-success">Tọa độ vị trí</label>
+                                            <div class="input-group">
+                                                <input type="number" step="any" name="vi_do" id="vi_do_sua_khach_hang" class="form-control" 
+                                                    placeholder="Vĩ độ" min="-90" max="90" required>
+                                                <input type="number" step="any" name="kinh_do" id="kinh_do_sua_khach_hang" class="form-control" 
+                                                    placeholder="Kinh độ" min="-180" max="180" required>
+                                            <button type="button" id="nut_chon_vi_tri_dia_diem" class="btn btn-outline-warning fw-bold text-dark" onclick="SetDataModal('modalSuaDiemKhachHang', 'vi_do_sua_khach_hang', 'kinh_do_sua_khach_hang')" data-bs-toggle="modal" data-bs-target="#modalPickLocation">
+                                                <i class="bi bi-geo-alt-fill"></i> Chọn trên bản đồ
+                                            </button>
+                                            </div>
+                                        </div>
+    
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold">Mô phỏng trạng thái</label>
+                                        <input type="number" name="ping" class="form-control" value="15" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Ngày đăng ký</label>
+                                        <input type="date" name="ngay_dang_ky" class="form-control" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Thời gian hợp đồng (Tháng)</label>
+                                        <input type="number" name="thoi_gian_su_dung_thang" class="form-control"
+                                            value="12" required>
+                                    </div>
+                                </div>
+
+                                <h6 class="text-danger fw-bold border-bottom pb-2 mb-3"><i
+                                        class="bi bi-diagram-3"></i>2. HẠ TẦNG QUANG & PPPoE</h6>
+                                <div class="bg-light p-3 rounded border">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold text-danger">Tủ cáp (Splitter 1:16)</label>
+                                        <select name="splitter_id" class="form-select border-danger fw-bold" required>
+                                            <option value="">-- Chọn tủ cáp để nối dây --</option>
+                                            <% if (typeof danhSachSplitter !=='undefined' ) { %>
+                                                <% danhSachSplitter.forEach(function(sp) { %>
+                                                    <option value="<%= sp._id %>">
+                                                        <%= sp.ten_splitter %> (SysID: <%= sp.sys_id %>)
+                                                    </option>
+                                                    <% }); %>
+                                                        <% } %>
+                                        </select>
+                                    </div>
+
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold">Mã trạm<span
+                                                    class="text-danger">*</span></label>
+                                            <input type="text" name="sys_id" class="form-control border-success"
+                                                placeholder="VD: AGG-LX-01" required>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold">Username PPPoE <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="text" name="username" class="form-control"
+                                                placeholder="hcm_lx_..." required>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold">Password PPPoE <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="password" name="password" class="form-control"
+                                                placeholder="******" required>
+                                        </div>
+                                    </div>
+
+                                    <label class="form-label fw-bold text-success mb-1">Thông số Circuit ID</label>
+                                    <div class="row g-2">
+                                        <div class="col-3">
+                                            <input type="text" name="rack" class="form-control border-warning shadow-sm"
+                                                placeholder="Rack (VD: a1)" maxlength="2" pattern="[a-z][a-zA-Z0-9]"
+                                                required>
+                                        </div>
+                                        <div class="col-3">
+                                            <input type="number" name="shelf" class="form-control bg-light text-muted"
+                                                value="0" readonly>
+                                        </div>
+                                        <div class="col-3">
+                                            <input type="number" name="slot" class="form-control" placeholder="Slot"
+                                                min="0" required>
+                                        </div>
+                                        <div class="col-3">
+                                            <input type="number" name="port" class="form-control" placeholder="Port"
+                                                min="1" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-text mt-2"><i class="bi bi-info-circle"></i> Tham số VPI/VCI sẽ
+                                        được tự động gán là 0/33.</div>
+
+                                </div>
+                                <div class="modal-footer bg-light">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn bg-vnpt text-white fw-bold"><i
+                                            class="bi bi-floppy"></i>Lưu khách hàng</button>
+                                </div>
+                        </form>
+                    </div>
+                </div> 
+            </div>
+
 <footer class="bg-vnpt text-white footer-thin mt-auto">
     <div class="container-fluid px-4">
         <div class="d-flex justify-content-between align-items-center">
@@ -12,8 +470,3 @@
         </div>
     </div>
 </footer>
-
-
-<script>
- 
-</script>

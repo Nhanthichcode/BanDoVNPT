@@ -9,11 +9,11 @@ const DiemKetNoi = require('../models/DiemKetNoi');
 const Splitter = require('../models/Splitter');
 
 //Route: Giao diện chính bản đồ
-router.get('/dashboard', kiemTraDangNhap, async (req, res) => {
+router.get('/', kiemTraDangNhap, async (req, res) => {
     try {
         const pool = await dbManager.getSQLPool();
         const user = req.session.user;
-
+        const danhSachSplitterCap1 = await Splitter.find({ loai_splitter: '1:4' });
         const stats = {};
         let pendingList = [];
         let resolvedList = [];
@@ -67,13 +67,24 @@ router.get('/dashboard', kiemTraDangNhap, async (req, res) => {
             stats.myPendingIssues = pendingList.length;
             stats.myResolvedIssues = resolvedList.length;
         }
+            const danhSachDiem = await DiemKetNoi.find({})
+            .populate('splitter_id')
+            .sort({ 'trang_thai_ket_noi.lan_kiem_tra_cuoi': -1 });
 
+        // Lấy danh sách tủ 1:16 để đổ vào Form thêm mới
+        const danhSachSplitter16 = await Splitter.find({ loai_splitter: '1:16' });
+
+        let resultGoiCuoc = await pool.request().query('SELECT id, ten_goi_cuoc, loai_hinh_thue_bao FROM GoiCuoc');
 
         res.render('pages/dashboard', { 
             user, 
             stats, 
             pendingList, // Truyền danh sách chờ ra giao diện
             resolvedList, // Truyền danh sách xong ra giao diện
+            danhSachSplitterCap1: danhSachSplitterCap1,
+            danhSachGoiCuoc: resultGoiCuoc.recordset,
+            danhSachDiem: danhSachDiem,
+            danhSachSplitter: danhSachSplitter16,
             activePage: 'dashboard',
             title: 'Bảng điều khiển' 
         });
