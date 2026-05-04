@@ -1,0 +1,177 @@
+
+    <style>
+        body { background-color: #f8f9fa; display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
+        .bg-vnpt { background-color: #0072BC !important; }
+        
+        .stat-card { border: none; border-radius: 10px; box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); transition: transform 0.2s;}
+        .stat-card:hover { transform: translateY(-3px); }
+        .icon-box { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        
+
+        /* Định dạng dropdown list mượt mà */
+        /* Tìm và thay thế đoạn này trong thẻ <style> */
+.dropdown-menu-list { 
+    max-height: 320px; 
+    overflow-y: auto; 
+    min-width: 260px; /* Thu gọn kích thước tối thiểu */
+    width: max-content; /* Tự động co giãn ôm vừa nội dung */
+    max-width: 350px; /* Khống chế không cho quá to */
+}
+.dropdown-menu-list::-webkit-scrollbar { width: 6px; }
+.dropdown-menu-list::-webkit-scrollbar-thumb { background-color: #adb5bd; border-radius: 10px; }
+        .leaflet-container {z-index: 1 !important;}
+  
+  /* Tạo hiệu ứng phát sáng cho đường trục (Trunk line) */
+.trunk-line-glow {
+    filter: drop-shadow(0 0 3px rgba(0,0,0,0.5));
+}
+
+/* Hiệu ứng đường nhánh trông mềm mại hơn */
+.dist-line-style {
+    stroke-linecap: round;
+}
+
+/* Bảng chú thích (Legend) nằm trên bản đồ */
+.map-legend {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    line-height: 1.5;
+    font-size: 12px;
+}
+.legend-item { display: flex; align-items: center; margin-bottom: 5px; }
+.legend-color { width: 20px; height: 10px; margin-right: 8px; border-radius: 2px; }
+
+.topo-node {
+            background-color: #212529; /* Nền đen xám đậm */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        
+        /* Viền đứt khúc và kích thước theo cấp độ */
+        .node-tucap1 { border: 3px dashed #fd7e14; width: 44px !important; height: 44px !important; }
+        .node-tucap2 { border: 3px dashed #0d6efd; width: 34px !important; height: 34px !important; }
+        
+        /* Trạng thái khách hàng */
+        .node-kh-xanh { border: 3px dashed #198754; width: 28px !important; height: 28px !important; }
+        .node-kh-do { border: 3px dashed #dc3545; width: 28px !important; height: 28px !important; animation: pulse-danger 1.5s infinite; }
+        .node-kh-xam { border: 3px dashed #6c757d; width: 28px !important; height: 28px !important; }
+</style>
+
+
+ 
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-3">
+   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3 mb-4" style="position: relative; z-index: 10;">    
+        <% if (user.vai_tro_id === 1 || user.vai_tro_id === 2) { %>
+            <div class="col">
+                <div class="card stat-card h-100 p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box bg-primary bg-opacity-10 text-primary me-3"><i class="bi bi-people-fill"></i></div>
+                        <div>
+                            <h6 class="text-muted mb-1">Tổng người dùng</h6>
+                            <h3 class="fw-bold mb-0 text-dark"><%= stats.users %></h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+
+        <div class="col">
+            <div class="card stat-card h-100 p-3 dropdown" style="cursor: pointer;">
+                <div data-bs-toggle="dropdown" title="Click để xem danh sách">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-box bg-info bg-opacity-10 text-info me-3"><i class="bi bi-hdd-network-fill"></i></div>
+                            <div>
+                                <h6 class="text-muted mb-1">Tủ cáp<i class="bi bi-caret-down-fill small"></i></h6>
+                                <h3 class="fw-bold mb-0 text-dark" id="splitter-count">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <ul class="dropdown-menu dropdown-menu-list shadow border-0 mt-2 p-2" id="splitter-dropdown-list">
+                    <li><span class="dropdown-item text-muted small text-center">Đang tải dữ liệu...</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card stat-card h-100 p-3 dropdown" style="cursor: pointer;">
+                <div data-bs-toggle="dropdown" title="Click để xem danh sách">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-box bg-danger bg-opacity-10 text-danger me-3"><i class="bi bi-tools"></i></div>
+                            <div>
+                                <h6 class="text-muted mb-1">Sự cố chờ xử lý <i class="bi bi-caret-down-fill small"></i></h6>
+                                <h3 class="fw-bold mb-0 text-dark"><%= stats.issues || stats.myPendingIssues || 0 %></h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-list shadow border-0 mt-2 p-2">
+                    <li><h6 class="dropdown-header text-danger fw-bold px-2 border-bottom pb-2 mb-2"><i class="bi bi-fire"></i> Đang chờ xử lý</h6></li>
+                    <% if (pendingList && pendingList.length > 0) { %>
+                        <% pendingList.forEach(item => { %>
+                            <li>
+                                <a class="dropdown-item py-2 px-3 rounded text-wrap" href="javascript:void(0)" onclick="zoomToMap('<%= item.diem_ket_noi_id %>')">
+                                    <div class="fw-bold text-dark"><%= item.ten_khach_hang %></div>
+                                    <div class="small text-danger"><i class="bi bi-exclamation-circle"></i> <%= item.loai_su_co %></div>
+                                    <div class="small text-muted" style="font-size: 0.7rem;"><%= new Date(item.thoi_gian_tao).toLocaleString('vi-VN') %></div>
+                                </a>
+                            </li>
+                        <% }) %>
+                    <% } else { %>
+                        <li><span class="dropdown-item text-muted small text-center">Không có sự cố nào!</span></li>
+                    <% } %>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card stat-card h-100 p-3 dropdown" style="cursor: pointer;">
+                <div data-bs-toggle="dropdown" title="Click để xem danh sách">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-box bg-success bg-opacity-10 text-success me-3"><i class="bi bi-check-circle-fill"></i></div>
+                            <div>
+                                <h6 class="text-muted mb-1">Đã khắc phục <i class="bi bi-caret-down-fill small"></i></h6>
+                                <h3 class="fw-bold mb-0 text-dark"><%= stats.myResolvedIssues !== undefined ? stats.myResolvedIssues : resolvedList.length %></h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-list shadow border-0 mt-2 p-2">
+                    <li><h6 class="dropdown-header text-success fw-bold px-2 border-bottom pb-2 mb-2"><i class="bi bi-check2-all"></i> Vừa khắc phục xong</h6></li>
+                    <% if (resolvedList && resolvedList.length > 0) { %>
+                        <% resolvedList.forEach(item => { %>
+                            <li>
+                                <a class="dropdown-item py-2 px-3 rounded text-wrap" href="/baocao/lich-su">
+                                    <div class="fw-bold text-dark"><%= item.ten_khach_hang %></div>
+                                    <div class="small text-success"><i class="bi bi-wrench"></i> <%= item.loai_su_co %></div>
+                                    <div class="small text-muted" style="font-size: 0.7rem;"><%= new Date(item.thoi_gian_tao).toLocaleString('vi-VN') %></div>
+                                </a>
+                            </li>
+                        <% }) %>
+                    <% } else { %>
+                        <li><span class="dropdown-item text-muted small text-center">Chưa có dữ liệu!</span></li>
+                    <% } %>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+                <div class="card stat-card p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-map-fill me-2 text-primary"></i>Giám sát bản đồ trực tuyến</h5>
+                    <div id="map-dashboard" style="height: 480px; border-radius: 10px; z-index: 1;" class="border shadow-sm">
+                        <div class="h-100 d-flex align-items-center justify-content-center bg-light">
+                            <div class="spinner-border text-primary me-2" role="status"></div>
+                            <span>Đang tải dữ liệu mạng lưới...</span>
+                        </div>
+                    </div>
+                </div>              
+        </main>
+        

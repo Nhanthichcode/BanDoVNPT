@@ -10,7 +10,10 @@
     "test": "nodemon index.js"
   },
   "dependencies": {
+<<<<<<< HEAD
     "connect-flash": "^0.1.1",
+=======
+>>>>>>> Feature/develop
     "dotenv": "^17.4.2",
     "ejs": "^4.0.1",
     "express": "^4.22.1",

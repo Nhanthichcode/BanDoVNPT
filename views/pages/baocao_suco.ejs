@@ -1,3 +1,4 @@
+<<<<<<< HEAD:views/baocao_suco.ejs
 <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
     <div>
         <h3 class="text-danger fw-bold mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Báo cáo sự cố và Thu hồi</h3>
@@ -6,6 +7,42 @@
             <i class="bi bi-megaphone-fill"></i> Báo cáo sự cố từ hiện trường
         </button>
     </div>
+=======
+    <title>
+        <%= title %> - Hệ thống giám sát mạng lưới VNPT
+    </title>     
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .bg-vnpt {
+            background-color: #0072BC !important;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f1f8ff;
+            transition: 0.2s;
+        }
+    </style>         
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-1">              
+                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                    <div>
+                        <h3 class="text-danger fw-bold mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Báo cáo sự
+                            cố và Thu hồi</h3>
+                        <p class="text-muted mb-0 mt-1">Quản lý các điểm kết nối đang gặp sự cố hoặc cần thu hồi thiết
+                            bị</p>
+
+                        <button class="btn btn-danger fw-bold shadow-sm mt-3" data-bs-toggle="modal"
+                            data-bs-target="#modalBaoCaoMoi">
+                            <i class="bi bi-megaphone-fill"></i> Báo cáo sự cố từ hiện trường
+                        </button>
+                    </div>
+>>>>>>> Feature/develop:views/pages/baocao_suco.ejs
                     <div class="d-flex gap-3">
                         <div
                             class="bg-white px-4 py-2 rounded shadow-sm border border-danger border-opacity-25 text-center">
@@ -26,7 +63,7 @@
 
                 <div class="card border-0 shadow-sm rounded-3">
                     <div class="card-body p-0">
-                        <div class="table-responsive">
+                        <div class="table-container-scroll">
                             <table class="table table-hover align-middle mb-0 text-center">
                                 <thead class="bg-light text-secondary">
                                     <tr>
@@ -149,7 +186,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+
             <div class="modal fade" id="modalLapBaoCao" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content rounded-4 border-0 shadow-lg">
@@ -198,9 +235,6 @@
                     </div>
                 </div>
             </div>
-
-
-
 
             <div class="modal fade" id="modalGiaHan" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
@@ -274,7 +308,6 @@
                     </div>
                 </div>
             </div>
-
 
             <div class="modal fade" id="modalCapNhatTienDo" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
@@ -396,7 +429,12 @@
                 </div>
             </div>
 
+<<<<<<< HEAD:views/baocao_suco.ejs
                 <script>
+=======
+    </main>             
+    <script>
+>>>>>>> Feature/develop:views/pages/baocao_suco.ejs
                     //Hàm chuẩn bị cho Modal Lập báo cáo
                     function chuanBiLapBaoCao(id, tenKhachHang) {
                         document.getElementById('diem_ket_noi_id').value = id;
@@ -436,4 +474,8 @@
                             document.getElementById('panel_thong_tin_diem').style.display = 'none';
                         }
                     }
+<<<<<<< HEAD:views/baocao_suco.ejs
                 </script>
+=======
+    </script>
+>>>>>>> Feature/develop:views/pages/baocao_suco.ejs

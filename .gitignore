@@ -1,5 +1,9 @@
 node_modules/
 .env
 .env.vnpt
+<<<<<<< HEAD
 database.config.json/
+=======
+database.config.json
+>>>>>>> Feature/develop
 database.js

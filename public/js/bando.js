@@ -9,7 +9,11 @@ document.addEventListener('DOMContentLoaded', function () {
     maxZoom: 20,
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
     attribution: '© Google Maps'
+<<<<<<< HEAD
 }).addTo(map);
+=======
+}).addTo(window.appMap);
+>>>>>>> Feature/develop
 
     let danhSachGoc = [];
 

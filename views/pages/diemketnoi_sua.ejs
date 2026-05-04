@@ -1,0 +1,86 @@
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <h3 class="text-primary fw-bold"><i class="bi bi-pencil-square"></i> CHỈNH SỬA: <%= diem.ten_khach_hang %></h3>
+        <a href="/diemketnoi" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Quay lại</a>
+    </div>
+
+    <form action="/diemketnoi/sua/<%= diem._id %>" method="POST" class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Tên khách hàng</label>
+                    <input type="text" name="ten_khach_hang" class="form-control" value="<%= diem.ten_khach_hang %>" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Địa chỉ</label>
+                    <input type="text" name="dia_chi" class="form-control" value="<%= diem.dia_chi %>" required>
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <label class="form-label fw-bold text-danger">Vị trí (Click vào bản đồ để lấy tọa độ mới)</label>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text">Vĩ độ</span>
+                        <input type="number" step="any" name="vi_do" id="vi_do" class="form-control" value="<%= diem.vi_tri.coordinates[1] %>" required>
+                        <span class="input-group-text">Kinh độ</span>
+                        <input type="number" step="any" name="kinh_do" id="kinh_do" class="form-control" value="<%= diem.vi_tri.coordinates[0] %>" required>
+                    </div>
+                    <div id="map-edit" style="height: 300px; border-radius: 10px;" class="border shadow-sm"></div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label fw-bold">Account (User)</label>
+                    <input type="text" name="username" class="form-control text-primary fw-bold" value="<%= diem.thong_tin_pppoe.username %>">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label fw-bold">Password</label>
+                    <input type="text" name="password" class="form-control" value="<%= diem.thong_tin_pppoe.password %>">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label fw-bold text-info">Tủ Splitter (Cấp 2)</label>
+                    <select name="splitter_id" class="form-select">
+                        <% danhSachSplitter.forEach(sp => { %>
+                            <option value="<%= sp._id %>" <%= diem.splitter_id && diem.splitter_id._id.equals(sp._id) ? 'selected' : '' %>>
+                                <%= sp.ten_splitter %> (<%= sp.sys_id %>)
+                            </option>
+                        <% }) %>
+                    </select>
+                </div>
+            </div>
+
+            <div class="text-end mt-4">
+                <button type="submit" class="btn btn-primary btn-lg px-5 fw-bold shadow">
+                    <i class="bi bi-save"></i> Cập nhật thay đổi
+                </button>
+            </div>
+        </div>
+    </form>
+</main>
+
+<script>
+    // Khởi tạo bản đồ tại vị trí cũ của khách hàng
+    document.addEventListener('DOMContentLoaded', function() {
+        const oldLat = <%= diem.vi_tri.coordinates[1] %>;
+        const oldLng = <%= diem.vi_tri.coordinates[0] %>;
+        
+        const map = L.map('map-edit').setView([oldLat, oldLng], 17);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        let marker = L.marker([oldLat, oldLng], {draggable: true}).addTo(map);
+
+        // Click để đổi vị trí
+        map.on('click', function(e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            marker.setLatLng([lat, lng]);
+            document.getElementById('vi_do').value = lat;
+            document.getElementById('kinh_do').value = lng;
+        });
+
+        // Kéo thả marker
+        marker.on('dragend', function(e) {
+            const position = marker.getLatLng();
+            document.getElementById('vi_do').value = position.lat;
+            document.getElementById('kinh_do').value = position.lng;
+        });
+    });
+</script>

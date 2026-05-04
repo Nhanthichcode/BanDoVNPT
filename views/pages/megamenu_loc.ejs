@@ -1,0 +1,64 @@
+<div class="row">
+    <div class="col-sm-4 border-end">
+        <h6 class="text-success fw-bold mb-3"><i class="bi bi-layers-fill"></i> Lớp hiển thị</h6>
+        <div class="form-check mb-2">
+            <input class="form-check-input filter-layer" type="radio" name="layerHienThi" value="tatca" id="layer_tatca" onchange="locDuLieu()" checked>
+            <label class="form-check-label fw-bold" for="layer_tatca">Lớp tổng hợp</label>
+        </div>
+        <div class="form-check mb-2">
+            <input class="form-check-input filter-layer" type="radio" name="layerHienThi" value="khachhang" id="layer_khachhang" onchange="locDuLieu()">
+            <label class="form-check-label text-success" for="layer_khachhang"><i class="bi bi-circle-fill small"></i> Điểm kết nối</label>
+        </div>
+        <div class="form-check mb-2">
+            <input class="form-check-input filter-layer" type="radio" name="layerHienThi" value="sp4" id="layer_sp4" onchange="locDuLieu()">
+            <label class="form-check-label text-danger" for="layer_sp4"><i class="bi bi-triangle-fill small"></i> Splitter 1:4</label>
+        </div>
+        <div class="form-check mb-2">
+            <input class="form-check-input filter-layer" type="radio" name="layerHienThi" value="sp16" id="layer_sp16" onchange="locDuLieu()">
+            <label class="form-check-label text-info" for="layer_sp16"><i class="bi bi-triangle-half small"></i> Splitter 1:16</label>
+        </div>
+    </div>
+
+    <div class="col-sm-4 border-end ps-4">
+        <h6 class="text-dark fw-bold mb-3"><i class="bi bi-tag"></i> Loại dịch vụ</h6>
+        <div class="form-check mb-2">
+            <input class="form-check-input filter-loai" type="radio" name="loaiDichVu" value="" id="loai_tatca" onchange="locDuLieu()" checked>
+            <label class="form-check-label" for="loai_tatca">Tất cả</label>
+        </div>
+        <div class="form-check mb-2">
+            <input class="form-check-input filter-loai" type="radio" name="loaiDichVu" value="Hộ gia đình" id="loai1" onchange="locDuLieu()">
+            <label class="form-check-label" for="loai1">Hộ gia đình</label>
+        </div>
+        <div class="form-check mb-2">
+            <input class="form-check-input filter-loai" type="radio" name="loaiDichVu" value="Doanh nghiệp" id="loai2" onchange="locDuLieu()">
+            <label class="form-check-label" for="loai2">Doanh nghiệp</label>
+        </div>
+        <div class="form-check mb-2">
+            <input class="form-check-input filter-loai" type="radio" name="loaiDichVu" value="Điểm công cộng" id="loai3" onchange="locDuLieu()">
+            <label class="form-check-label" for="loai3">Điểm công cộng</label>
+        </div>
+    </div>
+
+    <div class="col-sm-4 ps-4">
+        <h6 class="text-primary fw-bold mb-3"><i class="bi bi-geo-alt-fill text-danger"></i> Vùng Đô thị Long Xuyên</h6>
+        <div class="form-check mb-2">
+            <input class="form-check-input filter-khuvuc" type="checkbox" value="Phường Long Xuyên" id="kv_1" onchange="locDuLieu()">
+            <label class="form-check-label" for="kv_1">Phường Long Xuyên</label>
+        </div>
+        <div class="form-check mb-2">
+            <input class="form-check-input filter-khuvuc" type="checkbox" value="Phường Mỹ Thới" id="kv_2" onchange="locDuLieu()">
+            <label class="form-check-label" for="kv_2">Phường Mỹ Thới</label>
+        </div>
+        <div class="form-check mb-2">
+            <input class="form-check-input filter-khuvuc" type="checkbox" value="Phường Bình Đức" id="kv_3" onchange="locDuLieu()">
+            <label class="form-check-label" for="kv_3">Phường Bình Đức</label>
+        </div>
+    </div>
+</div>
+
+<hr class="dropdown-divider mt-3 mb-2">
+<div class="d-flex justify-content-end">
+    <button type="button" class="btn btn-sm btn-outline-danger" onclick="document.getElementById('layer_tatca').checked = true; document.getElementById('loai_tatca').checked = true; document.querySelectorAll('.filter-khuvuc').forEach(cb => cb.checked = false); locDuLieu();">
+        <i class="bi bi-trash"></i> Đặt lại bộ lọc
+    </button>
+</div>
