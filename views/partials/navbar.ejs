@@ -56,6 +56,13 @@
                                     <i class="bi bi-shield-lock text-warning me-2"></i> Đổi mật khẩu
                                 </a>
                             </li>
+                            <% if(user.vai_tro_id === 1) { %>
+                            <li>
+                                <button type="button" class="btn btn-danger fw-bold" onclick="xoaTatCaDuLieu()">
+                                    <i class="bi bi-exclamation-triangle-fill"></i> Xóa toàn bộ dữ liệu mạng lưới
+                                </button>
+                            </li>
+                            <% } %>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item text-danger fw-bold py-2" href="/dangxuat">
