@@ -34,7 +34,7 @@ router.get('/su-co', kiemTraDangNhap, async (req, res) => {
         //Tạo một mảng chứa ID của các điểm đã báo cáo
         const mapDangXuLy = {};
         resultSQL.recordset.forEach(r => {
-            mapDangXuLy[r.diem_ket_noi_id] = r.bao_cao_id;
+            mapDangXuLy[r.diem_ket_noi_id] = r.bao_cao_id;            
         });
 
         res.render('pages/baocao_suco', {
@@ -60,8 +60,8 @@ router.get('/lich-su', kiemTraDangNhap, async (req, res) => {
         const pool = await dbManager.getSQLPool();
         let resultSQL = await pool.request().query(`
             SELECT b.id AS truong_hop, b.diem_ket_noi_id, b.loai_su_co, b.thoi_gian_tao AS ngay_bao_cao,
-                   b.trang_thai_xu_ly, t.ho_ten AS nguoi_bao_cao,
-                   (SELECT MAX(thoi_gian_cap_nhat) FROM ChiTietBaoCao c WHERE c.bao_cao_id = b.id) AS ngay_khac_phuc
+                b.trang_thai_xu_ly, t.ho_ten AS nguoi_bao_cao,
+                (SELECT MAX(thoi_gian_cap_nhat) FROM ChiTietBaoCao c WHERE c.bao_cao_id = b.id) AS ngay_khac_phuc                   
             FROM BaoCaoSuCo b
             LEFT JOIN TaiKhoan t ON b.nguoi_tao_id = t.id
             ORDER BY b.thoi_gian_tao DESC
@@ -113,7 +113,14 @@ router.get('/lich-su', kiemTraDangNhap, async (req, res) => {
 //ROUTE: Gia hạn hợp đồng
 router.post('/gia-han', kiemTraDangNhap, async (req, res) => {
     try {
+        console.log("Yêu cầu gia hạn hợp đồng nhận được với dữ liệu:", req.body);
+
         const { diem_ket_noi_id, so_thang_gia_han } = req.body;
+        console.log("Dữ liệu sau khi giải cấu trúc:", { diem_ket_noi_id, so_thang_gia_han });
+        // THÊM ĐOẠN KIỂM TRA NÀY
+        if (!diem_ket_noi_id || !mongoose.Types.ObjectId.isValid(diem_ket_noi_id)) {
+            return hienThiLoiHeThong(req, res, "ID Điểm kết nối rỗng hoặc không hợp lệ!");
+        }
         const diem = await DiemKetNoi.findById(diem_ket_noi_id);
         if (!diem) return res.status(404).send("Không tìm thấy điểm.");
 
@@ -132,8 +139,9 @@ router.post('/gia-han', kiemTraDangNhap, async (req, res) => {
             UPDATE BaoCaoSuCo SET trang_thai_xu_ly = 2 WHERE diem_ket_noi_id = @diem_id AND trang_thai_xu_ly IN (0, 1)
         `);
 
-        return res.redirect('/baocao/su-co');
+        return res.redirect('/');
     } catch (error) {
+        console.error("Lỗi khi lấy danh sách sự cố:", error);
         return hienThiLoiHeThong(req, res, "Đã xảy ra lỗi khi gia hạn.");
     }
 });
@@ -142,7 +150,11 @@ router.post('/gia-han', kiemTraDangNhap, async (req, res) => {
 router.post('/thu-hoi', kiemTraDangNhap, async (req, res) => {
     try {
         const { diem_ket_noi_id } = req.body;
-        
+        console.log("Yêu cầu thu hồi nhận được với ID điểm kết nối:", diem_ket_noi_id);
+
+        if (!diem_ket_noi_id || !mongoose.Types.ObjectId.isValid(diem_ket_noi_id)) {
+            return hienThiLoiHeThong(req, res, "ID Điểm kết nối rỗng hoặc không hợp lệ!");
+        }
         // 1. Đồng bộ SQL: Hủy/Đóng tất cả báo cáo treo của khách này để tránh mồ côi dữ liệu
         const pool = await dbManager.getSQLPool();
         await pool.request().input('diem_id', sql.VarChar, diem_ket_noi_id.toString()).query(`
@@ -152,7 +164,7 @@ router.post('/thu-hoi', kiemTraDangNhap, async (req, res) => {
 
         // 2. Xóa Mongo
         await DiemKetNoi.findByIdAndDelete(diem_ket_noi_id);
-        return res.redirect('/baocao/su-co');
+        return res.redirect('/');
     } catch (error) {
         return hienThiLoiHeThong(req, res, "Lỗi khi thu hồi.");
     }
@@ -209,7 +221,8 @@ router.post('/cap-nhat', kiemTraDangNhap, async (req, res) => {
                 $set: { 'trang_thai_ket_noi.mau_sac': 'Xanh', 'trang_thai_ket_noi.ly_do_su_co': null, 'trang_thai_ket_noi.lan_kiem_tra_cuoi': new Date() }
             });
         }
-        return res.redirect('/baocao/su-co');
+        console.log(`Cập nhật báo cáo ${bao_cao_id} với trạng thái mới: ${trang_thai_moi}`);
+        return res.redirect('/');
     } catch (error) {
         return hienThiLoiHeThong(req, res, "Lỗi cập nhật.");
     }
