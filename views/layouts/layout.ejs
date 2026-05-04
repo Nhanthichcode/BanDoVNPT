@@ -96,6 +96,8 @@
 
 <script>
     // 1. Khai báo biến toàn cục
+    const userVaiTroId = <%= user ? user.vai_tro_id : 'null' %>;
+    console.log("Vai trò người dùng (userVaiTroId):", userVaiTroId);
     window.appMap = null;
     window.appMarkers = {};
     window.appSplitterMarkers = {};
@@ -175,12 +177,29 @@
     }
 
     function zoomToMap(id) {
-        const marker = window.appMarkers[String(id).toLowerCase().trim()];
-        if (marker) performFlyTo(marker);
+        const searchId = String(id).toLowerCase().trim();
+    let marker = null;
+
+    // Ưu tiên tìm Khách Hàng trước
+    if (window.appMarkers && window.appMarkers[searchId]) {
+        marker = window.appMarkers[searchId];
+    } 
+    // Nếu không thấy, tìm tiếp trong Tủ Cáp
+    else if (window.appSplitterMarkers && window.appSplitterMarkers[searchId]) {
+        marker = window.appSplitterMarkers[searchId];
+    }
+
+    if (marker) {
+        performFlyTo(marker);
+    } else {
+        alert("Lỗi: Không tìm thấy tọa độ điểm này trên bản đồ.");
+    }
     }
 
     function zoomToSplitter(id) {
+        console.log("Tìm marker tủ cáp với ID:", id);
         const marker = window.appSplitterMarkers[String(id).toLowerCase().trim()];
+        console.log("Marker tủ cáp tìm được cho ID", id, ":", marker);
         if (marker) performFlyTo(marker);
     }
 
@@ -293,6 +312,25 @@ function capNhatGoiCuocSua() {
         option.textContent = gc.ten_goi_cuoc;
         selectGoiCuoc.appendChild(option);
     });
+}
+
+function kiemTraQuyen() {
+    var quyen1 = sessionStorage.getItem('quyen_nguoi_dung');
+    console.log("Quyền người dùng từ sessionStorage:", quyen1);
+    const quyen = document.getElementById('quyen_nguoi_dung').value;
+    const nutThem = document.getElementById('nut_them_khach_hang');
+    const nutSua = document.querySelectorAll('.nut-sua-khach-hang');
+    const nutXoa = document.querySelectorAll('.nut-xoa-khach-hang');
+
+    if (quyen === 'admin') {
+        if (nutThem) nutThem.style.display = 'block';
+        nutSua.forEach(btn => btn.style.display = 'block');
+        nutXoa.forEach(btn => btn.style.display = 'block');
+    } else {
+        if (nutThem) nutThem.style.display = 'none';
+        nutSua.forEach(btn => btn.style.display = 'none');
+        nutXoa.forEach(btn => btn.style.display = 'none');
+    }
 }
 
 /**
@@ -487,15 +525,19 @@ function chuanBiSuaDiemKhachHang(id) {
     // ==========================================
     // SỰ KIỆN KHI CLICK BẢN ĐỒ DASHBOARD (THÊM NÚT)
     // ==========================================
-    let mapClickPopup = null;
+        let mapClickPopup = null;
 
     function onMapClick(e) {
-        const { lat, lng } = e.latlng;
+        if(userVaiTroId === 3) { // Nếu là vai trò "nhân viên kỹ thuật" (giả sử id = 3)
+            console.log("Bạn không có quyền thêm mới điểm kết nối. Vui lòng liên hệ quản trị viên.");
+            return;
+        }
+    const { lat, lng } = e.latlng;
         if (mapClickPopup) {
             window.appMap.closePopup(mapClickPopup);
             mapClickPopup = null;
         }
-        const popupContent = `
+            const popupContent = `
             <div style="min-width:200px;text-align:center;padding:10px;">
                 <h6 class="fw-bold text-dark mb-3 border-bottom pb-2">
                     <i class="bi bi-geo-alt-fill text-danger"></i> Vị trí đã chọn
@@ -572,6 +614,14 @@ const formModalEl = document.getElementById('modalThemSplitter');
         formModal.show();
 }
 
+
+//Hàm chuẩn bị cho Modal Cập nhật tiến độ
+                    function chuanBiCapNhat(baoCaoId, diemId, tenKhachHang) {
+                        console.log("Chuẩn bị cập nhật tiến độ cho điểm kết nối:", tenKhachHang, "(ID:", diemId + ")", "Báo cáo ID:", baoCaoId);
+                        document.getElementById('bao_cao_id_cn').value = baoCaoId;
+                        document.getElementById('diem_ket_noi_id_cn').value = diemId;
+                        document.getElementById('ten_khach_hang_cn').innerText = tenKhachHang;
+                    }
     // ==========================================
     // KHỞI TẠO CHÍNH KHI DOM SẴN SÀNG
     // ==========================================
@@ -634,6 +684,7 @@ const formModalEl = document.getElementById('modalThemSplitter');
                                 <span class="badge bg-light text-dark border mb-3 px-3 py-2 rounded-pill shadow-sm">
                                     TỦ CẤP ${sp.loai_splitter === '1:4' ? '1' : '2'} | ${sp.sys_id || 'N/A'}
                                 </span>
+                                <% if(user.vai_tro_id !== 3) { %>
                                 <div class="d-grid gap-2">
                                     <a href="/splitter" class="btn btn-sm btn-outline-info text-dark fw-bold shadow-sm rounded-pill">
                                         <i class="bi bi-pencil-square"></i> Quản lý
@@ -644,6 +695,7 @@ const formModalEl = document.getElementById('modalThemSplitter');
                                         <i class="bi bi-pencil-square"></i> Sửa
                                     </button>
                                 </div>
+                                <% } %>
                             </div>`;
 
                         if (sp.loai_splitter === '1:4') {
@@ -685,10 +737,12 @@ const formModalEl = document.getElementById('modalThemSplitter');
 
             // Vẽ khách hàng
             if (khachHangData && khachHangData.length > 0) {
-                khachHangData.forEach(diem => {
+                khachHangData.forEach(diem => {                                  
                     if (diem.vi_tri && diem.vi_tri.coordinates) {
                         const [lng, lat] = diem.vi_tri.coordinates;
                         const isError = diem.trang_thai_ket_noi.mau_sac === 'Đỏ';
+                        const isEndDate = diem.trang_thai_ket_noi.mau_sac === 'Xám';
+                        
                         let iconClass = isError ? 'node-kh-do' : (diem.trang_thai_ket_noi.mau_sac === 'Xám' ? 'node-kh-xam' : 'node-kh-xanh');
                         let iconColor = isError ? '#dc3545' : (diem.trang_thai_ket_noi.mau_sac === 'Xanh' ? '#198754' : '#6c757d');
 
@@ -713,15 +767,37 @@ const formModalEl = document.getElementById('modalThemSplitter');
                                     </div>
                                 </div>
                                 <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-secondary"></i> ${diem.dia_chi}</p>
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-sm btn-warning fw-bold text-dark shadow-sm rounded-pill"
-                                            onclick="chuanBiSuaDiemKhachHang('${diem._id}')"
-                                            data-bs-toggle="modal" data-bs-target="#modalSuaDiemKhachHang">                                       
-                                        <i class="bi bi-pencil-square"></i> Sửa
-                                    </button>
-                                    ${isError ? `<a href="/baocao/su-co" class="btn btn-sm btn-outline-info text-dark fw-bold shadow-sm rounded-pill">
-                                        <i class="bi bi-pencil-square"></i> xử lý
-                                    </a>` : ''}
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <% if(user.vai_tro_id !== 3) { %>
+                                        <button class="btn btn-sm btn-warning fw-bold text-dark shadow-sm rounded-pill px-3"
+                                                onclick="chuanBiSuaDiemKhachHang('${diem._id}')"
+                                                data-bs-toggle="modal" data-bs-target="#modalSuaDiemKhachHang">                                       
+                                            <i class="bi bi-pencil-square me-1"></i> Sửa
+                                        </button>
+                                    <% } %>                                    
+                                ${isError ? `
+                                        <button class="btn btn-sm btn-primary fw-bold shadow-sm rounded-pill px-3 flex-grow-1"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalCapNhatTienDo"
+                                                onclick="chuanBiCapNhat('${diem.bao_cao_id}', '${diem._id}', '${diem.ten_khach_hang}')">
+                                            <i class="bi bi-tools me-1"></i> Xử lý sự cố
+                                        </button>
+                                    ` : ''}
+                                    
+                                    ${isEndDate ? `
+                                        <button class="btn btn-sm btn-success fw-bold text-white shadow-sm rounded-pill px-3 flex-grow-1"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalGiaHan"
+                                                onclick="chuanBiGiaHan('${diem._id}', '${diem.ten_khach_hang}')">
+                                            <i class="bi bi-calendar-plus me-1"></i> Gia hạn
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm rounded-pill px-3 flex-grow-1"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalThuHoi"
+                                                onclick="chuanBiThuHoi('${diem._id}', '${diem.ten_khach_hang}')">
+                                            <i class="bi bi-plug me-1"></i> Thu hồi
+                                        </button>
+                                    ` : ''}
                                 </div>
                             </div>`;
                         marker.bindPopup(popupContent);
@@ -758,7 +834,7 @@ const formModalEl = document.getElementById('modalThemSplitter');
                         splitterListEl.innerHTML += `<li><h6 class="dropdown-header text-warning"><i class="bi bi-hdd-rack-fill"></i> TỦ CẤP 1 (1:4)</h6></li>`;
                         splArr1.forEach(sp => {
                             splitterListEl.innerHTML += `
-                                <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="javascript:void(0)" onclick="zoomToSplitter('${sp._id}')">
+                                <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="javascript:void(0)" onclick='zoomToMap("${sp._id}")'>
                                     <span>${sp.ten_splitter}</span>
                                     <small class="text-muted" style="font-size:0.65rem;">${sp.sys_id || ''}</small>
                                 </a></li>`;
@@ -769,7 +845,7 @@ const formModalEl = document.getElementById('modalThemSplitter');
                         splitterListEl.innerHTML += `<li><h6 class="dropdown-header text-primary"><i class="bi bi-router-fill"></i> TỦ CẤP 2 (1:16)</h6></li>`;
                         splArr2.forEach(sp => {
                             splitterListEl.innerHTML += `
-                                <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="javascript:void(0)" onclick="zoomToSplitter('${sp._id}')">
+                                <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="javascript:void(0)" onclick='zoomToMap("${sp._id}")'>
                                     <span>${sp.ten_splitter}</span>
                                     <small class="text-muted" style="font-size:0.65rem;">${sp.sys_id || ''}</small>
                                 </a></li>`;
@@ -810,6 +886,62 @@ const formModalEl = document.getElementById('modalThemSplitter');
             });
         }
     });
+
+ //Hàm chuẩn bị cho Modal Lập báo cáo
+                    function chuanBiLapBaoCao(id, tenKhachHang) {
+                        document.getElementById('diem_ket_noi_id').value = id;
+                        document.getElementById('ten_khach_hang_bc').innerText = tenKhachHang;
+                    }
+
+                     //Hàm chuẩn bị cho Modal Gia hạn hợp đồng
+                    function chuanBiGiaHan(id, ten, hanCu) {
+                        console.log("Chuẩn bị gia hạn hợp đồng cho:", ten, "(ID:", id + ")", "Hạn cũ:", hanCu);
+                        // document.getElementById('diem_ket_noi_id').value = id;
+                        document.getElementById('diem_id_giahan').value = id;
+                        document.getElementById('ten_khach_hang_gh').innerText = ten;
+                        document.getElementById('ngay_het_han_cu').innerText = hanCu;
+                    }
+
+                    //Hàm chuẩn bị cho Modal Thu hồi thiết bị
+                    function chuanBiThuHoi(id, ten) {
+                        console.log("Chuẩn bị thu hồi thiết bị cho:", ten, "(ID:", id + ")");
+                        document.getElementById('diem_id_thuhoi').value = id;
+                        document.getElementById('ten_khach_hang_th').innerText = ten;
+                    }
+
+    /**
+ * Hàm xóa sạch toàn bộ dữ liệu Khách hàng và Tủ cáp
+ */
+function xoaTatCaDuLieu() {
+    // Lớp bảo vệ 1
+    if (confirm("⚠️ CẢNH BÁO NGUY HIỂM: Bạn có chắc chắn muốn xóa TOÀN BỘ dữ liệu Khách hàng và Tủ cáp khỏi bản đồ không?")) {
+        
+        // Lớp bảo vệ 2
+        if (confirm("Hành động này KHÔNG THỂ HOÀN TÁC. Bạn sẽ mất sạch dữ liệu. Nhấn OK để xác nhận xóa!")) {
+            
+            fetch('/xoa-tat-ca-du-lieu', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    // Xóa xong thì tải lại trang để bản đồ và bảng dữ liệu trống trơn
+                    window.location.reload(); 
+                } else {
+                    alert("Lỗi: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Lỗi mạng hoặc server không phản hồi!');
+            });
+        }
+    }
+}
 </script>
     <%- typeof script !== 'undefined' ? script : '' %>
 </body>
