@@ -120,36 +120,6 @@ router.post('/them', kiemTraDangNhap, async (req, res) => {
     }
 });
 
-// // Route: Hiển thị trang sửa thông tin khách hàng (Giao diện)
-// router.get('/sua/:id', kiemTraDangNhap, async (req, res) => {
-//     try {
-//         const { id } = req.params;
-
-//         // 1. Lấy thông tin chi tiết khách hàng
-//         const diem = await DiemKetNoi.findById(id).populate('splitter_id');
-//         if (!diem) return res.status(404).send("Không tìm thấy điểm kết nối.");
-
-//         // 2. Lấy danh sách Tủ 1:16 để chọn lại (nếu cần)
-//         const danhSachSplitter16 = await Splitter.find({ loai_splitter: '1:16' });
-
-//         // 3. Lấy danh sách gói cước từ SQL Server
-//         const pool = await dbManager.getSQLPool();
-//         let resultGoiCuoc = await pool.request().query('SELECT id, ten_goi_cuoc, loai_hinh_thue_bao FROM GoiCuoc');
-
-//         res.render('pages/diemketnoi_sua', {
-//             title: 'Sửa thông tin khách hàng',
-//             user: req.session.user,
-//             diem: diem,
-//             danhSachSplitter: danhSachSplitter16,
-//             danhSachGoiCuoc: resultGoiCuoc.recordset,
-//             activePage: 'diemketnoi'
-//         });
-//     } catch (error) {
-//         console.error("Lỗi khi mở trang sửa:", error);
-//         hienThiLoiHeThong(req, res);
-//     }
-// });
-
 // Route: Xử lý cập nhật/sửa thông tin điểm kết nối (Update)
 router.post('/sua/:id', kiemTraDangNhap, async (req, res) => {
     try {
