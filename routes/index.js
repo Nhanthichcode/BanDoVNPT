@@ -14,6 +14,8 @@ router.get('/', kiemTraDangNhap, async (req, res) => {
         const pool = await dbManager.getSQLPool();
         const user = req.session.user;
         const danhSachSplitterCap1 = await Splitter.find({ loai_splitter: '1:4' });
+            const danhSachSplitterCap2 = await Splitter.find({ loai_splitter: '1:16' });
+
         const stats = {};
         let pendingList = [];
         let resolvedList = [];
@@ -71,10 +73,7 @@ router.get('/', kiemTraDangNhap, async (req, res) => {
             .populate('splitter_id')
             .sort({ 'trang_thai_ket_noi.lan_kiem_tra_cuoi': -1 });
 
-        // Lấy danh sách tủ 1:16 để đổ vào Form thêm mới
-        const danhSachSplitter16 = await Splitter.find({ loai_splitter: '1:16' });
-
-        let resultGoiCuoc = await pool.request().query('SELECT id, ten_goi_cuoc, loai_hinh_thue_bao FROM GoiCuoc');
+                let resultGoiCuoc = await pool.request().query('SELECT id, ten_goi_cuoc, loai_hinh_thue_bao FROM GoiCuoc');
 
         res.render('pages/dashboard', { 
             user, 
@@ -84,7 +83,7 @@ router.get('/', kiemTraDangNhap, async (req, res) => {
             danhSachSplitterCap1: danhSachSplitterCap1,
             danhSachGoiCuoc: resultGoiCuoc.recordset,
             danhSachDiem: danhSachDiem,
-            danhSachSplitter: danhSachSplitter16,
+            danhSachSplitterCap2: danhSachSplitterCap2,
             activePage: 'dashboard',
             title: 'Bảng điều khiển' 
         });
@@ -111,10 +110,16 @@ router.get('/api/diem-ket-noi', async (req, res) => {
 router.get('/api/splitters', async (req, res) => {
     try {
         const danhSachSplitter = await Splitter.find({});
-        res.status(200).json(danhSachSplitter);
+        const splitters = danhSachSplitter.map(sp => {
+        const obj = sp.toObject();
+        obj.splitter_cha_id = obj.splitter_cha_id ? obj.splitter_cha_id.toString() : "";
+        return obj;
+        });
+        res.status(200).json(splitters);       
     } catch (error) {
         console.error("Lỗi API lấy danh sách tủ cáp:", error);
         res.status(500).json({ error: "Lỗi server" });
     }
 });
+
 module.exports = router;
