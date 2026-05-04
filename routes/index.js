@@ -75,6 +75,9 @@ router.get('/', kiemTraDangNhap, async (req, res) => {
 
                 let resultGoiCuoc = await pool.request().query('SELECT id, ten_goi_cuoc, loai_hinh_thue_bao FROM GoiCuoc');
 
+            const danhSachThuHoi = danhSachDiem.filter(d => d.trang_thai_ket_noi && d.trang_thai_ket_noi.mau_sac === 'Xám');
+        stats.thuHoiCount = danhSachThuHoi.length;
+
         res.render('pages/dashboard', { 
             user, 
             stats, 
@@ -83,6 +86,7 @@ router.get('/', kiemTraDangNhap, async (req, res) => {
             danhSachSplitterCap1: danhSachSplitterCap1,
             danhSachGoiCuoc: resultGoiCuoc.recordset,
             danhSachDiem: danhSachDiem,
+            thuHoiList: danhSachThuHoi,
             danhSachSplitterCap2: danhSachSplitterCap2,
             activePage: 'dashboard',
             title: 'Bảng điều khiển' 
@@ -96,13 +100,39 @@ router.get('/', kiemTraDangNhap, async (req, res) => {
 //Route: API lấy điểm kết nối (Giữ nguyên)
 router.get('/api/diem-ket-noi', async (req, res) => {
     try {
+        // 1. THÊM .lean() để lấy đối tượng thuần thay vì Mongoose Document
         const danhSachDiem = await DiemKetNoi.find({}).populate({
-            path: 'splitter_id', populate: { path: 'splitter_cha_id' }
+            path: 'splitter_id', 
+            populate: { path: 'splitter_cha_id' }
+        }).lean();
+
+        // 2. Truy vấn SQL Server lấy báo cáo
+        const pool = await dbManager.getSQLPool();
+        const resultSQL = await pool.request().query(`
+            SELECT id AS bao_cao_id, diem_ket_noi_id 
+            FROM BaoCaoSuCo 
+            WHERE trang_thai_xu_ly IN (0, 1)
+        `);
+
+        // 3. Tạo Map tra cứu nhanh
+        const mapDangXuLy = {};
+        resultSQL.recordset.forEach(r => {
+            mapDangXuLy[r.diem_ket_noi_id] = r.bao_cao_id;
         });
-        res.status(200).json(danhSachDiem);
+
+        // 4. Hợp nhất dữ liệu (Bây giờ ...diem sẽ hoạt động hoàn hảo)
+        const dataKetQua = danhSachDiem.map(diem => {
+            return {
+                ...diem,
+                // Gán bao_cao_id nếu có trong SQL
+                bao_cao_id: mapDangXuLy[diem._id.toString()] || null
+            };
+        });
+
+        res.status(200).json(dataKetQua);
     } catch (error) {
         console.error("Lỗi API lấy điểm kết nối MongoDB:", error);
-        hienThiLoiHeThong(req, res); 
+        res.status(500).json({ error: "Lỗi hệ thống" }); 
     }
 });
 
@@ -119,6 +149,33 @@ router.get('/api/splitters', async (req, res) => {
     } catch (error) {
         console.error("Lỗi API lấy danh sách tủ cáp:", error);
         res.status(500).json({ error: "Lỗi server" });
+    }
+});
+
+// ==========================================
+// ROUTER: Xóa TẤT CẢ Khách hàng và Tủ cáp (Nguy hiểm!)
+// ==========================================
+router.delete('/xoa-tat-ca-du-lieu', kiemTraDangNhap, async (req, res) => {
+    try {
+        // (Tùy chọn) Bật dòng dưới lên nếu muốn chỉ Admin (vai_tro_id === 1) mới được xóa
+        // if (req.session.user.vai_tro_id !== 1) {
+        //     return res.status(403).json({ success: false, message: 'Từ chối truy cập: Chỉ Admin mới có quyền xóa toàn bộ!' });
+        // }
+
+        // 1. Xóa toàn bộ dữ liệu trong collection DiemKetNoi (Khách hàng)
+        const ketQuaKH = await DiemKetNoi.deleteMany({});
+        
+        // 2. Xóa toàn bộ dữ liệu trong collection Splitter (Tủ cáp)
+        const ketQuaTuCap = await Splitter.deleteMany({});
+
+        res.status(200).json({ 
+            success: true, 
+            message: `Hủy diệt thành công! Đã xóa ${ketQuaKH.deletedCount} khách hàng và ${ketQuaTuCap.deletedCount} tủ cáp.` 
+        });
+        
+    } catch (error) {
+        console.error("Lỗi khi xóa toàn bộ dữ liệu:", error);
+        res.status(500).json({ success: false, message: 'Đã xảy ra lỗi hệ thống khi xóa dữ liệu!' });
     }
 });
 
