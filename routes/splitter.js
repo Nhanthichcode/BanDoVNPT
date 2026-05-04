@@ -105,7 +105,7 @@ router.post('/sua/:id', kiemTraDangNhap, async (req, res) => {
         });
 
         // Cập nhật thành công, quay lại trang quản lý
-        return res.redirect('/splitter');
+        return res.redirect('/');
 
     } catch (error) {
         console.error("Lỗi khi cập nhật Splitter:", error);
