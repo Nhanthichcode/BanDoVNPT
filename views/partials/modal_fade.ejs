@@ -452,3 +452,245 @@
                     </div>
                 </div> 
             </div>
+
+            <div class="modal fade" id="modalLapBaoCao" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content rounded-4 border-0 shadow-lg">
+                        <form action="/baocao/lap-bao-cao" method="POST">
+                            <div class="modal-header bg-danger text-white py-3">
+                                <h5 class="modal-title fw-bold"><i class="bi bi-file-earmark-medical"></i> Lập báo cáo
+                                    sự cố</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                    aria-label="Đóng"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div class="alert alert-danger border-0 shadow-sm">
+                                    Khách hàng: <strong id="ten_khach_hang_bc"></strong>
+                                </div>
+
+                                <input type="hidden" id="diem_ket_noi_id" name="diem_ket_noi_id">
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Phân loại sự cố <span
+                                            class="text-danger">*</span></label>
+                                    <select class="form-select border-danger shadow-sm" name="loai_su_co" required>
+                                        <option value="" disabled selected>-- Chọn loại sự cố --</option>
+                                        <option value="Lỗi cấu hình (PPPoE)">Lỗi cấu hình mạng (PPPoE)</option>
+                                        <option value="Đứt cáp quang">Đứt cáp quang ngoài tuyến</option>
+                                        <option value="Mất điện trạm/tủ">Mất điện khu vực/tủ cáp</option>
+                                        <option value="Hỏng thiết bị (ONT/Router)">Hỏng thiết bị (ONT/Router)</option>
+                                        <option value="Suy hao tín hiệu cao">Suy hao tín hiệu cáp quang</option>
+                                        <option value="Trộm/mất dây cáp">Trộm cắp / Mất dây cáp</option>
+                                        <option value="Chưa rõ nguyên nhân">Khác / Chưa rõ nguyên nhân</option>
+                                    </select>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold">Mô tả ban đầu/Ghi chú</label>
+                                    <textarea class="form-control shadow-sm" name="mo_ta_ban_dau" rows="3"
+                                        placeholder="Ghi chú chi tiết tình trạng để kỹ thuật viên nắm bắt..."></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer bg-light mt-2">
+                                <button type="button" class="btn btn-outline-secondary fw-bold rounded-pill px-4"
+                                    data-bs-dismiss="modal">Hủy</button>
+                                <button type="submit" class="btn btn-danger fw-bold rounded-pill px-4 shadow-sm">
+                                    <i class="bi bi-send-fill"></i> Gửi báo cáo
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="modalGiaHan" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content rounded-4 border-0 shadow-lg">
+                        <form action="/baocao/gia-han" method="POST">
+                            <div class="modal-header bg-success text-white py-3">
+                                <h5 class="modal-title fw-bold"><i class="bi bi-calendar-plus"></i> Gia hạn gói cước
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white"
+                                    data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div class="alert alert-success border-0 shadow-sm">
+                                    Gia hạn cho KH: <strong id="ten_khach_hang_gh"></strong>
+                                </div>
+                                <input type="hidden" id="diem_id_giahan" name="diem_ket_noi_id">
+
+                                <p class="small text-muted mb-3">Ngày hết hạn cũ: <strong id="ngay_het_han_cu"
+                                        class="text-danger"></strong></p>
+
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold text-success">Số tháng gia hạn <span
+                                            class="text-success">*</span></label>
+                                    <select class="form-select border-success shadow-sm fw-bold" name="so_thang_gia_han"
+                                        required>
+                                        <option value="6">6 tháng</option>
+                                        <option value="12" selected>12 tháng</option>
+                                        <option value="1">1 tháng</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer bg-light mt-2">
+                                <button type="button" class="btn btn-outline-secondary fw-bold rounded-pill px-4"
+                                    data-bs-dismiss="modal">Hủy</button>
+                                <button type="submit" class="btn btn-success fw-bold rounded-pill px-4 shadow-sm">
+                                    <i class="bi bi-check-circle-fill"></i> Xác nhận gia hạn
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="modalThuHoi" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content rounded-4 border-0 shadow-lg">
+                        <form action="/baocao/thu-hoi" method="POST">
+                            <div class="modal-header bg-secondary text-white py-3">
+                                <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> Xác nhận
+                                    thu hồi</h5>
+                                <button type="button" class="btn-close btn-close-white"
+                                    data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div class="alert alert-warning border-0 shadow-sm">
+                                    Bạn sắp thu hồi thiết bị và hủy đường truyền của khách hàng: <strong
+                                        id="ten_khach_hang_th" class="text-danger"></strong>
+                                </div>
+                                <input type="hidden" id="diem_id_thuhoi" name="diem_ket_noi_id">
+                                <p class="text-muted small mb-0">Hành động này sẽ <b>XÓA VĨNH VIỄN</b> điểm kết nối này
+                                    khỏi bản đồ giám sát. Không thể hoàn tác!</p>
+                            </div>
+                            <div class="modal-footer bg-light mt-2">
+                                <button type="button" class="btn btn-outline-secondary fw-bold rounded-pill px-4"
+                                    data-bs-dismiss="modal">Hủy</button>
+                                <button type="submit" class="btn btn-danger fw-bold rounded-pill px-4 shadow-sm">
+                                    <i class="bi bi-trash-fill"></i> Xác nhận hủy và thu hồi
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="modalCapNhatTienDo" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content rounded-4 border-0 shadow-lg">
+                        <form action="/baocao/cap-nhat" method="POST">
+                            <div class="modal-header bg-warning py-3">
+                                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-tools"></i> Cập nhật tiến độ
+                                    sửa chữa</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Đóng"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div class="alert alert-warning border-0 shadow-sm text-dark">
+                                    Khách hàng: <strong id="ten_khach_hang_cn"></strong>
+                                </div>
+
+                                <input type="hidden" id="bao_cao_id_cn" name="bao_cao_id">
+                                <input type="hidden" id="diem_ket_noi_id_cn" name="diem_ket_noi_id">
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Chi tiết công việc đã thực hiện <span
+                                            class="text-danger">*</span></label>
+                                    <textarea class="form-control shadow-sm border-warning" name="noi_dung_cap_nhat"
+                                        rows="3" placeholder="VD: Đã xuống hiện trường hàn nối lại cáp quang bị đứt..."
+                                        required></textarea>
+                                </div>
+
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold">Trạng thái hiện tại <span
+                                            class="text-danger">*</span></label>
+                                    <select class="form-select border-warning shadow-sm fw-bold text-dark"
+                                        name="trang_thai_moi" required>
+                                        <option value="1">Đang xử lý </option>
+                                        <option value="2">Đã khắc phục xong</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer bg-light mt-2">
+                                <button type="button" class="btn btn-outline-secondary fw-bold rounded-pill px-4"
+                                    data-bs-dismiss="modal">Hủy</button>
+                                <button type="submit"
+                                    class="btn btn-warning text-dark fw-bold rounded-pill px-4 shadow-sm">
+                                    <i class="bi bi-send-fill"></i> Lưu nhật ký
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="modalBaoCaoMoi" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content rounded-4 border-0 shadow-lg">
+                        <form action="/baocao/lap-bao-cao" method="POST">
+                            <div class="modal-header bg-danger text-white py-3">
+                                <h5 class="modal-title fw-bold"><i class="bi bi-megaphone-fill"></i> BÁO CÁO SỰ CỐ MỚI
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                    aria-label="Đóng"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Chọn điểm kết nối gặp sự cố <span
+                                            class="text-danger">*</span></label>
+                                    <select class="form-select border-danger" name="diem_ket_noi_id"
+                                        id="chon_diem_su_co" onchange="hienThiThongTinDiem()" required>
+                                        <option value="" disabled selected>-- Tìm và chọn khách hàng / Điểm kết nối --
+                                        </option>
+                                        <% if (typeof danhSachBinhThuong !=='undefined' ) { %>
+                                            <% danhSachBinhThuong.forEach(function(diem) { %>
+                                                <option value="<%= diem._id %>" data-diachi="<%= diem.dia_chi %>"
+                                                    data-loai="<%= diem.loai_khach_hang %>">
+                                                    <%= diem.ten_khach_hang %> (<%= diem.dia_chi %>)
+                                                </option>
+                                                <% }); %>
+                                                    <% } %>
+                                    </select>
+                                </div>
+
+                                <div class="bg-light p-3 rounded mb-3 border" id="panel_thong_tin_diem"
+                                    style="display: none;">
+                                    <h6 class="fw-bold text-primary border-bottom pb-2">Thông tin điểm kết nối</h6>
+                                    <div class="row">
+                                        <div class="col-md-4"><span class="text-muted small">Loại hình:</span> <strong
+                                                id="hien_thi_loai_kh" class="text-dark"></strong></div>
+                                        <div class="col-md-8"><span class="text-muted small">Địa chỉ:</span> <strong
+                                                id="hien_thi_dia_chi" class="text-dark"></strong></div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Sự cố báo cáo là gì? <span
+                                            class="text-danger">*</span></label>
+                                    <select class="form-select border-danger shadow-sm" name="loai_su_co" required>
+                                        <option value="" disabled selected>-- Chọn loại sự cố --</option>
+                                        <option value="Lỗi cấu hình (PPPoE)">Lỗi cấu hình mạng (PPPoE)</option>
+                                        <option value="Đứt cáp quang">Đứt cáp quang ngoài tuyến</option>
+                                        <option value="Mất điện trạm/tủ">Mất điện khu vực/tủ cáp</option>
+                                        <option value="Hỏng thiết bị (ONT/Router)">Hỏng thiết bị (ONT/Router)</option>
+                                        <option value="Suy hao tín hiệu cao">Suy hao tín hiệu cáp quang</option>
+                                        <option value="Trộm/mất dây cáp">Trộm cắp / Mất dây cáp</option>
+                                        <option value="Chưa rõ nguyên nhân">Khác / Chưa rõ nguyên nhân</option>
+                                    </select>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold">Ghi chú sự cố</label>
+                                    <textarea class="form-control shadow-sm" name="mo_ta_ban_dau" rows="3"
+                                        placeholder="Nhập thêm chi tiết tình trạng để kỹ thuật viên dễ dàng xử lý..."></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer bg-light mt-2">
+                                <button type="button" class="btn btn-outline-secondary fw-bold rounded-pill px-4"
+                                    data-bs-dismiss="modal">Hủy</button>
+                                <button type="submit" class="btn btn-danger fw-bold rounded-pill px-4 shadow-sm">
+                                    <i class="bi bi-send-fill"></i> Báo cáo
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
