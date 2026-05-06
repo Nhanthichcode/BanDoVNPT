@@ -83,7 +83,7 @@ router.post('/xoa/:id', kiemTraDangNhap, async (req, res) => {
         req.session.error = 'Lỗi hệ thống, không thể xóa!';
     }
 
-    res.redirect('/splitter');
+    res.redirect('/');
 });
 
 // Route: Xử lý cập nhật/sửa thông tin tủ cáp
