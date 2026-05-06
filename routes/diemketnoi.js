@@ -220,7 +220,7 @@ router.post('/xoa/:id', kiemTraDangNhap, kiemTraQuyenAdmin, async (req, res) => 
         req.session.error = 'Lỗi hệ thống, không thể xóa!';
     }
 
-    res.redirect('/diemketnoi');   // quay về trang danh sách
+    res.redirect('/');   // quay về trang danh sách
 });
 
 module.exports = router;
