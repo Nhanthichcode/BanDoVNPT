@@ -462,7 +462,7 @@ router.post('/doi-mat-khau', kiemTraDangNhap, async (req, res) => {
             .query('UPDATE TaiKhoan SET mat_khau = @newPass WHERE id = @userId');
 
         req.session.success = 'Đổi mật khẩu thành công!';
-        res.redirect('/dashboard');
+        res.redirect('/');
     } catch (error) {
         console.error('Lỗi đổi mật khẩu:', error);
         res.render('pages/taikhoan_nguoidung_doi_mat_khau', {
