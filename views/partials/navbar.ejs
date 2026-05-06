@@ -61,6 +61,13 @@
                                 <button type="button" class="btn btn-danger fw-bold" onclick="xoaTatCaDuLieu()">
                                     <i class="bi bi-exclamation-triangle-fill"></i> Xóa toàn bộ dữ liệu mạng lưới
                                 </button>
+                                <div class="d-flex align-items-center gap-2">
+                                    <input type="number" id="soLuongSeed" class="form-control form-control-sm" 
+                                        style="width: 80px;" min="1" max="500" value="40" placeholder="SL">
+                                    <button type="button" class="btn btn-success fw-bold" onclick="seedDuLieu()">
+                                        <i class="bi bi-magic"></i> Tạo dữ liệu mẫu
+                                    </button>
+                                </div>
                             </li>
                             <% } %>
                             <li><hr class="dropdown-divider"></li>
