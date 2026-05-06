@@ -7,6 +7,8 @@ const dbManager = require('../database');
 const { kiemTraDangNhap } = require('../middleware/auth');
 const DiemKetNoi = require('../models/DiemKetNoi');
 const Splitter = require('../models/Splitter');
+const seedData = require('../seedData'); // hoặc đường dẫn đến file seedData.js
+
 
 //Route: Giao diện chính bản đồ
 router.get('/', kiemTraDangNhap, async (req, res) => {
@@ -176,6 +178,28 @@ router.delete('/xoa-tat-ca-du-lieu', kiemTraDangNhap, async (req, res) => {
     } catch (error) {
         console.error("Lỗi khi xóa toàn bộ dữ liệu:", error);
         res.status(500).json({ success: false, message: 'Đã xảy ra lỗi hệ thống khi xóa dữ liệu!' });
+    }
+});
+
+// Route: Gọi seed dữ liệu
+router.post('/api/seed', kiemTraDangNhap, async (req, res) => {
+    // Chỉ Admin (vai_tro_id === 1) mới được quyền seed
+    if (req.session.user.vai_tro_id !== 1) {
+        return res.status(403).json({ success: false, message: 'Bạn không có quyền thực hiện thao tác này.' });
+    }
+
+    const { soLuong } = req.body;
+    console.log("Body nhận được:", req.body);
+    if (!soLuong || isNaN(soLuong) || soLuong < 1 || soLuong > 500) {
+        return res.status(400).json({ success: false, message: 'Số lượng không hợp lệ. Vui lòng nhập từ 1 đến 500.' });
+    }
+
+    try {
+        const result = await seedData(parseInt(soLuong));
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Lỗi khi seed dữ liệu:", error);
+        res.status(500).json({ success: false, message: 'Lỗi máy chủ khi tạo dữ liệu.' });
     }
 });
 
