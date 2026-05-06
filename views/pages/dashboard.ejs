@@ -12,6 +12,8 @@
         min-width: 260px;
         width: max-content;
         max-width: 350px;
+        z-index: 1050 !important; /* Đảm bảo menu luôn nổi lên trên cùng */
+        position: absolute;
     }
     .dropdown-menu-list::-webkit-scrollbar { width: 6px; }
     .dropdown-menu-list::-webkit-scrollbar-thumb { background-color: #adb5bd; border-radius: 10px; }
@@ -55,21 +57,34 @@
 
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-3">
     
-    <!-- THANH TÌM KIẾM TỔNG HỢP -->
-    <div class="row mb-3" style="position: relative; z-index: 10;">
-        <div class="col-12">
-            <div class="input-group shadow-sm border-0" style="border-radius: 10px; overflow: hidden;">
+    <!-- THANH TÌM KIẾM TỔNG HỢP & NÚT ĐIỀU KHIỂN -->
+    <div class="row mb-3" style="position: relative; z-index: 20;"> <!-- Nâng z-index của container -->
+        <div class="col-12 d-flex gap-2">
+            <div class="input-group shadow-sm border-0 flex-grow-1" style="border-radius: 10px; overflow: hidden;">
                 <span class="input-group-text bg-white border-0 ps-3"><i class="bi bi-search text-primary fs-5"></i></span>
-                <input type="text" id="timKiemDashboard" class="form-control border-0 py-3" placeholder="Nhập tên khách hàng, mã thiết bị hoặc trạng thái để lọc nhanh danh sách..." onkeyup="locDanhSachDashboard()">
+                <input type="text" id="timKiemDashboard" class="form-control border-0 py-3" 
+                       placeholder="Nhập tên khách hàng, mã thiết bị hoặc trạng thái..." 
+                       onkeyup="locDanhSachDashboard()">
+                <!-- Nút xóa nhanh tìm kiếm -->
+                <button class="btn btn-white border-0 text-muted" type="button" onclick="resetSearch()"><i class="bi bi-x-lg"></i></button>
             </div>
+            
+            <!-- Nút Ẩn/Hiện toàn bộ menu -->
+            <button class="btn btn-primary shadow-sm text-nowrap d-flex align-items-center" 
+                    style="border-radius: 10px;" 
+                    onclick="toggleAllDropdowns()" 
+                    id="btnToggleDropdown" 
+                    title="Mở/Đóng toàn bộ danh sách">
+                <i class="bi bi-arrows-expand me-1"></i> <span class="d-none d-sm-inline">Mở rộng</span>
+            </button>
         </div>
     </div>
-
     <!-- KHU VỰC CÁC THẺ THỐNG KÊ KÈM DROPDOWN DANH SÁCH -->
     <div class="row g-3 mb-4" style="position: relative; z-index: 10;">    
         
         <!-- 1. TỔNG NGƯỜI DÙNG (Chỉ Admin/Quản lý) -->
         <% if (user.vai_tro_id === 1 || user.vai_tro_id === 2) { %>
+            <!-- Đã bỏ class card-dropdown-container để không bị lỗi javascript null classList -->
             <div class="col-12 col-md-6 col-lg-3 col-xl">
                 <div class="card stat-card h-100 p-3 shadow-sm border-0">
                     <div class="d-flex align-items-center">
@@ -84,7 +99,7 @@
         <% } %>
 
         <!-- 2. TỦ CẤP 1 (Dropdown) -->
-        <div class="col-12 col-md-6 col-lg-3 col-xl">
+        <div class="col-12 col-md-6 col-lg-3 col-xl card-dropdown-container">
             <div class="card stat-card h-100 p-3 dropdown shadow-sm border-0 border-start border-warning border-4" style="cursor: pointer;">
                 <div data-bs-toggle="dropdown" title="Click để xem danh sách Tủ Cấp 1">
                     <div class="d-flex align-items-center justify-content-between">
@@ -116,7 +131,7 @@
         </div>
 
         <!-- 3. TỦ CẤP 2 (Dropdown) -->
-        <div class="col-12 col-md-6 col-lg-3 col-xl">
+        <div class="col-12 col-md-6 col-lg-3 col-xl card-dropdown-container">
             <div class="card stat-card h-100 p-3 dropdown shadow-sm border-0 border-start border-info border-4" style="cursor: pointer;">
                 <div data-bs-toggle="dropdown" title="Click để xem danh sách Tủ Cấp 2">
                     <div class="d-flex align-items-center justify-content-between">
@@ -148,14 +163,14 @@
         </div>
 
         <!-- 4. SỰ CỐ MẠNG - ĐỎ (Dropdown) -->
-        <div class="col-12 col-md-6 col-lg-3 col-xl">
+        <div class="col-12 col-md-6 col-lg-3 col-xl card-dropdown-container">
             <div class="card stat-card h-100 p-3 dropdown shadow-sm border-0 border-start border-danger border-4" style="cursor: pointer;">
                 <div data-bs-toggle="dropdown" title="Danh sách khách hàng mất kết nối">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="d-flex align-items-center">
                             <div class="icon-box bg-danger bg-opacity-10 text-danger me-2"><i class="bi bi-exclamation-triangle-fill fs-5"></i></div>
                             <div>
-                                <h6 class="text-danger fw-bold mb-1 text-uppercase" style="font-size: 0.75rem;">Sự cố (Đỏ) <i class="bi bi-caret-down-fill small"></i></h6>
+                                <h6 class="text-danger fw-bold mb-1 text-uppercase" style="font-size: 0.75rem;">Sự cố<i class="bi bi-caret-down-fill small"></i></h6>
                                 <h4 class="fw-bold mb-0 text-dark"><%= stats.issues || stats.myPendingIssues || 0 %></h4>
                             </div>
                         </div>
@@ -181,7 +196,7 @@
         </div>
 
         <!-- 5. THU HỒI / HẾT HẠN - XÁM (Dropdown) -->
-        <div class="col-12 col-md-6 col-lg-3 col-xl">
+        <div class="col-12 col-md-6 col-lg-3 col-xl card-dropdown-container">
             <div class="card stat-card h-100 p-3 dropdown shadow-sm border-0 border-start border-secondary border-4" style="cursor: pointer;">
                 <div data-bs-toggle="dropdown" title="Danh sách khách hàng đã thu hồi/hết hạn">
                     <div class="d-flex align-items-center justify-content-between">
@@ -217,7 +232,7 @@
     <!-- KHU VỰC BẢN ĐỒ -->
     <div class="card stat-card p-4">
         <h5 class="fw-bold mb-3"><i class="bi bi-map-fill me-2 text-primary"></i> Giám sát bản đồ trực tuyến</h5>
-        <div id="map-dashboard" style="height: 480px; border-radius: 10px; z-index: 1;" class="border shadow-sm">
+        <div id="map-dashboard" style="height: 650px; border-radius: 10px; z-index: 1;" class="border shadow-sm">
             <div class="h-100 d-flex align-items-center justify-content-center bg-light">
                 <div class="spinner-border text-primary me-2" role="status"></div>
                 <span>Đang tải dữ liệu mạng lưới...</span>
@@ -228,22 +243,110 @@
 </main>
 
 <script>
+let isAllOpen = false;
+
+/**
+ * Mở/Đóng toàn bộ các dropdown cùng lúc
+ */
+function toggleAllDropdowns() {
+    isAllOpen = !isAllOpen;
+    const allCards = document.querySelectorAll(".card-dropdown-container");
+    const btnIcon = document.querySelector("#btnToggleDropdown i");
+    const btnText = document.querySelector("#btnToggleDropdown span");
+
+    allCards.forEach(cardContainer => {
+        const dropdownMenu = cardContainer.querySelector(".dropdown-menu");
+        if (dropdownMenu) { // Chốt chặn an toàn
+            if (isAllOpen) {
+                dropdownMenu.classList.add("show");
+                dropdownMenu.setAttribute("data-bs-popper", "static");
+            } else {
+                dropdownMenu.classList.remove("show");
+                dropdownMenu.removeAttribute("data-bs-popper");
+            }
+        }
+    });
+
+    // Cập nhật giao diện nút bấm
+    if (isAllOpen) {
+        btnIcon.classList.replace("bi-arrows-expand", "bi-arrows-collapse");
+        if(btnText) btnText.innerText = "Thu gọn";
+    } else {
+        btnIcon.classList.replace("bi-arrows-collapse", "bi-arrows-expand");
+        if(btnText) btnText.innerText = "Mở rộng";
+    }
+}
+
 /**
  * Hàm lọc dữ liệu theo thời gian thực (Real-time Filtering)
  * Ẩn/hiện các <li> bên trong các dropdown dựa trên từ khóa tìm kiếm
  */
 function locDanhSachDashboard() {
-    const tuKhoa = document.getElementById("timKiemDashboard").value.toLowerCase();
-    const danhSachHienThi = document.querySelectorAll(".item-loc");
+    const tuKhoa = document.getElementById("timKiemDashboard").value.toLowerCase().trim();
+    const allCards = document.querySelectorAll(".card-dropdown-container");
 
-    danhSachHienThi.forEach(item => {
-        const noiDung = item.textContent.toLowerCase();
-        // Nếu có chứa từ khóa thì hiển thị, ngược lại thì ẩn dòng đó đi
-        if (noiDung.includes(tuKhoa)) {
-            item.style.display = ""; 
+    allCards.forEach(cardContainer => {
+        const items = cardContainer.querySelectorAll(".item-loc");
+        const dropdownMenu = cardContainer.querySelector(".dropdown-menu");
+        
+        // Nếu card vô tình không có dropdown menu thì bỏ qua để tránh báo lỗi null
+        if (!dropdownMenu) return; 
+
+        let hasMatchInCard = false;
+
+        items.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            if (text.includes(tuKhoa)) {
+                item.style.setProperty('display', 'block', 'important');
+                hasMatchInCard = true;
+            } else {
+                item.style.setProperty('display', 'none', 'important');
+            }
+        });
+
+        // Xử lý Co giãn/Ẩn hiện menu khi tìm kiếm
+        if (tuKhoa.length > 0) {
+            if (hasMatchInCard) {
+                cardContainer.style.display = ""; 
+                dropdownMenu.classList.add("show");
+                dropdownMenu.setAttribute("data-bs-popper", "static"); // Giữ menu cố định khi bung
+            } else {
+                cardContainer.style.display = "none";
+                dropdownMenu.classList.remove("show");
+            }
         } else {
-            item.style.display = "none";
+            // Khi ô tìm kiếm trống: Trả về trạng thái bình thường
+            cardContainer.style.display = "";
+            items.forEach(item => item.style.display = "");
+            
+            // Nếu người dùng không bật chế độ "Mở toàn bộ", thì mới đóng menu lại
+            if (!isAllOpen) {
+                dropdownMenu.classList.remove("show");
+                dropdownMenu.removeAttribute("data-bs-popper");
+            }
         }
     });
 }
+
+/**
+ * Reset tìm kiếm
+ */
+function resetSearch() {
+    document.getElementById("timKiemDashboard").value = "";
+    locDanhSachDashboard();
+}
+
+/**
+ * Đảm bảo các dropdown hoạt động mượt mà khi click thủ công
+ */
+document.querySelectorAll('.dropdown-trigger').forEach(trigger => {
+    trigger.addEventListener('click', function() {
+        const icon = this.querySelector('.toggle-icon');
+        if(icon) {
+            icon.classList.toggle('bi-caret-down-fill');
+            icon.classList.toggle('bi-caret-up-fill');
+        }
+    });
+});
+
 </script>
