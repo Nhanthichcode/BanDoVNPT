@@ -97,7 +97,6 @@
 <script>
     // 1. Khai báo biến toàn cục
     const userVaiTroId = <%= user ? user.vai_tro_id : 'null' %>;
-    console.log("Vai trò người dùng (userVaiTroId):", userVaiTroId);
     window.appMap = null;
     window.appMarkers = {};
     window.appSplitterMarkers = {};
@@ -108,24 +107,23 @@
     let isEditingMap = false;
     let currentScale = parseFloat(localStorage.getItem('interfaceScale')) || 0.8;
 
-                    const mangGoiCuoc = <%- JSON.stringify(typeof danhSachGoiCuoc !== 'undefined' ? danhSachGoiCuoc : []) %>;
+    const mangGoiCuoc = <%- JSON.stringify(typeof danhSachGoiCuoc !== 'undefined' ? danhSachGoiCuoc : []) %>;
 
-                    function capNhatGoiCuoc() {
-                        const loaiHinh = document.getElementById('chon_loai_hinh').value;
-                        const selectGoiCuoc = document.getElementById('chon_goi_cuoc');
-                        selectGoiCuoc.innerHTML = '<option value="">-- Chọn gói cước --</option>';
+    function capNhatGoiCuoc() {
+        const loaiHinh = document.getElementById('chon_loai_hinh').value;
+        const selectGoiCuoc = document.getElementById('chon_goi_cuoc');
+        selectGoiCuoc.innerHTML = '<option value="">-- Chọn gói cước --</option>';
 
-                        if (!loaiHinh) return;
-                        const danhSachLoc = mangGoiCuoc.filter(gc => gc.loai_hinh_thue_bao && gc.loai_hinh_thue_bao.includes(loaiHinh));
+        if (!loaiHinh) return;
+        const danhSachLoc = mangGoiCuoc.filter(gc => gc.loai_hinh_thue_bao && gc.loai_hinh_thue_bao.includes(loaiHinh));
 
-                        danhSachLoc.forEach(gc => {
-                            const option = document.createElement('option');
-                            option.value = gc.id;
-                            option.textContent = gc.ten_goi_cuoc;
-                            selectGoiCuoc.appendChild(option);
-                        });
-                    }
-                
+        danhSachLoc.forEach(gc => {
+            const option = document.createElement('option');
+            option.value = gc.id;
+            option.textContent = gc.ten_goi_cuoc;
+            selectGoiCuoc.appendChild(option);
+        });
+    }
 
     // ==========================================
     // HÀM ÁP DỤNG SCALE GIAO DIỆN
@@ -178,22 +176,22 @@
 
     function zoomToMap(id) {
         const searchId = String(id).toLowerCase().trim();
-    let marker = null;
+        let marker = null;
 
-    // Ưu tiên tìm Khách Hàng trước
-    if (window.appMarkers && window.appMarkers[searchId]) {
-        marker = window.appMarkers[searchId];
-    } 
-    // Nếu không thấy, tìm tiếp trong Tủ Cáp
-    else if (window.appSplitterMarkers && window.appSplitterMarkers[searchId]) {
-        marker = window.appSplitterMarkers[searchId];
-    }
+        // Ưu tiên tìm Khách Hàng trước
+        if (window.appMarkers && window.appMarkers[searchId]) {
+            marker = window.appMarkers[searchId];
+        } 
+        // Nếu không thấy, tìm tiếp trong Tủ Cáp
+        else if (window.appSplitterMarkers && window.appSplitterMarkers[searchId]) {
+            marker = window.appSplitterMarkers[searchId];
+        }
 
-    if (marker) {
-        performFlyTo(marker);
-    } else {
-        alert("Lỗi: Không tìm thấy tọa độ điểm này trên bản đồ.");
-    }
+        if (marker) {
+            performFlyTo(marker);
+        } else {
+            alert("Lỗi: Không tìm thấy tọa độ điểm này trên bản đồ.");
+        }
     }
 
     function zoomToSplitter(id) {
@@ -220,63 +218,56 @@
     }
     let currentModal = '', input_vi_do='', input_kinh_do='';
 
-function SetDataModal(name, inputViDoId, inputKinhDoId) {
-    // 1. Lưu ID vào biến toàn cục để hàm xacNhanToaDo() biết chỗ điền dữ liệu về sau
-    currentModal = name;
-    input_vi_do = inputViDoId;
-    input_kinh_do = inputKinhDoId;
+    function SetDataModal(name, inputViDoId, inputKinhDoId) {
+        currentModal = name;
+        input_vi_do = inputViDoId;
+        input_kinh_do = inputKinhDoId;
 
-    // 2. Lấy giá trị tọa độ hiện có từ các input của form (nếu có - chế độ Sửa)
-    const lat = document.getElementById(inputViDoId)?.value;
-    const lng = document.getElementById(inputKinhDoId)?.value;
+        const lat = document.getElementById(inputViDoId)?.value;
+        const lng = document.getElementById(inputKinhDoId)?.value;
 
-    // 3. Nếu đã có tọa độ hợp lệ, chuẩn bị sẵn trạng thái cho bản đồ trong Modal
-    if (lat && lng && parseFloat(lat) !== 0) {
-        capNhatToaDoModal(lat, lng);
-    } else {
-        // Nếu là thêm mới (tọa độ trống/0), xóa marker cũ để tránh nhầm lẫn[cite: 6]
-        capNhatToaDoModal(0, 0);
-    }
-}
-
-function xacNhanToaDo() {  
-    const lat = document.getElementById('display-lat').innerText;
-    const lng = document.getElementById('display-lng').innerText;
-    if (lat === "0") return alert("Vui lòng click chọn một điểm trên bản đồ!");
-    
-    // Điền tọa độ vào form (nếu có)
-    const inputViDo = document.getElementById(input_vi_do);
-    const inputKinhDo = document.getElementById(input_kinh_do);
-    if (inputViDo && inputKinhDo) {
-        inputViDo.value = lat;
-        inputKinhDo.value = lng;
+        if (lat && lng && parseFloat(lat) !== 0) {
+            capNhatToaDoModal(lat, lng);
+        } else {
+            capNhatToaDoModal(0, 0);
+        }
     }
 
-    // Đóng modal picker an toàn
-    const mapModalEl = document.getElementById('modalPickLocation');
-    const mapModal = bootstrap.Modal.getInstance(mapModalEl);
-    if (mapModal) {
-        mapModal.hide();
-    }
+    function xacNhanToaDo() {  
+        const lat = document.getElementById('display-lat').innerText;
+        const lng = document.getElementById('display-lng').innerText;
+        if (lat === "0") return alert("Vui lòng click chọn một điểm trên bản đồ!");
+        
+        const inputViDo = document.getElementById(input_vi_do);
+        const inputKinhDo = document.getElementById(input_kinh_do);
+        if (inputViDo && inputKinhDo) {
+            inputViDo.value = lat;
+            inputKinhDo.value = lng;
+        }
 
-    // Đợi picker ẩn hoàn toàn rồi mở modal nguồn
-    setTimeout(() => {
-        if (!currentModal) {
-            console.warn('Chưa set modal nguồn (currentModal rỗng)');
-            return;
+        const mapModalEl = document.getElementById('modalPickLocation');
+        const mapModal = bootstrap.Modal.getInstance(mapModalEl);
+        if (mapModal) {
+            mapModal.hide();
         }
-        const formModalEl = document.getElementById(currentModal);
-        if (!formModalEl) {
-            console.error('Không tìm thấy modal:', currentModal);
-            return;
-        }
-        let formModal = bootstrap.Modal.getInstance(formModalEl);
-        if (!formModal) {
-            formModal = new bootstrap.Modal(formModalEl);
-        }
-        formModal.show();
-    }, 400);
-}
+
+        setTimeout(() => {
+            if (!currentModal) {
+                console.warn('Chưa set modal nguồn (currentModal rỗng)');
+                return;
+            }
+            const formModalEl = document.getElementById(currentModal);
+            if (!formModalEl) {
+                console.error('Không tìm thấy modal:', currentModal);
+                return;
+            }
+            let formModal = bootstrap.Modal.getInstance(formModalEl);
+            if (!formModal) {
+                formModal = new bootstrap.Modal(formModalEl);
+            }
+            formModal.show();
+        }, 400);
+    }
 
     // ==========================================
     // HÀM SỬA SPLITTER
@@ -288,219 +279,185 @@ function xacNhanToaDo() {
         document.getElementById('sua_loai_splitter_sua').value = loai;
         document.getElementById('vi_do_tu_pon_sua').value = lat;
         document.getElementById('kinh_do_tu_pon_sua').value = lng;
-        document.getElementById('sua_splitter_cha_id').value = chaId? chaId : '';    
+        document.getElementById('sua_splitter_cha_id').value = chaId ? chaId : '';    
         
         const khungCha = document.getElementById('sua_khung_splitter_cha_sua');
         if (loai === '1:16') {
             khungCha.classList.remove('d-none');                        
         } else {
             khungCha.classList.add('d-none');
-            }
+        }
     }
 
-function capNhatGoiCuocSua() {
-    const loaiHinh = document.getElementById('chon_loai_hinh_sua').value;
-    const selectGoiCuoc = document.getElementById('chon_goi_cuoc_sua');
-    selectGoiCuoc.innerHTML = '<option value="">-- Chọn gói cước --</option>';
+    function capNhatGoiCuocSua() {
+        const loaiHinh = document.getElementById('chon_loai_hinh_sua').value;
+        const selectGoiCuoc = document.getElementById('chon_goi_cuoc_sua');
+        selectGoiCuoc.innerHTML = '<option value="">-- Chọn gói cước --</option>';
 
-    if (!loaiHinh) return;
-    const danhSachLoc = mangGoiCuoc.filter(gc => gc.loai_hinh_thue_bao && gc.loai_hinh_thue_bao.includes(loaiHinh));
+        if (!loaiHinh) return;
+        const danhSachLoc = mangGoiCuoc.filter(gc => gc.loai_hinh_thue_bao && gc.loai_hinh_thue_bao.includes(loaiHinh));
 
-    danhSachLoc.forEach(gc => {
-        const option = document.createElement('option');
-        option.value = gc.id;
-        option.textContent = gc.ten_goi_cuoc;
-        selectGoiCuoc.appendChild(option);
-    });
-}
-
-function kiemTraQuyen() {
-    var quyen1 = sessionStorage.getItem('quyen_nguoi_dung');
-    console.log("Quyền người dùng từ sessionStorage:", quyen1);
-    const quyen = document.getElementById('quyen_nguoi_dung').value;
-    const nutThem = document.getElementById('nut_them_khach_hang');
-    const nutSua = document.querySelectorAll('.nut-sua-khach-hang');
-    const nutXoa = document.querySelectorAll('.nut-xoa-khach-hang');
-
-    if (quyen === 'admin') {
-        if (nutThem) nutThem.style.display = 'block';
-        nutSua.forEach(btn => btn.style.display = 'block');
-        nutXoa.forEach(btn => btn.style.display = 'block');
-    } else {
-        if (nutThem) nutThem.style.display = 'none';
-        nutSua.forEach(btn => btn.style.display = 'none');
-        nutXoa.forEach(btn => btn.style.display = 'none');
-    }
-}
-
-/**
- * Lấy toàn bộ thông tin chi tiết của một điểm kết nối dựa trên ID
- * @param {string} id - ID của điểm kết nối (_id từ MongoDB)
- * @returns {Object|null} - Đối tượng chứa toàn bộ thông tin đã được làm phẳng hoặc null
- */
-function getThongTinChiTietDiemKetNoi(id) {
-    if (!window.khachHangData) {
-        console.error("Dữ liệu khách hàng chưa được tải!");
-        return null;
+        danhSachLoc.forEach(gc => {
+            const option = document.createElement('option');
+            option.value = gc.id;
+            option.textContent = gc.ten_goi_cuoc;
+            selectGoiCuoc.appendChild(option);
+        });
     }
 
-    // Tìm khách hàng trong dữ liệu đã fetch từ API /api/diem-ket-noi
-    const kh = window.khachHangData.find(item => String(item._id) === String(id));
+    function kiemTraQuyen() {
+        var quyen1 = sessionStorage.getItem('quyen_nguoi_dung');
+        console.log("Quyền người dùng từ sessionStorage:", quyen1);
+        const quyen = document.getElementById('quyen_nguoi_dung').value;
+        const nutThem = document.getElementById('nut_them_khach_hang');
+        const nutSua = document.querySelectorAll('.nut-sua-khach-hang');
+        const nutXoa = document.querySelectorAll('.nut-xoa-khach-hang');
 
-    if (!kh) {
-        console.warn("Không tìm thấy điểm kết nối với ID:", id);
-        return null;
+        if (quyen === 'admin') {
+            if (nutThem) nutThem.style.display = 'block';
+            nutSua.forEach(btn => btn.style.display = 'block');
+            nutXoa.forEach(btn => btn.style.display = 'block');
+        } else {
+            if (nutThem) nutThem.style.display = 'none';
+            nutSua.forEach(btn => btn.style.display = 'none');
+            nutXoa.forEach(btn => btn.style.display = 'none');
+        }
     }
 
-    // Trích xuất và tổ chức lại dữ liệu để dễ sử dụng
-    return {
-        id: kh._id,
-        ten: kh.ten_khach_hang,
-        loai: kh.loai_khach_hang,
-        dia_chi: kh.dia_chi,
-        vi_tri: {
-            lat: kh.vi_tri?.coordinates[1], // Vĩ độ
-            lng: kh.vi_tri?.coordinates[0]  // Kinh độ
-        },
-        // Thông tin hợp đồng
-        hop_dong: {
-            goi_cuoc_id: kh.thong_tin_hop_dong?.goi_cuoc_id,
-            ngay_dang_ky: kh.thong_tin_hop_dong?.ngay_dang_ky,
-            thoi_gian_su_dung: kh.thong_tin_hop_dong?.thoi_gian_su_dung_thang,
-            ngay_het_han: kh.thong_tin_hop_dong?.ngay_het_han
-        },
-        // Thông tin kỹ thuật PPPoE & hạ tầng
-        ky_thuat: {
-            username: kh.thong_tin_pppoe?.username,
-            password: kh.thong_tin_pppoe?.password,
-            rack: kh.thong_tin_pppoe?.circuit_id?.rack,
-            shelf: kh.thong_tin_pppoe?.circuit_id?.shelf,
-            slot: kh.thong_tin_pppoe?.circuit_id?.slot,
-            port: kh.thong_tin_pppoe?.circuit_id?.port,
-            vpi: kh.thong_tin_pppoe?.circuit_id?.vpi,
-            vci: kh.thong_tin_pppoe?.circuit_id?.vci
-        },
-        // Thông tin tủ cáp (đã populate trong router)
-        splitter: {
-            id: kh.splitter_id?._id,
-            ten: kh.splitter_id?.ten_splitter,
-            sys_id: kh.splitter_id?.sys_id,
-            loai: kh.splitter_id?.loai_splitter,
-            splitter_cha: kh.splitter_id?.splitter_cha_id?.ten_splitter // Dữ liệu từ populate sâu
-        },
-        // Trạng thái hệ thống
-        trang_thai: {
-            mau: kh.trang_thai_ket_noi?.mau_sac,
-            ly_do: kh.trang_thai_ket_noi?.ly_do_su_co,
-            kiem_tra_cuoi: kh.trang_thai_ket_noi?.lan_kiem_tra_cuoi
-        },
-        nguoi_tao: kh.nguoi_tao
-    };
-}
-
-/**
- * Cập nhật vị trí hiển thị bên trong Modal Chọn vị trí
- * @param {number|string} lat - Vĩ độ
- * @param {number|string} lng - Kinh độ
- */
-function capNhatToaDoModal(lat, lng) {
-    const nLat = parseFloat(lat);
-    const nLng = parseFloat(lng);
-
-    // Kiểm tra tính hợp lệ của tọa độ[cite: 6]
-    if (isNaN(nLat) || isNaN(nLng) || nLat === 0) {
-        if (tempMarker && pickerMap) pickerMap.removeLayer(tempMarker);
-        document.getElementById('display-lat').innerText = "0";
-        document.getElementById('display-lng').innerText = "0";
-        return;
-    }
-
-    // Cập nhật số liệu hiển thị trên các Badge trong Modal[cite: 6]
-    document.getElementById('display-lat').innerText = nLat.toFixed(6);
-    document.getElementById('display-lng').innerText = nLng.toFixed(6);
-
-    // Nếu bản đồ picker đã khởi tạo, di chuyển camera và đặt Marker[cite: 6]
-    if (pickerMap) {
-        // Di chuyển tâm bản đồ và phóng to để quan sát rõ[cite: 6]
-        pickerMap.setView([nLat, nLng], 18);
-        
-        // Cập nhật Marker (sử dụng hàm updateMarker bạn đã viết sẵn)[cite: 6]
-        updateMarker(nLat, nLng);
-        
-        // Đảm bảo bản đồ không bị lỗi hiển thị các ô xám[cite: 6]
-        setTimeout(() => pickerMap.invalidateSize(), 200);
-    }
-}
-function chuanBiSuaDiemKhachHang(id) {
-    // 1. Lấy dữ liệu đã được làm phẳng từ helper
-    const kh = getThongTinChiTietDiemKetNoi(id);
-    
-    if (!kh) {
-        alert("Không tìm thấy thông tin chi tiết của điểm kết nối này!");
-        return;
-    }
-
-    try {
-        console.log("Đang điền dữ liệu sửa đầy đủ cho:", kh.ten);
-        
-        // --- 1. THÔNG TIN KHÁCH HÀNG & LOẠI HÌNH ---
-        document.getElementById('ten_khach_hang_sua').value = kh.ten || '';
-        document.getElementById('dia_chi_sua_khach_hang_sua').value = kh.dia_chi || '';
-        document.getElementById('vi_do_sua_khach_hang_sua').value = kh.vi_tri.lat || '';
-        document.getElementById('kinh_do_sua_khach_hang_sua').value = kh.vi_tri.lng || '';
-        
-        // Cập nhật "Loại hình mạng" (loai_khach_hang trong Schema)
-        const loaiHinhSelect = document.getElementById('chon_loai_hinh_sua');
-        if (loaiHinhSelect) {
-            loaiHinhSelect.value = kh.loai || '';
-            // Kích hoạt hàm render danh sách gói cước theo loại hình vừa chọn
-            if (typeof capNhatGoiCuocSua === 'function') {
-                capNhatGoiCuocSua(); 
-            }
+    /**
+     * Lấy toàn bộ thông tin chi tiết của một điểm kết nối dựa trên ID
+     */
+    function getThongTinChiTietDiemKetNoi(id) {
+        if (!window.khachHangData) {
+            console.error("Dữ liệu khách hàng chưa được tải!");
+            return null;
         }
 
-        // Cập nhật "Gói cước đăng ký" (Sử dụng setTimeout để đợi danh sách render xong)
-        setTimeout(() => {
-            const goiCuocSelect = document.getElementById('chon_goi_cuoc_sua');
-            if (goiCuocSelect) {
-                goiCuocSelect.value = kh.hop_dong.goi_cuoc_id || '';
-            }
-        }, 200);
+        const kh = window.khachHangData.find(item => String(item._id) === String(id));
 
-        // Các thông tin hợp đồng khác
-        document.getElementById('ngay_dang_ky_sua_khach_hang_sua').value = kh.hop_dong.ngay_dang_ky ? kh.hop_dong.ngay_dang_ky.substr(0, 10) : '';
-        document.getElementById('thoi_gian_su_dung_thang_sua_khach_hang_sua').value = kh.hop_dong.thoi_gian_su_dung || '';
-
-        // --- 2. HẠ TẦNG QUANG & TỦ CÁP ---
-        // Điền "Tủ cáp" (Splitter ID)
-        const splitterSelect = document.getElementById('splitter_id_sua_khach_hang_sua');
-        if (splitterSelect) {
-            splitterSelect.value = kh.splitter.id || '';
+        if (!kh) {
+            console.warn("Không tìm thấy điểm kết nối với ID:", id);
+            return null;
         }
 
-        // Điền "Mã trạm" (Lấy từ thông tin tủ cáp đã populate)[cite: 17]
-        const sysIdInput = document.getElementById('sys_id_sua_khach_hang_sua');
-        if (sysIdInput) {
-            sysIdInput.value = kh.splitter.sys_id || '';
-        }
-        
-        // Thông tin PPPoE
-        document.getElementById('username_sua_khach_hang_sua').value = kh.ky_thuat.username || '';
-        document.getElementById('password_sua_khach_hang_sua').value = kh.ky_thuat.password || '';
-
-        // Thông số Circuit ID
-        document.getElementById('rack_sua_khach_hang_sua').value = kh.ky_thuat.rack || '';
-        document.getElementById('shelf_sua_khach_hang_sua').value = kh.ky_thuat.shelf || '0';
-        document.getElementById('slot_sua_khach_hang_sua').value = kh.ky_thuat.slot || '';
-        document.getElementById('port_sua_khach_hang_sua').value = kh.ky_thuat.port || '';
-
-        // Thiết lập đường dẫn gửi form[cite: 17]
-        document.getElementById('formsuakhachhang').action = '/diemketnoi/sua/' + id;
-
-    } catch (e) {
-        console.error("Lỗi khi điền dữ liệu bổ sung vào form sửa:", e);
+        return {
+            id: kh._id,
+            ten: kh.ten_khach_hang,
+            loai: kh.loai_khach_hang,
+            dia_chi: kh.dia_chi,
+            vi_tri: {
+                lat: kh.vi_tri?.coordinates[1],
+                lng: kh.vi_tri?.coordinates[0]
+            },
+            hop_dong: {
+                goi_cuoc_id: kh.thong_tin_hop_dong?.goi_cuoc_id,
+                ngay_dang_ky: kh.thong_tin_hop_dong?.ngay_dang_ky,
+                thoi_gian_su_dung: kh.thong_tin_hop_dong?.thoi_gian_su_dung_thang,
+                ngay_het_han: kh.thong_tin_hop_dong?.ngay_het_han
+            },
+            ky_thuat: {
+                username: kh.thong_tin_pppoe?.username,
+                password: kh.thong_tin_pppoe?.password,
+                rack: kh.thong_tin_pppoe?.circuit_id?.rack,
+                shelf: kh.thong_tin_pppoe?.circuit_id?.shelf,
+                slot: kh.thong_tin_pppoe?.circuit_id?.slot,
+                port: kh.thong_tin_pppoe?.circuit_id?.port,
+                vpi: kh.thong_tin_pppoe?.circuit_id?.vpi,
+                vci: kh.thong_tin_pppoe?.circuit_id?.vci
+            },
+            splitter: {
+                id: kh.splitter_id?._id,
+                ten: kh.splitter_id?.ten_splitter,
+                sys_id: kh.splitter_id?.sys_id,
+                loai: kh.splitter_id?.loai_splitter,
+                splitter_cha: kh.splitter_id?.splitter_cha_id?.ten_splitter
+            },
+            trang_thai: {
+                mau: kh.trang_thai_ket_noi?.mau_sac,
+                ly_do: kh.trang_thai_ket_noi?.ly_do_su_co,
+                kiem_tra_cuoi: kh.trang_thai_ket_noi?.lan_kiem_tra_cuoi
+            },
+            nguoi_tao: kh.nguoi_tao
+        };
     }
-}
+
+    function capNhatToaDoModal(lat, lng) {
+        const nLat = parseFloat(lat);
+        const nLng = parseFloat(lng);
+
+        if (isNaN(nLat) || isNaN(nLng) || nLat === 0) {
+            if (tempMarker && pickerMap) pickerMap.removeLayer(tempMarker);
+            document.getElementById('display-lat').innerText = "0";
+            document.getElementById('display-lng').innerText = "0";
+            return;
+        }
+
+        document.getElementById('display-lat').innerText = nLat.toFixed(6);
+        document.getElementById('display-lng').innerText = nLng.toFixed(6);
+
+        if (pickerMap) {
+            pickerMap.setView([nLat, nLng], 18);
+            updateMarker(nLat, nLng);
+            setTimeout(() => pickerMap.invalidateSize(), 200);
+        }
+    }
+
+    function chuanBiSuaDiemKhachHang(id) {
+        const kh = getThongTinChiTietDiemKetNoi(id);
+        
+        if (!kh) {
+            alert("Không tìm thấy thông tin chi tiết của điểm kết nối này!");
+            return;
+        }
+
+        try {
+            document.getElementById('ten_khach_hang_sua').value = kh.ten || '';
+            document.getElementById('dia_chi_sua_khach_hang_sua').value = kh.dia_chi || '';
+            document.getElementById('vi_do_sua_khach_hang_sua').value = kh.vi_tri.lat || '';
+            document.getElementById('kinh_do_sua_khach_hang_sua').value = kh.vi_tri.lng || '';
+            
+            const loaiHinhSelect = document.getElementById('chon_loai_hinh_sua');
+            if (loaiHinhSelect) {
+                loaiHinhSelect.value = kh.loai || '';
+                if (typeof capNhatGoiCuocSua === 'function') {
+                    capNhatGoiCuocSua(); 
+                }
+            }
+
+            setTimeout(() => {
+                const goiCuocSelect = document.getElementById('chon_goi_cuoc_sua');
+                if (goiCuocSelect) {
+                    goiCuocSelect.value = kh.hop_dong.goi_cuoc_id || '';
+                }
+            }, 200);
+
+            document.getElementById('ngay_dang_ky_sua_khach_hang_sua').value = kh.hop_dong.ngay_dang_ky ? kh.hop_dong.ngay_dang_ky.substr(0, 10) : '';
+            document.getElementById('thoi_gian_su_dung_thang_sua_khach_hang_sua').value = kh.hop_dong.thoi_gian_su_dung || '';
+
+            const splitterSelect = document.getElementById('splitter_id_sua_khach_hang_sua');
+            if (splitterSelect) {
+                splitterSelect.value = kh.splitter.id || '';
+            }
+
+            const sysIdInput = document.getElementById('sys_id_sua_khach_hang_sua');
+            if (sysIdInput) {
+                sysIdInput.value = kh.splitter.sys_id || '';
+            }
+            
+            document.getElementById('username_sua_khach_hang_sua').value = kh.ky_thuat.username || '';
+            document.getElementById('password_sua_khach_hang_sua').value = kh.ky_thuat.password || '';
+
+            document.getElementById('rack_sua_khach_hang_sua').value = kh.ky_thuat.rack || '';
+            document.getElementById('shelf_sua_khach_hang_sua').value = kh.ky_thuat.shelf || '0';
+            document.getElementById('slot_sua_khach_hang_sua').value = kh.ky_thuat.slot || '';
+            document.getElementById('port_sua_khach_hang_sua').value = kh.ky_thuat.port || '';
+
+            document.getElementById('formsuakhachhang').action = '/diemketnoi/sua/' + id;
+
+        } catch (e) {
+            console.error("Lỗi khi điền dữ liệu bổ sung vào form sửa:", e);
+        }
+    }
 
     function kiemTraLoaiSplitterSua() {
         const loai = document.getElementById('sua_loai_splitter_sua').value;
@@ -512,7 +469,7 @@ function chuanBiSuaDiemKhachHang(id) {
         }
     }
 
-        function kiemTraLoaiSplitterThem() {
+    function kiemTraLoaiSplitterThem() {
         const loai_them = document.getElementById('sua_loai_splitter_them').value;
         const khungCha = document.getElementById('sua_khung_splitter_cha_them');
         if (loai_them === '1:16') {
@@ -525,19 +482,19 @@ function chuanBiSuaDiemKhachHang(id) {
     // ==========================================
     // SỰ KIỆN KHI CLICK BẢN ĐỒ DASHBOARD (THÊM NÚT)
     // ==========================================
-        let mapClickPopup = null;
+    let mapClickPopup = null;
 
     function onMapClick(e) {
-        if(userVaiTroId === 3) { // Nếu là vai trò "nhân viên kỹ thuật" (giả sử id = 3)
+        if(userVaiTroId === 3) {
             console.log("Bạn không có quyền thêm mới điểm kết nối. Vui lòng liên hệ quản trị viên.");
             return;
         }
-    const { lat, lng } = e.latlng;
+        const { lat, lng } = e.latlng;
         if (mapClickPopup) {
             window.appMap.closePopup(mapClickPopup);
             mapClickPopup = null;
         }
-            const popupContent = `
+        const popupContent = `
             <div style="min-width:200px;text-align:center;padding:10px;">
                 <h6 class="fw-bold text-dark mb-3 border-bottom pb-2">
                     <i class="bi bi-geo-alt-fill text-danger"></i> Vị trí đã chọn
@@ -566,26 +523,24 @@ function chuanBiSuaDiemKhachHang(id) {
             mapClickPopup = null;
         }
         const nut_them_dia_diem = document.getElementById('nut_chon_vi_tri_tu_pon');
-        nut_them_dia_diem.hidden = true; // Ẩn nút "Chọn trên bản đồ" trong modal thêm tủ vì đã chọn vị trí từ bản đồ rồi
-        // Điền tọa độ vào input của modal thêm tủ
-    const inputViDo = document.getElementById('vi_do_tu_pon');
-    const inputKinhDo = document.getElementById('kinh_do_tu_pon');
-    if (inputViDo && inputKinhDo) {
-        inputViDo.value = lat;
-        inputKinhDo.value = lng;
-    }
-const formModalEl = document.getElementById('modalThemSplitter');
-    if(!formModalEl) {
-        console.error('Không tìm thấy modal để thêm tủ!');
-        return;
-    }
-    // Mở modal thêm tủ
-    let formModal = bootstrap.Modal.getInstance(formModalEl);
+        nut_them_dia_diem.hidden = true;
+        const inputViDo = document.getElementById('vi_do_tu_pon');
+        const inputKinhDo = document.getElementById('kinh_do_tu_pon');
+        if (inputViDo && inputKinhDo) {
+            inputViDo.value = lat;
+            inputKinhDo.value = lng;
+        }
+        const formModalEl = document.getElementById('modalThemSplitter');
+        if(!formModalEl) {
+            console.error('Không tìm thấy modal để thêm tủ!');
+            return;
+        }
+        let formModal = bootstrap.Modal.getInstance(formModalEl);
         if (!formModal) {
             formModal = new bootstrap.Modal(formModalEl);
         }
         formModal.show();
-}
+    }
 
     function themKhachHangTaiViTri(lat, lng) {
         if (mapClickPopup) {
@@ -593,43 +548,53 @@ const formModalEl = document.getElementById('modalThemSplitter');
             mapClickPopup = null;
         }
         const nut_them_dia_diem = document.getElementById('nut_chon_vi_tri_dia_diem'); 
-        nut_them_dia_diem.hidden = true; // Ẩn nút "Chọn trên bản đồ" trong modal thêm khách hàng vì đã chọn vị trí từ bản đồ rồi
-        // Điền tọa độ vào input của modal thêm khách hàng
-    const inputViDo = document.getElementById('vi_do_them_khach_hang');
-    const inputKinhDo = document.getElementById('kinh_do_them_khach_hang');
-    if (inputViDo && inputKinhDo) {
-        inputViDo.value = lat;
-        inputKinhDo.value = lng;
-    }
-    const formModalEl = document.getElementById('modalThemDiemKhachHang');
-    if(!formModalEl) {
-        console.error('Không tìm thấy modal để thêm khách hàng!');
-        return;
-    }
-    // Mở modal thêm khách hàng
-    let formModal = bootstrap.Modal.getInstance(formModalEl);
+        nut_them_dia_diem.hidden = true;
+        const inputViDo = document.getElementById('vi_do_them_khach_hang');
+        const inputKinhDo = document.getElementById('kinh_do_them_khach_hang');
+        if (inputViDo && inputKinhDo) {
+            inputViDo.value = lat;
+            inputKinhDo.value = lng;
+        }
+        const formModalEl = document.getElementById('modalThemDiemKhachHang');
+        if(!formModalEl) {
+            console.error('Không tìm thấy modal để thêm khách hàng!');
+            return;
+        }
+        let formModal = bootstrap.Modal.getInstance(formModalEl);
         if (!formModal) {
             formModal = new bootstrap.Modal(formModalEl);
         }
         formModal.show();
+    }
+
+    function chuanBiCapNhat(baoCaoId, diemId, tenKhachHang) {
+        console.log("Chuẩn bị cập nhật tiến độ cho điểm kết nối:", tenKhachHang, "(ID:", diemId + ")", "Báo cáo ID:", baoCaoId);
+        document.getElementById('bao_cao_id_cn').value = baoCaoId;
+        document.getElementById('diem_ket_noi_id_cn').value = diemId;
+        document.getElementById('ten_khach_hang_cn').innerText = tenKhachHang;
+    }
+
+    function yeuCauXoa(id, routerPath, displayName) {
+    const form = document.getElementById('formXoaDoiTuong');
+    const label = document.getElementById('ten_hien_thi_xoa');
+
+    // Thiết lập action cho form dựa trên router truyền vào
+    // Ví dụ: /diemketnoi/xoa/65f... hoặc /splitter/xoa/65f...
+    form.action = `/${routerPath}/xoa/${id}`;
+
+    // Hiển thị tên đối tượng lên modal để người dùng xác nhận lần cuối
+    label.innerText = displayName;
+
+    // Hiển thị modal
+    const xoaModal = new bootstrap.Modal(document.getElementById('modalXoaDoiTuong'));
+    xoaModal.show();
 }
-
-
-//Hàm chuẩn bị cho Modal Cập nhật tiến độ
-                    function chuanBiCapNhat(baoCaoId, diemId, tenKhachHang) {
-                        console.log("Chuẩn bị cập nhật tiến độ cho điểm kết nối:", tenKhachHang, "(ID:", diemId + ")", "Báo cáo ID:", baoCaoId);
-                        document.getElementById('bao_cao_id_cn').value = baoCaoId;
-                        document.getElementById('diem_ket_noi_id_cn').value = diemId;
-                        document.getElementById('ten_khach_hang_cn').innerText = tenKhachHang;
-                    }
     // ==========================================
     // KHỞI TẠO CHÍNH KHI DOM SẴN SÀNG
     // ==========================================
     document.addEventListener('DOMContentLoaded', function () {
-        // Áp dụng scale giao diện
         applyScale();
 
-        // --- Khởi tạo bản đồ dashboard ---
         const mapContainer = document.getElementById('map-dashboard');
         if (window.appMap !== null) {
             window.appMap.remove();
@@ -651,25 +616,22 @@ const formModalEl = document.getElementById('modalThemSplitter');
             }).addTo(window.appMap);
             window.appMap.setMaxBounds([[5.0, 95.0], [25.0, 115.0]]);
 
-            // Gắn sự kiện click bản đồ (thêm popup 2 nút)
             window.appMap.on('click', onMapClick);
             document.getElementById('map-dashboard').style.cursor = 'crosshair';
-
         } catch (e) {
             console.error("Lỗi khi tạo bản đồ:", e);
         }
 
-        // --- Tải dữ liệu và vẽ marker ---
         Promise.all([
             fetch('/api/diem-ket-noi').then(res => res.json()),
             fetch('/api/splitters').then(res => res.json())
         ])
         .then(([khachHangData, splitterData]) => {
             window.khachHangData = khachHangData;
-            const uniqueSplitters = {};
             const uniqueSplittersCap1 = {};
+            const uniqueSplittersCap2 = {};
 
-            // Vẽ splitters
+            // ========== VẼ SPLITTERS ==========
             if (splitterData && splitterData.length > 0) {
                 splitterData.forEach(sp => {
                     if (sp.vi_tri && sp.vi_tri.coordinates) {
@@ -690,9 +652,13 @@ const formModalEl = document.getElementById('modalThemSplitter');
                                         <i class="bi bi-pencil-square"></i> Quản lý
                                     </a>
                                     <button class="btn btn-sm btn-warning fw-bold text-dark shadow-sm rounded-pill"
-                                            onclick="chuanBiSuaSplitter('${sp._id}', '${sp.ten_splitter}', '${sp.sys_id}', '${sp.loai_splitter}', '${sp.splitter_cha_id || 'đây là splitter cấp 1'}', '${sp.vi_tri.coordinates[1]}', '${sp.vi_tri.coordinates[0]}')"
+                                            onclick="chuanBiSuaSplitter('${sp._id}', '${sp.ten_splitter}', '${sp.sys_id}', '${sp.loai_splitter}', '${sp.splitter_cha_id || ''}', '${sp.vi_tri.coordinates[1]}', '${sp.vi_tri.coordinates[0]}')"
                                             data-bs-toggle="modal" data-bs-target="#modalSuaSplitter">
                                         <i class="bi bi-pencil-square"></i> Sửa
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger fw-bold text-dark shadow-sm rounded-pill px-3" 
+                                        onclick="yeuCauXoa('${sp._id}', 'splitter', '${sp.ten_splitter}')">
+                                        <i class="bi bi-trash"></i> Xóa
                                     </button>
                                 </div>
                                 <% } %>
@@ -708,8 +674,8 @@ const formModalEl = document.getElementById('modalThemSplitter');
                             const sp1Marker = L.marker([spLat, spLng], { icon: iconTu1 }).addTo(window.appMap);
                             sp1Marker.bindPopup(popupContent);
                             window.appSplitterMarkers[spId] = sp1Marker;
-                        } else {
-                            uniqueSplitters[spId] = sp;
+                        } else { // Tủ cấp 2
+                            uniqueSplittersCap2[spId] = sp;
                             const iconTu2 = L.divIcon({
                                 className: 'topo-node node-tucap2',
                                 html: '<i class="bi bi-router-fill" style="color:#0d6efd"></i>',
@@ -719,6 +685,7 @@ const formModalEl = document.getElementById('modalThemSplitter');
                             sp2Marker.bindPopup(popupContent);
                             window.appSplitterMarkers[spId] = sp2Marker;
 
+                            // Vẽ đường trunk line từ tủ cấp 1 đến tủ cấp 2
                             if (sp.splitter_cha_id) {
                                 const spCha = splitterData.find(s => String(s._id) === String(sp.splitter_cha_id));
                                 if (spCha && spCha.vi_tri && spCha.vi_tri.coordinates) {
@@ -726,7 +693,11 @@ const formModalEl = document.getElementById('modalThemSplitter');
                                         [spCha.vi_tri.coordinates[1], spCha.vi_tri.coordinates[0]],
                                         [spLat, spLng]
                                     ], {
-                                        color: '#fd7e14', weight: 6, dashArray: '10, 8', opacity: 0.9, className: 'trunk-line-glow'
+                                        color: '#e66900',  // Cam đậm cho trunk line
+                                        weight: 6,
+                                        dashArray: '10, 8',
+                                        opacity: 0.9,
+                                        className: 'trunk-line-glow'
                                     }).addTo(window.appMap);
                                 }
                             }
@@ -735,16 +706,36 @@ const formModalEl = document.getElementById('modalThemSplitter');
                 });
             }
 
-            // Vẽ khách hàng
+            // ========== VẼ KHÁCH HÀNG ==========
             if (khachHangData && khachHangData.length > 0) {
                 khachHangData.forEach(diem => {                                  
                     if (diem.vi_tri && diem.vi_tri.coordinates) {
                         const [lng, lat] = diem.vi_tri.coordinates;
-                        const isError = diem.trang_thai_ket_noi.mau_sac === 'Đỏ';
-                        const isEndDate = diem.trang_thai_ket_noi.mau_sac === 'Xám';
                         
-                        let iconClass = isError ? 'node-kh-do' : (diem.trang_thai_ket_noi.mau_sac === 'Xám' ? 'node-kh-xam' : 'node-kh-xanh');
-                        let iconColor = isError ? '#dc3545' : (diem.trang_thai_ket_noi.mau_sac === 'Xanh' ? '#198754' : '#6c757d');
+                        // Xác định trạng thái
+                        const mauSac = diem.trang_thai_ket_noi?.mau_sac || 'Xanh';
+                        let iconClass, iconColor, lineColor, dashArray;
+
+                        switch (mauSac) {
+                            case 'Đỏ':
+                                iconClass = 'node-kh-do';
+                                iconColor = '#dc3545';
+                                lineColor = '#dc3545';
+                                dashArray = '6, 15';
+                                break;
+                            case 'Xám':
+                                iconClass = 'node-kh-xam';
+                                iconColor = '#6c757d';
+                                lineColor = '#6c757d';
+                                dashArray = '5, 5';   // nét đứt ngắn hơn để phân biệt
+                                break;
+                            default: // Xanh
+                                iconClass = 'node-kh-xanh';
+                                iconColor = '#198754';
+                                lineColor = '#198754';
+                                dashArray = '6, 6';
+                                break;
+                        }
 
                         const iconKH = L.divIcon({
                             className: `topo-node ${iconClass}`,
@@ -753,8 +744,12 @@ const formModalEl = document.getElementById('modalThemSplitter');
                         });
 
                         const marker = L.marker([lat, lng], { icon: iconKH }).addTo(window.appMap);
-                        window.appMarkers[String(diem._id).toLowerCase().trim()] = marker;
+                        const markerId = String(diem._id).toLowerCase().trim();
+                        window.appMarkers[markerId] = marker;
 
+                        // Popup
+                        const isError = mauSac === 'Đỏ';
+                        const isEndDate = mauSac === 'Xám';
                         let popupContent = `
                             <div style="min-width:220px;">
                                 <div class="d-flex align-items-center mb-2 border-bottom pb-2">
@@ -763,7 +758,7 @@ const formModalEl = document.getElementById('modalThemSplitter');
                                     </div>
                                     <div>
                                         <h6 class="fw-bold text-dark mb-0 text-wrap">${diem.ten_khach_hang}</h6>
-                                        <small class="text-${isError ? 'danger fw-bold' : 'success'}">${isError ? 'Đang gặp sự cố' : 'Đang hoạt động'}</small>
+                                        <small class="text-${isError ? 'danger fw-bold' : 'success'}">${isError ? 'Đang gặp sự cố' : (isEndDate ? 'Đã hết hạn' : 'Đang hoạt động')}</small>
                                     </div>
                                 </div>
                                 <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-secondary"></i> ${diem.dia_chi}</p>
@@ -774,8 +769,12 @@ const formModalEl = document.getElementById('modalThemSplitter');
                                                 data-bs-toggle="modal" data-bs-target="#modalSuaDiemKhachHang">                                       
                                             <i class="bi bi-pencil-square me-1"></i> Sửa
                                         </button>
+                                        <button class="btn btn-sm btn-outline-danger fw-bold text-dark shadow-sm rounded-pill px-3" 
+                                            onclick="yeuCauXoa('${diem._id}', 'diemketnoi', '${diem.ten_khach_hang}')">
+                                            <i class="bi bi-trash"></i> Xóa
+                                        </button>
                                     <% } %>                                    
-                                ${isError ? `
+                                    ${isError ? `
                                         <button class="btn btn-sm btn-primary fw-bold shadow-sm rounded-pill px-3 flex-grow-1"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#modalCapNhatTienDo"
@@ -802,13 +801,17 @@ const formModalEl = document.getElementById('modalThemSplitter');
                             </div>`;
                         marker.bindPopup(popupContent);
 
+                        // Vẽ đường line từ khách hàng đến tủ cấp 2
                         if (diem.splitter_id && diem.splitter_id.vi_tri) {
                             const [sp2Lng, sp2Lat] = diem.splitter_id.vi_tri.coordinates;
-                            L.polyline([[lat, lng], [sp2Lat, sp2Lng]], {
-                                color: isError ? '#dc3545' : '#ada',
+                            L.polyline([
+                                [lat, lng],
+                                [sp2Lat, sp2Lng]
+                            ], {
+                                color: lineColor,
                                 weight: isError ? 7 : 5,
                                 opacity: isError ? 0.8 : 0.7,
-                                dashArray: isError ? '6, 15' : '6, 6',
+                                dashArray: dashArray,
                                 lineCap: 'round'
                             }).addTo(window.appMap);
                         }
@@ -816,13 +819,10 @@ const formModalEl = document.getElementById('modalThemSplitter');
                 });
             }
 
-            // Cập nhật dropdown danh sách tủ cáp
+            // Cập nhật dropdown danh sách tủ cáp (tùy chọn)
             const splitterListEl = document.getElementById('splitter-dropdown-list');
             const splitterCountEl = document.getElementById('splitter-count');
-            const splArr1 = Object.values(uniqueSplittersCap1);
-            const splArr2 = Object.values(uniqueSplitters);
-            const allSplitters = [...splArr1, ...splArr2];
-
+            const allSplitters = [...Object.values(uniqueSplittersCap1), ...Object.values(uniqueSplittersCap2)];
             if (splitterCountEl) splitterCountEl.innerText = allSplitters.length;
 
             if (splitterListEl) {
@@ -830,9 +830,9 @@ const formModalEl = document.getElementById('modalThemSplitter');
                 if (allSplitters.length === 0) {
                     splitterListEl.innerHTML = '<li><a class="dropdown-item disabled">Không có dữ liệu tủ</a></li>';
                 } else {
-                    if (splArr1.length > 0) {
+                    if (Object.keys(uniqueSplittersCap1).length > 0) {
                         splitterListEl.innerHTML += `<li><h6 class="dropdown-header text-warning"><i class="bi bi-hdd-rack-fill"></i> TỦ CẤP 1 (1:4)</h6></li>`;
-                        splArr1.forEach(sp => {
+                        Object.values(uniqueSplittersCap1).forEach(sp => {
                             splitterListEl.innerHTML += `
                                 <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="javascript:void(0)" onclick='zoomToMap("${sp._id}")'>
                                     <span>${sp.ten_splitter}</span>
@@ -841,9 +841,9 @@ const formModalEl = document.getElementById('modalThemSplitter');
                         });
                     }
                     splitterListEl.innerHTML += `<li><hr class="dropdown-divider"></li>`;
-                    if (splArr2.length > 0) {
+                    if (Object.keys(uniqueSplittersCap2).length > 0) {
                         splitterListEl.innerHTML += `<li><h6 class="dropdown-header text-primary"><i class="bi bi-router-fill"></i> TỦ CẤP 2 (1:16)</h6></li>`;
-                        splArr2.forEach(sp => {
+                        Object.values(uniqueSplittersCap2).forEach(sp => {
                             splitterListEl.innerHTML += `
                                 <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="javascript:void(0)" onclick='zoomToMap("${sp._id}")'>
                                     <span>${sp.ten_splitter}</span>
@@ -856,7 +856,7 @@ const formModalEl = document.getElementById('modalThemSplitter');
         })
         .catch(err => console.error("Lỗi tải API Bản đồ:", err));
 
-        // --- Sự kiện modal chọn vị trí ---
+        // Sự kiện modal chọn vị trí
         const modalPickEl = document.getElementById('modalPickLocation');
         if (modalPickEl) {
             modalPickEl.addEventListener('shown.bs.modal', function () {
@@ -887,60 +887,87 @@ const formModalEl = document.getElementById('modalThemSplitter');
         }
     });
 
- //Hàm chuẩn bị cho Modal Lập báo cáo
-                    function chuanBiLapBaoCao(id, tenKhachHang) {
-                        document.getElementById('diem_ket_noi_id').value = id;
-                        document.getElementById('ten_khach_hang_bc').innerText = tenKhachHang;
-                    }
+    // Các hàm chuẩn bị modal khác
+    function chuanBiLapBaoCao(id, tenKhachHang) {
+        document.getElementById('diem_ket_noi_id').value = id;
+        document.getElementById('ten_khach_hang_bc').innerText = tenKhachHang;
+    }
 
-                     //Hàm chuẩn bị cho Modal Gia hạn hợp đồng
-                    function chuanBiGiaHan(id, ten, hanCu) {
-                        console.log("Chuẩn bị gia hạn hợp đồng cho:", ten, "(ID:", id + ")", "Hạn cũ:", hanCu);
-                        // document.getElementById('diem_ket_noi_id').value = id;
-                        document.getElementById('diem_id_giahan').value = id;
-                        document.getElementById('ten_khach_hang_gh').innerText = ten;
-                        document.getElementById('ngay_het_han_cu').innerText = hanCu;
-                    }
+    function chuanBiGiaHan(id, ten, hanCu) {
+        console.log("Chuẩn bị gia hạn hợp đồng cho:", ten, "(ID:", id + ")", "Hạn cũ:", hanCu);
+        document.getElementById('diem_id_giahan').value = id;
+        document.getElementById('ten_khach_hang_gh').innerText = ten;
+        document.getElementById('ngay_het_han_cu').innerText = hanCu;
+    }
 
-                    //Hàm chuẩn bị cho Modal Thu hồi thiết bị
-                    function chuanBiThuHoi(id, ten) {
-                        console.log("Chuẩn bị thu hồi thiết bị cho:", ten, "(ID:", id + ")");
-                        document.getElementById('diem_id_thuhoi').value = id;
-                        document.getElementById('ten_khach_hang_th').innerText = ten;
-                    }
+    function chuanBiThuHoi(id, ten) {
+        console.log("Chuẩn bị thu hồi thiết bị cho:", ten, "(ID:", id + ")");
+        document.getElementById('diem_id_thuhoi').value = id;
+        document.getElementById('ten_khach_hang_th').innerText = ten;
+    }
 
-    /**
- * Hàm xóa sạch toàn bộ dữ liệu Khách hàng và Tủ cáp
- */
-function xoaTatCaDuLieu() {
-    // Lớp bảo vệ 1
-    if (confirm("⚠️ CẢNH BÁO NGUY HIỂM: Bạn có chắc chắn muốn xóa TOÀN BỘ dữ liệu Khách hàng và Tủ cáp khỏi bản đồ không?")) {
-        
-        // Lớp bảo vệ 2
-        if (confirm("Hành động này KHÔNG THỂ HOÀN TÁC. Bạn sẽ mất sạch dữ liệu. Nhấn OK để xác nhận xóa!")) {
-            
-            fetch('/xoa-tat-ca-du-lieu', {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    // Xóa xong thì tải lại trang để bản đồ và bảng dữ liệu trống trơn
-                    window.location.reload(); 
-                } else {
-                    alert("Lỗi: " + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Lỗi mạng hoặc server không phản hồi!');
-            });
+    function xoaTatCaDuLieu() {
+        if (confirm("⚠️ CẢNH BÁO NGUY HIỂM: Bạn có chắc chắn muốn xóa TOÀN BỘ dữ liệu Khách hàng và Tủ cáp khỏi bản đồ không?")) {
+            if (confirm("Hành động này KHÔNG THỂ HOÀN TÁC. Bạn sẽ mất sạch dữ liệu. Nhấn OK để xác nhận xóa!")) {
+                fetch('/xoa-tat-ca-du-lieu', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        window.location.reload(); 
+                    } else {
+                        alert("Lỗi: " + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Lỗi mạng hoặc server không phản hồi!');
+                });
+            }
         }
     }
+
+    
+function seedDuLieu() {
+    const input = document.getElementById('soLuongSeed');
+    if (!input) return alert("Không tìm thấy ô nhập số lượng.");
+    const soLuong = input.value.trim();
+    if (!soLuong || isNaN(soLuong) || soLuong < 1 || soLuong > 500) {
+        alert("Vui lòng nhập số lượng từ 1 đến 500.");
+        return;
+    }
+
+    if (!confirm(`Bạn sắp xóa hết dữ liệu cũ và tạo MỚI ${soLuong} tủ cấp 1, cấp 2 và khách hàng. Tiếp tục?`)) return;
+
+    fetch('/api/seed', {          // Đảm bảo URL đúng với mount point
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ soLuong: parseInt(soLuong) })
+    })
+    .then(res => {
+        if (!res.ok) {
+            // Nếu server trả JSON lỗi, parse ra để hiển thị
+            return res.json().then(data => { throw new Error(data.message); });
+        }
+        return res.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            window.location.reload();
+        } else {
+            alert("Lỗi: " + data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Đã xảy ra lỗi: " + err.message);
+    });
 }
 </script>
     <%- typeof script !== 'undefined' ? script : '' %>
